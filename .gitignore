@@ -7,3 +7,5 @@ dist/
 bun.lockb
 drizzle/
 *.tsbuildinfo
+CLAUDE.md.local
+.claude/
