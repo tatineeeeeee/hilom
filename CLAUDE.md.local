@@ -1,0 +1,60 @@
+# Hilom — Multi-Specialty Healthcare Platform
+
+Doctor marketplace: patients browse doctors by specialization, book slots, pay, chat, get prescriptions.
+Three roles: Patient, Doctor, Admin. See @phases.md for current development phase.
+
+## Tech Stack
+
+- **Frontend**: React 18 + Vite + TypeScript, Tailwind CSS, React Router v6, Zustand, TanStack Query, React Hook Form + Zod
+- **Backend**: Node.js + Express + TypeScript, Drizzle ORM, PostgreSQL 16, JWT (15m access + 7d refresh), Socket.io
+- **Payments**: PayMongo (GCash, Maya, cards)
+- **Testing**: Jest + Supertest
+- **Package manager**: Bun (NOT npm)
+- **Deploy**: Vercel (frontend) + Railway (backend + PostgreSQL)
+
+## Commands
+
+```bash
+bun install                          # install all workspaces
+bun run dev                          # start client (5173) + server (4000)
+bun run --filter server dev          # server only
+bun run --filter client dev          # client only
+bun run --filter server db:push      # push Drizzle schema to DB
+bun run --filter server db:seed      # seed specializations
+bun run --filter server db:generate  # generate migration
+bun run --filter server test         # run Jest tests
+```
+
+## Environment Variables
+
+Server: `DATABASE_URL`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `PORT` (4000), `CLIENT_URL`, `PAYMONGO_SECRET_KEY`
+Client: `VITE_API_URL` (http://localhost:4000/api), `VITE_SOCKET_URL` (http://localhost:4000)
+
+## Architecture Decisions
+
+- **JWT**: access token in memory (Zustand), refresh token in httpOnly/secure/sameSite:strict cookie. On 401 → silent refresh → retry → logout.
+- **Responses**: `{ success: true, data: T }` or `{ success: false, error: string }`. Paginated: add `meta: { page, limit, total, totalPages }`.
+- **Socket.io rooms**: `conversation:{conversationId}`, JWT handshake auth. Events: `new_message`, `message_read`, `typing`.
+- **PayMongo escrow**: booking → create intent (pending) → patient pays (escrowed) → doctor completes (released). Cancel → refunded.
+- **Slot generation**: get doctor schedule for day_of_week → generate slots by slot_duration_minutes → filter out booked + past slots.
+
+## Conventions (non-default only)
+
+- Named exports only — no default exports
+- Drizzle ORM only — no raw SQL outside migrations
+- Zod for ALL validation (request bodies, env vars, forms)
+- bcryptjs with 12 salt rounds for passwords
+- SQL: snake_case tables/columns, plural names. JSON responses: camelCase.
+- One component per file, PascalCase filename
+- No barrel exports (index.ts re-exports) — import from source
+- TypeScript strict — no `any`, no `as` unless absolutely necessary
+
+## Database
+
+12 tables in `server/src/db/schema.ts`: users, specializations, doctor_profiles, doctor_schedules, patient_profiles, appointments, conversations, messages, prescriptions, prescription_medications, payments, reviews.
+
+Specializations seeded: General Practice, Pediatrics, Cardiology, Dermatology, Orthopedics, OB-GYN, Neurology, Ophthalmology, ENT, Psychiatry.
+
+## Phase Tracking
+
+See @phases.md for all 11 phases with files to create and acceptance criteria.
