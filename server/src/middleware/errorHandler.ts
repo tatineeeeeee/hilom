@@ -10,11 +10,11 @@ interface ErrorBody {
   details?: unknown;
 }
 
-const isPgUniqueViolation = (err: unknown): boolean =>
-  typeof err === "object" &&
-  err !== null &&
-  "code" in err &&
-  (err as { code?: string }).code === "23505";
+const isPgUniqueViolation = (err: unknown): boolean => {
+  if (typeof err !== "object" || err === null) return false;
+  if (!("code" in err)) return false;
+  return err.code === "23505";
+};
 
 export const errorHandler = (
   err: Error,

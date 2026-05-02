@@ -15,7 +15,7 @@ import {
   clearRefreshCookie,
   REFRESH_COOKIE_NAME,
 } from "../utils/cookies";
-import type { RegisterInput, LoginInput } from "../schemas/auth.schema";
+import { registerSchema, loginSchema } from "../schemas/auth.schema";
 
 interface PublicUser {
   id: string;
@@ -49,7 +49,7 @@ const issueTokensForUser = async (
 };
 
 export const register = async (req: Request, res: Response): Promise<void> => {
-  const input = req.body as RegisterInput;
+  const input = registerSchema.parse(req.body);
 
   const existing = await db.query.users.findFirst({
     where: eq(users.email, input.email),
@@ -100,7 +100,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
-  const { email, password } = req.body as LoginInput;
+  const { email, password } = loginSchema.parse(req.body);
 
   const user = await db.query.users.findFirst({ where: eq(users.email, email) });
   const genericFail = new AppError(401, "Invalid email or password");
