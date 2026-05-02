@@ -4,18 +4,15 @@ import { db } from "../config/db";
 import { users, doctorProfiles, patientProfiles } from "../db/schema";
 import { AppError } from "../utils/AppError";
 import { hashPassword, verifyPassword } from "../utils/password";
-import {
-  signAccess,
-  signRefresh,
-  verifyRefresh,
-  hashRefresh,
-} from "../utils/jwt";
+import { signAccess, signRefresh, verifyRefresh } from "../utils/jwt";
+import { hashOpaqueToken } from "../utils/tokens";
 import {
   setRefreshCookie,
   clearRefreshCookie,
   REFRESH_COOKIE_NAME,
 } from "../utils/cookies";
 import { registerSchema, loginSchema } from "../schemas/auth.schema";
+import { sendVerificationEmail } from "./emailVerification.controller";
 
 interface PublicUser {
   id: string;
@@ -24,6 +21,7 @@ interface PublicUser {
   fullName: string;
   avatarUrl: string | null;
   phone: string | null;
+  emailVerifiedAt: string | null;
 }
 
 const toPublicUser = (u: typeof users.$inferSelect): PublicUser => ({
@@ -33,6 +31,7 @@ const toPublicUser = (u: typeof users.$inferSelect): PublicUser => ({
   fullName: u.fullName,
   avatarUrl: u.avatarUrl,
   phone: u.phone,
+  emailVerifiedAt: u.emailVerifiedAt ? u.emailVerifiedAt.toISOString() : null,
 });
 
 const issueTokensForUser = async (
@@ -43,7 +42,7 @@ const issueTokensForUser = async (
   const refreshToken = signRefresh({ sub: userId });
   await db
     .update(users)
-    .set({ refreshTokenHash: hashRefresh(refreshToken) })
+    .set({ refreshTokenHash: hashOpaqueToken(refreshToken) })
     .where(eq(users.id, userId));
   return { accessToken, refreshToken };
 };
@@ -93,6 +92,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   );
   setRefreshCookie(res, refreshToken);
 
+  await sendVerificationEmail(created.id, created.fullName, created.email);
+
   res.status(201).json({
     success: true,
     data: { accessToken, user: toPublicUser(created) },
@@ -102,14 +103,19 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 export const login = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = loginSchema.parse(req.body);
 
-  const user = await db.query.users.findFirst({ where: eq(users.email, email) });
+  const user = await db.query.users.findFirst({
+    where: eq(users.email, email),
+  });
   const genericFail = new AppError(401, "Invalid email or password");
   if (!user) throw genericFail;
 
   const ok = await verifyPassword(password, user.passwordHash);
   if (!ok) throw genericFail;
 
-  const { accessToken, refreshToken } = await issueTokensForUser(user.id, user.role);
+  const { accessToken, refreshToken } = await issueTokensForUser(
+    user.id,
+    user.role,
+  );
   setRefreshCookie(res, refreshToken);
 
   res.json({
@@ -132,9 +138,8 @@ export const refresh = async (req: Request, res: Response): Promise<void> => {
     throw new AppError(401, "Invalid refresh token");
   }
 
-  const incomingHash = hashRefresh(cookieToken);
+  const incomingHash = hashOpaqueToken(cookieToken);
   if (incomingHash !== user.refreshTokenHash) {
-    // Possible token theft / reuse — invalidate the session
     await db
       .update(users)
       .set({ refreshTokenHash: null })
@@ -143,7 +148,10 @@ export const refresh = async (req: Request, res: Response): Promise<void> => {
     throw new AppError(401, "Refresh token reuse detected");
   }
 
-  const { accessToken, refreshToken } = await issueTokensForUser(user.id, user.role);
+  const { accessToken, refreshToken } = await issueTokensForUser(
+    user.id,
+    user.role,
+  );
   setRefreshCookie(res, refreshToken);
 
   res.json({
