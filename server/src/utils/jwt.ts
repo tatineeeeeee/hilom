@@ -1,5 +1,5 @@
 import jwt, { type SignOptions } from "jsonwebtoken";
-import { createHash, randomUUID } from "crypto";
+import { randomUUID } from "crypto";
 import { env } from "../config/env";
 
 export type Role = "patient" | "doctor" | "admin";
@@ -41,6 +41,3 @@ export const verifyRefresh = (token: string): RefreshPayload => {
   }
   return { sub: String(decoded.sub) };
 };
-
-export const hashRefresh = (token: string): string =>
-  createHash("sha256").update(token).digest("hex");

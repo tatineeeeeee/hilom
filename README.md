@@ -32,6 +32,10 @@ bun run --filter server db:seed
 
 # 4. Run both apps (client on 5173, server on 4000)
 bun run dev
+
+# 5. Optional: local SMTP catcher for verification + reset emails
+#    Web UI at http://localhost:1080
+bunx maildev
 ```
 
 To run only one workspace: `bun run --filter client dev` or `bun run --filter server dev`.

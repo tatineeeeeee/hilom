@@ -7,6 +7,7 @@ export interface User {
   fullName: string;
   avatarUrl: string | null;
   phone: string | null;
+  emailVerifiedAt: string | null;
 }
 
 export interface Specialization {

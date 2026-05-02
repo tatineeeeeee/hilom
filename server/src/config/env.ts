@@ -13,6 +13,7 @@ const baseSchema = z.object({
   PAYMONGO_SECRET_KEY: z.string().default(""),
   JWT_ACCESS_SECRET: z.string().optional(),
   JWT_REFRESH_SECRET: z.string().optional(),
+  RESEND_API_KEY: z.string().optional(),
 });
 
 const parsed = baseSchema.parse(process.env);
@@ -30,6 +31,10 @@ const jwtSecret = (label: string, value: string | undefined): string => {
   }
   return value ?? `${label.toLowerCase()}-dev-fallback-do-not-use-in-prod`;
 };
+
+if (isProd && !parsed.RESEND_API_KEY) {
+  throw new Error("RESEND_API_KEY must be set in production");
+}
 
 export const env = {
   ...parsed,

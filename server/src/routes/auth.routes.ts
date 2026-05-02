@@ -1,7 +1,11 @@
 import { Router, type Router as ExpressRouter } from "express";
 import { asyncHandler } from "../middleware/asyncHandler";
 import { requireAuth } from "../middleware/auth.middleware";
-import { authLimiter } from "../middleware/rateLimit";
+import {
+  authLimiter,
+  forgotPasswordLimiter,
+  resendVerificationLimiter,
+} from "../middleware/rateLimit";
 import {
   register,
   login,
@@ -9,6 +13,14 @@ import {
   logout,
   me,
 } from "../controllers/auth.controller";
+import {
+  verifyEmail,
+  resendVerification,
+} from "../controllers/emailVerification.controller";
+import {
+  requestPasswordReset,
+  resetPassword,
+} from "../controllers/passwordReset.controller";
 
 export const authRouter: ExpressRouter = Router();
 
@@ -17,3 +29,17 @@ authRouter.post("/login", authLimiter, asyncHandler(login));
 authRouter.post("/refresh", asyncHandler(refresh));
 authRouter.post("/logout", requireAuth, asyncHandler(logout));
 authRouter.get("/me", requireAuth, asyncHandler(me));
+
+authRouter.get("/verify-email", asyncHandler(verifyEmail));
+authRouter.post(
+  "/resend-verification",
+  requireAuth,
+  resendVerificationLimiter,
+  asyncHandler(resendVerification),
+);
+authRouter.post(
+  "/forgot-password",
+  forgotPasswordLimiter,
+  asyncHandler(requestPasswordReset),
+);
+authRouter.post("/reset-password", asyncHandler(resetPassword));

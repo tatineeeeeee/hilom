@@ -56,7 +56,10 @@ export const LoginPage = () => {
       footer={
         <>
           New here?{" "}
-          <Link to="/register" className="font-medium text-foreground underline">
+          <Link
+            to="/register"
+            className="font-medium text-foreground underline"
+          >
             Create an account
           </Link>
         </>
@@ -85,6 +88,14 @@ export const LoginPage = () => {
           error={errors.password?.message}
           {...register("password")}
         />
+        <div className="text-right text-sm">
+          <Link
+            to="/forgot-password"
+            className="font-medium text-foreground underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
         <Button
           type="submit"
           className="min-h-11 w-full"

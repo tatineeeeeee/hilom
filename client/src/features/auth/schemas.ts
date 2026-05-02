@@ -46,6 +46,16 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password is required").max(128),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: emailSchema,
+});
+
+export const resetPasswordSchema = z.object({
+  newPassword: passwordSchema,
+});
+
 export type RegisterPatientInput = z.infer<typeof registerPatientSchema>;
 export type RegisterDoctorInput = z.infer<typeof registerDoctorSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
