@@ -5,10 +5,13 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "test": "jest --runInBand",
     "db:push": "drizzle-kit push",
+    "db:push:test": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/hilom_test drizzle-kit push",
     "db:generate": "drizzle-kit generate",
-    "db:seed": "tsx src/db/seed.ts",
-    "test": "jest"
+    "db:seed": "tsx src/db/seed.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
