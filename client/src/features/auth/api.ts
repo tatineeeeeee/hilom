@@ -33,9 +33,8 @@ export const loginUser = async (input: LoginInput): Promise<AuthResponse> => {
 };
 
 export const refreshSession = async (): Promise<AuthResponse> => {
-  const { data } = await apiClient().post<ApiSuccess<AuthResponse>>(
-    "/auth/refresh",
-  );
+  const { data } =
+    await apiClient().post<ApiSuccess<AuthResponse>>("/auth/refresh");
   return data.data;
 };
 
@@ -44,15 +43,39 @@ export const logoutUser = async (): Promise<void> => {
 };
 
 export const getMe = async (): Promise<User> => {
-  const { data } = await apiClient().get<ApiSuccess<{ user: User }>>(
-    "/auth/me",
-  );
+  const { data } =
+    await apiClient().get<ApiSuccess<{ user: User }>>("/auth/me");
   return data.data.user;
 };
 
 export const listSpecializations = async (): Promise<Specialization[]> => {
-  const { data } = await apiClient().get<ApiSuccess<Specialization[]>>(
-    "/specializations",
-  );
+  const { data } =
+    await apiClient().get<ApiSuccess<Specialization[]>>("/specializations");
   return data.data;
+};
+
+export const verifyEmail = async (token: string): Promise<void> => {
+  await apiClient().get<ApiSuccess<{ verified: true }>>(
+    `/auth/verify-email?token=${encodeURIComponent(token)}`,
+  );
+};
+
+export const requestPasswordReset = async (email: string): Promise<void> => {
+  await apiClient().post<ApiSuccess<{ sent: true }>>("/auth/forgot-password", {
+    email,
+  });
+};
+
+export const resetPassword = async (
+  token: string,
+  newPassword: string,
+): Promise<void> => {
+  await apiClient().post<ApiSuccess<{ reset: true }>>("/auth/reset-password", {
+    token,
+    newPassword,
+  });
+};
+
+export const resendVerification = async (): Promise<void> => {
+  await apiClient().post("/auth/resend-verification");
 };
