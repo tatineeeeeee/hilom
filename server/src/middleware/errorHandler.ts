@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import jwt from "jsonwebtoken";
 import { AppError } from "../utils/AppError";
 import { env } from "../config/env";
+import { logger } from "../config/logger";
 
 interface ErrorBody {
   success: false;
@@ -18,7 +19,7 @@ const isPgUniqueViolation = (err: unknown): boolean => {
 
 export const errorHandler = (
   err: Error,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction,
 ) => {
@@ -50,7 +51,10 @@ export const errorHandler = (
   }
 
   if (status >= 500) {
-    console.error(err);
+    logger.error(
+      { reqId: req.id, err: { message: err.message, stack: err.stack } },
+      "unhandled error",
+    );
   }
 
   res.status(status).json(body);
