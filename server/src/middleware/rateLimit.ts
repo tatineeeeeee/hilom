@@ -5,6 +5,7 @@ export const authLimiter = rateLimit({
   limit: 5,
   standardHeaders: "draft-7",
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === "test",
   message: {
     success: false,
     error: "Too many requests. Try again later.",
