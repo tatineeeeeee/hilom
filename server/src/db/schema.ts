@@ -15,11 +15,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 // Enums
-export const userRoleEnum = pgEnum("user_role", [
-  "patient",
-  "doctor",
-  "admin",
-]);
+export const userRoleEnum = pgEnum("user_role", ["patient", "doctor", "admin"]);
 
 export const appointmentStatusEnum = pgEnum("appointment_status", [
   "pending",
@@ -45,8 +41,31 @@ export const users = pgTable("users", {
   avatarUrl: text("avatar_url"),
   phone: varchar("phone", { length: 20 }),
   refreshTokenHash: text("refresh_token_hash"),
+  emailVerifiedAt: timestamp("email_verified_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const emailVerificationTokens = pgTable("email_verification_tokens", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const specializations = pgTable("specializations", {
