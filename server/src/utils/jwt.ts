@@ -1,5 +1,5 @@
 import jwt, { type SignOptions } from "jsonwebtoken";
-import { createHash } from "crypto";
+import { createHash, randomUUID } from "crypto";
 import { env } from "../config/env";
 
 export type Role = "patient" | "doctor" | "admin";
@@ -22,7 +22,9 @@ export const signAccess = (payload: AccessPayload): string =>
   jwt.sign(payload, env.JWT_ACCESS_SECRET, { expiresIn: ACCESS_TTL });
 
 export const signRefresh = (payload: RefreshPayload): string =>
-  jwt.sign(payload, env.JWT_REFRESH_SECRET, { expiresIn: REFRESH_TTL });
+  jwt.sign({ ...payload, jti: randomUUID() }, env.JWT_REFRESH_SECRET, {
+    expiresIn: REFRESH_TTL,
+  });
 
 export const verifyAccess = (token: string): AccessPayload => {
   const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET);
