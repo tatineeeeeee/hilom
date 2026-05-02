@@ -1,5 +1,5 @@
 import axios, {
-  AxiosError,
+  type AxiosError,
   type AxiosInstance,
   type InternalAxiosRequestConfig,
 } from "axios";
@@ -27,6 +27,11 @@ export const createApiClient = (hooks: ClientHooks): AxiosInstance => {
     baseURL,
     withCredentials: true,
     headers: { "Content-Type": "application/json" },
+  });
+
+  client.interceptors.request.use((config) => {
+    config.headers.set("X-Request-Id", crypto.randomUUID());
+    return config;
   });
 
   client.interceptors.request.use((config) => {
