@@ -19,6 +19,7 @@ Monorepo, Express + Drizzle + PostgreSQL, React + Vite + Tailwind.
 JWT auth: register, login, refresh, logout, protected routes, profile setup.
 
 **Server files**:
+
 - `controllers/auth.controller.ts` — register, login, logout, refresh, me
 - `routes/auth.routes.ts`
 - `middleware/auth.middleware.ts` — JWT verification, attaches `req.user`
@@ -27,6 +28,7 @@ JWT auth: register, login, refresh, logout, protected routes, profile setup.
 - `types/express.d.ts` — `req.user` type extension
 
 **Client files**:
+
 - `api/client.ts` — Axios instance, interceptors (attach token, auto-refresh on 401)
 - `api/auth.ts` — register, login, logout, refresh, me API calls
 - `store/authStore.ts` — Zustand: user, accessToken, login/logout actions
@@ -37,6 +39,7 @@ JWT auth: register, login, refresh, logout, protected routes, profile setup.
 - `components/ui/Button.tsx`, `Input.tsx`
 
 **Done when**:
+
 - [x] Register → hashed password → user + role-specific profile created
 - [x] Login → access token (body) + refresh token (httpOnly cookie)
 - [x] Refresh → new access token from cookie (with rotation + reuse detection)
@@ -52,19 +55,22 @@ JWT auth: register, login, refresh, logout, protected routes, profile setup.
 Knock out the five blockers from senior review before more features land. CI, auth tests, structured logging, prod-hardened env, README — the floor that makes everything after this safe.
 
 **Server files**:
+
 - `server/src/config/logger.ts` — pino with per-request correlation IDs
 - `server/src/middleware/requestId.ts` — adds `req.id`, propagates to logger
-- `server/src/middleware/rateLimit.ts` — Redis-backed (`rate-limit-redis`) with in-memory fallback for dev
+- ~~`server/src/middleware/rateLimit.ts` — Redis-backed (`rate-limit-redis`) with in-memory fallback for dev~~ **deferred to Phase 11** (no Redis available until Railway). For now: in-memory limiter is kept as-is, with a `skip: () => NODE_ENV === "test"` added so the auth integration suite isn't throttled. Phase 11 swaps the store, keeps the test skip.
 - `server/src/index.ts` — graceful SIGTERM: stop accepting, drain in-flight, close DB pool
 - `server/src/config/env.ts` — fail-closed in production: no JWT defaults, `min(32)` on secrets
 - `server/jest.config.ts`, `server/tests/setup.ts`
 - `server/tests/auth.test.ts` — register dup (409), register profile-creation, login generic-error (401), refresh rotation, refresh reuse-detection
 
 **Client files**:
+
 - `client/src/lib/sentry.ts` — error reporting init (gated on env)
 - `client/src/lib/api/client.ts` — propagate `X-Request-Id` header so client + server logs correlate
 
 **Root files**:
+
 - `.github/workflows/ci.yml` — typecheck + lint + test on every PR
 - `.github/PULL_REQUEST_TEMPLATE.md` — what changed, why, manual verification, screenshots
 - `.husky/pre-commit` — `bunx tsc --noEmit` + `lint-staged`
@@ -75,6 +81,7 @@ Knock out the five blockers from senior review before more features land. CI, au
 - Branch protection on `main` — require PR + green CI before merge
 
 **Done when**:
+
 - [ ] PR opens → CI runs typecheck + lint + tests, blocks merge on red
 - [ ] Auth integration suite covers: register dup, register-creates-profile, login generic-error, refresh rotation, refresh reuse-detection (5 tests minimum)
 - [ ] Production refuses to boot without `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` set (no defaults)
@@ -93,6 +100,7 @@ Knock out the five blockers from senior review before more features land. CI, au
 Close the auth gap: email verification + password reset. Without these, "auth is done" is a half-truth and recruiters notice.
 
 **Server files**:
+
 - `server/src/services/email.service.ts` — Resend (or Postmark) wrapper, transactional email templates
 - `server/src/db/schema.ts` — add `users.email_verified_at`, new tables `email_verification_tokens`, `password_reset_tokens` (each: `id`, `user_id`, `token_hash`, `expires_at`, `used_at`)
 - `server/src/controllers/auth.controller.ts` — extend with: `requestEmailVerification`, `verifyEmail`, `requestPasswordReset`, `resetPassword`
@@ -100,6 +108,7 @@ Close the auth gap: email verification + password reset. Without these, "auth is
 - `server/src/schemas/auth.schema.ts` — Zod schemas for the new payloads
 
 **Client files**:
+
 - `client/src/features/auth/pages/VerifyEmailPage.tsx` — landing page that consumes the token in the URL
 - `client/src/features/auth/pages/ForgotPasswordPage.tsx` — email input → send link
 - `client/src/features/auth/pages/ResetPasswordPage.tsx` — new-password form, consumes token
@@ -108,6 +117,7 @@ Close the auth gap: email verification + password reset. Without these, "auth is
 - Banner on `Dashboard` if `email_verified_at` is null prompting user to verify
 
 **Done when**:
+
 - [ ] Register sends a verification email with a single-use token (15-min expiry)
 - [ ] `GET /api/auth/verify-email?token=...` flips `email_verified_at`, marks token used
 - [ ] `POST /api/auth/forgot-password` sends a reset email (always returns 200 — never reveals if email exists)
@@ -123,17 +133,20 @@ Close the auth gap: email verification + password reset. Without these, "auth is
 Browse doctors, filter, schedule management, slot generation.
 
 **Server files**:
+
 - `controllers/doctor.controller.ts` — list, detail, update profile, update schedule, get slots
 - `routes/doctor.routes.ts`
 - `services/slot.service.ts` — generate available time slots
 
 **Client files**:
+
 - `api/doctors.ts`
 - `pages/doctors/DoctorListPage.tsx`, `DoctorDetailPage.tsx`
 - `components/doctors/DoctorCard.tsx`, `DoctorFilter.tsx`, `SlotPicker.tsx`
 - `utils/formatCurrency.ts`
 
 **Done when**:
+
 - [ ] `GET /api/specializations` returns seeded list
 - [ ] `GET /api/doctors` filters by specialization, name, fee, rating
 - [ ] `GET /api/doctors/:id` returns profile with specialization + rating
@@ -148,16 +161,19 @@ Browse doctors, filter, schedule management, slot generation.
 Book, confirm, complete, cancel. Full lifecycle.
 
 **Server files**:
+
 - `controllers/appointment.controller.ts`
 - `routes/appointment.routes.ts`
 
 **Client files**:
+
 - `api/appointments.ts`
 - `pages/appointments/BookAppointmentPage.tsx`, `MyAppointmentsPage.tsx`, `AppointmentDetailPage.tsx`
 - `components/appointments/AppointmentCard.tsx`, `StatusBadge.tsx`
 - `utils/formatDate.ts`
 
 **Done when**:
+
 - [ ] Patient books available slot → pending
 - [ ] Double-booking prevented (same doctor, same slot)
 - [ ] Doctor confirms → confirmed, completes → completed
@@ -172,11 +188,13 @@ Book, confirm, complete, cancel. Full lifecycle.
 Socket.io chat, unlocked per confirmed appointment.
 
 **Server files**:
+
 - `socket/socket.ts` — Socket.io server, JWT handshake, room management
 - `controllers/message.controller.ts`
 - `routes/message.routes.ts`
 
 **Client files**:
+
 - `api/messages.ts`
 - `hooks/useSocket.ts`
 - `store/chatStore.ts` — active conversation, unread counts
@@ -184,6 +202,7 @@ Socket.io chat, unlocked per confirmed appointment.
 - `components/chat/ChatRoom.tsx`, `MessageBubble.tsx`, `MessageInput.tsx`
 
 **Done when**:
+
 - [ ] Conversation auto-created when appointment → confirmed
 - [ ] Only patient + doctor in that appointment can access
 - [ ] Messages persist to DB + real-time delivery
@@ -198,14 +217,17 @@ Socket.io chat, unlocked per confirmed appointment.
 Doctor writes prescription with medications, patient views.
 
 **Server files**:
+
 - `controllers/prescription.controller.ts`
 - `routes/prescription.routes.ts`
 
 **Client files**:
+
 - `api/prescriptions.ts`
 - `pages/prescriptions/WritePrescriptionPage.tsx`, `MyPrescriptionsPage.tsx`
 
 **Done when**:
+
 - [ ] Doctor writes prescription for completed appointment (with medications)
 - [ ] Patient views per-appointment + all prescriptions
 - [ ] One prescription per appointment max
@@ -218,14 +240,17 @@ Doctor writes prescription with medications, patient views.
 PayMongo integration with app-level escrow (PayMongo has no native escrow — we track hold/release in our DB).
 
 **Server files**:
+
 - `services/paymongo.service.ts` — PayMongo API wrapper
 - `controllers/payment.controller.ts`
 - `routes/payment.routes.ts`
 
 **Client files**:
+
 - `api/payments.ts`
 
 **Done when**:
+
 - [ ] Create payment intent → pending
 - [ ] Patient pays → escrowed
 - [ ] Doctor completes → released
@@ -240,14 +265,17 @@ PayMongo integration with app-level escrow (PayMongo has no native escrow — we
 Star ratings for doctors. Admin panel for verification + management.
 
 **Server files**:
+
 - `controllers/review.controller.ts`, `admin.controller.ts`
 - `routes/review.routes.ts`, `admin.routes.ts`
 
 **Client files**:
+
 - `api/reviews.ts`, `admin.ts`
 - `pages/admin/UserManagementPage.tsx`, `DoctorVerificationPage.tsx`
 
 **Done when**:
+
 - [ ] Patient reviews after completed appointment (1-5 stars + comment)
 - [ ] One review per appointment, doctor's average_rating updates
 - [ ] Admin: view users, verify/reject doctors, view appointments, dashboard stats
@@ -259,10 +287,12 @@ Star ratings for doctors. Admin panel for verification + management.
 Role-specific dashboards with real data.
 
 **Client files**:
+
 - `pages/dashboard/PatientDashboard.tsx`, `DoctorDashboard.tsx`, `AdminDashboard.tsx`
 - `components/ui/Card.tsx`, `Badge.tsx`, `Avatar.tsx`
 
 **Done when**:
+
 - [ ] Patient: upcoming appointments, recent prescriptions, quick book
 - [ ] Doctor: today's schedule, pending confirmations, earnings, rating
 - [ ] Admin: total users, appointments, revenue, unverified doctors
@@ -275,9 +305,11 @@ Role-specific dashboards with real data.
 Full backend integration coverage + E2E for the golden user paths.
 
 **Files (backend integration — extends the auth suite from Phase 2.5)**:
+
 - `server/tests/doctor.test.ts`, `appointment.test.ts`, `prescription.test.ts`, `payment.test.ts`, `review.test.ts`, `admin.test.ts`
 
 **Files (E2E)**:
+
 - `e2e/playwright.config.ts`
 - `e2e/auth.spec.ts` — register, login, logout, session restore on reload
 - `e2e/booking.spec.ts` — patient books a slot, doctor confirms, both see status update
@@ -286,6 +318,7 @@ Full backend integration coverage + E2E for the golden user paths.
 - `e2e/review.spec.ts` — completed appointment lets patient leave a review
 
 **Done when**:
+
 - [ ] Test DB created/cleaned per suite (auth tests already in Phase 2.5)
 - [ ] Backend: Doctor (4) + Appointment (3) + Prescription (3) + Payment (2) + Review (3) + Admin (2) = 17 new tests on top of Phase 2.5's 5 auth = 22 total
 - [ ] All backend tests pass: `bun run --filter server test`
@@ -300,6 +333,7 @@ Full backend integration coverage + E2E for the golden user paths.
 Push the project from "good code" to "I would hire this person." Live demo, real polish, recruiter-visible signal.
 
 **Files**:
+
 - `.github/workflows/deploy.yml` — push to main → Railway (server) + Vercel (client)
 - `.github/dependabot.yml` — weekly bumps for npm + GitHub Actions
 - `.github/release.yml` + release-please config — auto-generate `CHANGELOG.md` from conventional commits
@@ -309,6 +343,7 @@ Push the project from "good code" to "I would hire this person." Live demo, real
 - `README.md` — fully polished (see "Done when")
 
 **Done when**:
+
 - [ ] Push to main → frontend on Vercel, backend on Railway, both green
 - [ ] Live demo URL pinned in repo "About" + at the top of README
 - [ ] Socket.io works over WSS in production (WebSocket upgrade through Railway proxy)
@@ -324,6 +359,7 @@ Push the project from "good code" to "I would hire this person." Live demo, real
 - [ ] `CHANGELOG.md` auto-generates from conventional commits on each release
 - [ ] Lighthouse score on the production client: Performance >85, Accessibility >95, Best Practices >95, SEO >90
 - [ ] OpenAPI spec (`server/openapi.json`) generated from Zod schemas + served at `/api/docs` via Swagger UI
+- [ ] **Rate limit promoted to Redis-backed** (carried over from Phase 2.5) — `server/src/middleware/rateLimit.ts` switches to `rate-limit-redis` with an in-memory fallback for `NODE_ENV !== "production"`. Keep the existing `skip: () => NODE_ENV === "test"` so the auth suite still isn't throttled. Provision Redis on Railway before this lands.
 
 ---
 
@@ -332,23 +368,27 @@ Push the project from "good code" to "I would hire this person." Live demo, real
 Captured here so they aren't forgotten. None block the phase plan; each is its own future ticket.
 
 **Auth — beyond Phase 2.6**:
+
 - Multi-device refresh (move `refresh_token_hash` column → `refresh_tokens` table keyed on `user_id, jti`)
 - "Log out everywhere" UI
 - Optional: OAuth social login (Google, Apple)
 - Migrate `bcryptjs` → `argon2` (password hashes can be re-hashed lazily on next login)
 
 **Healthcare compliance** (Data Privacy Act 2012 / RA 10173):
+
 - Encryption at rest for sensitive columns: `messages.content`, `prescriptions.notes`, `patient_profiles.allergies` (Postgres `pgcrypto`)
 - Immutable audit-log table for read/write of patient data
 - Right-to-erasure workflow (soft-delete + tombstones)
 - Doctor verification with PRC license number + uploaded credential review queue
 
 **Payments hardening**:
+
 - Migrate from "app-level escrow" → PayMongo Connected Accounts (money never lands in your platform balance)
 - Webhook signature verification + idempotency keys
 - Refund flow with reason codes
 
 **Performance / scale**:
+
 - DB pool sizing tuned to Railway plan
 - Read replica for `/doctors` browsing list
 - Image optimization pipeline (avatars, credential uploads)
@@ -356,6 +396,7 @@ Captured here so they aren't forgotten. None block the phase plan; each is its o
 - Bundle splitting per route (currently one chunk)
 
 **Product polish**:
+
 - i18n setup with `react-i18next` (en + tl)
 - PWA: installable, offline-tolerant for "my upcoming appointments" view
 - Email/SMS reminders 24h before appointments
@@ -364,6 +405,7 @@ Captured here so they aren't forgotten. None block the phase plan; each is its o
 - Patient medical history attachments
 
 **Engineering polish**:
+
 - Storybook for UI primitives + auth forms
 - Visual regression tests (Chromatic / Percy)
 - API rate-limit response includes `Retry-After` header
