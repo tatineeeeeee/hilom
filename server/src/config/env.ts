@@ -4,6 +4,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const envSchema = z.object({
+  NODE_ENV: z
+    .enum(["development", "test", "production"])
+    .default("development"),
   DATABASE_URL: z.string().min(1),
   JWT_ACCESS_SECRET: z.string().min(1).default("hilom-access-secret-dev"),
   JWT_REFRESH_SECRET: z.string().min(1).default("hilom-refresh-secret-dev"),

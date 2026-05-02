@@ -44,6 +44,7 @@ export const users = pgTable("users", {
   fullName: varchar("full_name", { length: 255 }).notNull(),
   avatarUrl: text("avatar_url"),
   phone: varchar("phone", { length: 20 }),
+  refreshTokenHash: text("refresh_token_hash"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
