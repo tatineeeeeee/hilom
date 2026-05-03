@@ -11,12 +11,18 @@ import { authRouter } from "./routes/auth.routes";
 import { specializationRouter } from "./routes/specialization.routes";
 import { profileRouter } from "./routes/profile.routes";
 import { doctorRouter } from "./routes/doctor.routes";
+import { appointmentRouter } from "./routes/appointment.routes";
 
 export const app: Express = express();
 
 app.use(requestId);
 app.use(helmet());
-app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
+const allowedOrigins =
+  env.NODE_ENV === "production"
+    ? [env.CLIENT_URL]
+    : [env.CLIENT_URL, /^http:\/\/localhost:\d+$/];
+
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 
 morgan.token("id", (req) => (req as express.Request).id ?? "-");
 app.use(
@@ -36,5 +42,6 @@ app.use("/api/auth", authRouter);
 app.use("/api/specializations", specializationRouter);
 app.use("/api/me", profileRouter);
 app.use("/api/doctors", doctorRouter);
+app.use("/api/appointments", appointmentRouter);
 
 app.use(errorHandler);
