@@ -34,11 +34,6 @@ export const registerPatientSchema = baseRegisterSchema.extend({
 
 export const registerDoctorSchema = baseRegisterSchema.extend({
   role: z.literal("doctor"),
-  specializationId: z.coerce.number().int().positive("Pick a specialization"),
-  consultationFee: z.coerce
-    .number()
-    .nonnegative("Fee must be 0 or more")
-    .max(99_999_999),
 });
 
 export const loginSchema = z.object({

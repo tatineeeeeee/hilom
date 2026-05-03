@@ -2,16 +2,13 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label";
 import { FormField } from "@/components/forms/FormField";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { extractApiError } from "@/lib/helpers/errors";
 import { cn } from "@/lib/utils";
 import { useAuth } from "../hooks";
-import { listSpecializations } from "../api";
 import {
   registerDoctorSchema,
   registerPatientSchema,
@@ -55,7 +52,10 @@ const RoleTabs = ({ value, onChange }: RoleTabsProps) => {
     { id: "doctor", label: "Doctor" },
   ];
   return (
-    <div role="tablist" className="grid grid-cols-2 gap-1 rounded-md bg-muted p-1">
+    <div
+      role="tablist"
+      className="grid grid-cols-2 gap-1 rounded-md bg-muted p-1"
+    >
       {tabs.map((t) => (
         <button
           key={t.id}
@@ -164,10 +164,6 @@ const DoctorForm = () => {
   const { register: registerUser } = useAuth();
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
-  const specializations = useQuery({
-    queryKey: ["specializations"],
-    queryFn: listSpecializations,
-  });
 
   const {
     register,
@@ -181,8 +177,6 @@ const DoctorForm = () => {
       password: "",
       fullName: "",
       phone: "",
-      specializationId: 0,
-      consultationFee: 0,
     },
   });
 
@@ -190,7 +184,7 @@ const DoctorForm = () => {
     setServerError(null);
     try {
       await registerUser(values);
-      navigate("/dashboard", { replace: true });
+      navigate("/profile/setup", { replace: true });
     } catch (err) {
       setServerError(extractApiError(err).error);
     }
@@ -229,52 +223,6 @@ const DoctorForm = () => {
         error={errors.phone?.message}
         {...register("phone")}
       />
-
-      <div className="grid gap-1.5">
-        <Label htmlFor="specializationId">Specialization</Label>
-        <select
-          id="specializationId"
-          {...register("specializationId", { valueAsNumber: true })}
-          aria-invalid={errors.specializationId ? "true" : undefined}
-          aria-describedby={
-            errors.specializationId ? "specializationId-error" : undefined
-          }
-          className={cn(
-            "h-10 rounded-md border border-input bg-background px-3 text-sm",
-            "focus:outline-none focus:ring-2 focus:ring-ring",
-            errors.specializationId && "border-destructive",
-          )}
-          disabled={specializations.isLoading}
-        >
-          <option value={0}>
-            {specializations.isLoading
-              ? "Loading…"
-              : "Select a specialization"}
-          </option>
-          {specializations.data?.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
-        {errors.specializationId && (
-          <p id="specializationId-error" className="text-xs text-destructive">
-            {errors.specializationId.message}
-          </p>
-        )}
-      </div>
-
-      <FormField
-        id="doctor-fee"
-        label="Consultation fee (PHP)"
-        type="number"
-        inputMode="decimal"
-        min="0"
-        step="0.01"
-        error={errors.consultationFee?.message}
-        {...register("consultationFee", { valueAsNumber: true })}
-      />
-
       <FormField
         id="doctor-password"
         label="Password"
@@ -284,7 +232,10 @@ const DoctorForm = () => {
         error={errors.password?.message}
         {...register("password")}
       />
-
+      <p className="text-xs text-muted-foreground">
+        After signing up, complete your specialization, bio, and consultation
+        fee in profile setup.
+      </p>
       <Button
         type="submit"
         className="min-h-11 w-full"
