@@ -11,7 +11,8 @@
     "db:push": "drizzle-kit push",
     "db:push:test": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/hilom_test drizzle-kit push",
     "db:generate": "drizzle-kit generate",
-    "db:seed": "tsx src/db/seed.ts"
+    "db:seed": "tsx src/db/seed.ts",
+    "db:seed:doctor": "tsx src/db/seedDoctor.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
