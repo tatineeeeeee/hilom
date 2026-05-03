@@ -7,6 +7,7 @@ import {
   updateStatus,
 } from "../controllers/appointment.controller";
 import { createReview } from "../controllers/review.controller";
+import { getConversationForAppointment } from "../controllers/chat.controller";
 
 export const appointmentRouter: ExpressRouter = Router();
 
@@ -14,3 +15,8 @@ appointmentRouter.post("/", requireAuth, asyncHandler(bookAppointment));
 appointmentRouter.get("/", requireAuth, asyncHandler(listMyAppointments));
 appointmentRouter.patch("/:id/status", requireAuth, asyncHandler(updateStatus));
 appointmentRouter.post("/:id/review", requireAuth, asyncHandler(createReview));
+appointmentRouter.get(
+  "/:id/conversation",
+  requireAuth,
+  asyncHandler(getConversationForAppointment),
+);

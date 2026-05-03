@@ -3,8 +3,10 @@ import { app } from "./app";
 import { env } from "./config/env";
 import { pool } from "./config/db";
 import { logger } from "./config/logger";
+import { initSocket, closeSocket } from "./socket";
 
 const server = http.createServer(app);
+initSocket(server);
 
 server.listen(env.PORT, () => {
   logger.info({ port: env.PORT }, "server listening");
@@ -27,6 +29,11 @@ const shutdown = async (signal: string): Promise<void> => {
   server.close(async (err) => {
     if (err) {
       logger.error({ err }, "error closing http server");
+    }
+    try {
+      await closeSocket();
+    } catch (sockErr) {
+      logger.error({ err: sockErr }, "error closing socket.io");
     }
     try {
       await pool.end();

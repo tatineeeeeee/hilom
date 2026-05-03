@@ -15,6 +15,7 @@ import {
   addDaysToManilaDate,
 } from "../utils/manilaTime";
 import { generateSlots } from "./slot.service";
+import { findOrCreateConversation } from "./chat.service";
 import {
   APPOINTMENT_PAGE_SIZE,
   type BookAppointmentInput,
@@ -319,6 +320,19 @@ export const updateAppointmentStatus = async (
     .set({ status: newStatus })
     .where(eq(appointments.id, appointmentId))
     .returning();
+
+  if (newStatus === "confirmed" && updated) {
+    const profile = await db.query.doctorProfiles.findFirst({
+      where: eq(doctorProfiles.id, appointment.doctorId),
+    });
+    if (profile) {
+      await findOrCreateConversation(
+        appointmentId,
+        appointment.patientId,
+        profile.userId,
+      );
+    }
+  }
 
   return updated;
 };
