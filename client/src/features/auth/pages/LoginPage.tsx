@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FormField } from "@/components/forms/FormField";
@@ -26,6 +27,7 @@ export const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [showPw, setShowPw] = useState(false);
 
   const {
     register,
@@ -83,9 +85,20 @@ export const LoginPage = () => {
         <FormField
           id="password"
           label="Password"
-          type="password"
+          type={showPw ? "text" : "password"}
           autoComplete="current-password"
           error={errors.password?.message}
+          action={
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label={showPw ? "Hide password" : "Show password"}
+              onClick={() => setShowPw((p) => !p)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+          }
           {...register("password")}
         />
         <div className="text-right text-sm">
