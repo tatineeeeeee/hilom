@@ -24,22 +24,24 @@ const optionalPhone = z.preprocess(
 const baseRegisterSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
+  confirmPassword: z.string().min(1, "Please confirm your password"),
   fullName: z.string().min(1, "Full name is required").max(255).trim(),
   phone: optionalPhone,
 });
 
-export const registerPatientSchema = baseRegisterSchema.extend({
-  role: z.literal("patient"),
-});
+export const registerPatientSchema = baseRegisterSchema
+  .extend({ role: z.literal("patient") })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
-export const registerDoctorSchema = baseRegisterSchema.extend({
-  role: z.literal("doctor"),
-  specializationId: z.coerce.number().int().positive("Pick a specialization"),
-  consultationFee: z.coerce
-    .number()
-    .nonnegative("Fee must be 0 or more")
-    .max(99_999_999),
-});
+export const registerDoctorSchema = baseRegisterSchema
+  .extend({ role: z.literal("doctor") })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 export const loginSchema = z.object({
   email: emailSchema,

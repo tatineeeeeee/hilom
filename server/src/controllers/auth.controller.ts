@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { eq } from "drizzle-orm";
 import { db } from "../config/db";
-import { users, doctorProfiles, patientProfiles } from "../db/schema";
+import { users, patientProfiles } from "../db/schema";
 import { AppError } from "../utils/AppError";
 import { hashPassword, verifyPassword } from "../utils/password";
 import { signAccess, signRefresh, verifyRefresh } from "../utils/jwt";
@@ -75,12 +75,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     if (input.role === "patient") {
       await tx.insert(patientProfiles).values({ userId: user.id });
-    } else {
-      await tx.insert(doctorProfiles).values({
-        userId: user.id,
-        specializationId: input.specializationId,
-        consultationFee: input.consultationFee.toFixed(2),
-      });
     }
 
     return user;

@@ -4,6 +4,10 @@ import { specializations } from "../../src/db/schema";
 export const seedTestSpecializations = async (): Promise<void> => {
   await db
     .insert(specializations)
-    .values([{ name: "General Practice" }])
+    .values([
+      { name: "General Practice" },
+      { name: "Pediatrics" },
+      { name: "Cardiology" },
+    ])
     .onConflictDoNothing();
 };

@@ -27,8 +27,6 @@ export const registerPatientSchema = baseRegisterSchema.extend({
 
 export const registerDoctorSchema = baseRegisterSchema.extend({
   role: z.literal("doctor"),
-  specializationId: z.coerce.number().int().positive(),
-  consultationFee: z.coerce.number().nonnegative().max(99999999),
 });
 
 export const registerSchema = z.discriminatedUnion("role", [
