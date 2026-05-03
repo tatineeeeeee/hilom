@@ -4,12 +4,17 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LinkButton } from "@/components/ui/link-button";
 import { useAuth } from "@/features/auth/hooks";
+import { useUnreadCount, useChatSocket } from "@/features/chat/hooks";
+import { UnreadBadge } from "@/features/chat/components/UnreadBadge";
 import { cn } from "@/lib/utils";
 
 export const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  useChatSocket();
+  const { data: unread } = useUnreadCount();
+  const unreadCount = isAuthenticated ? (unread ?? 0) : 0;
 
   const handleLogout = async () => {
     await logout();
@@ -46,6 +51,12 @@ export const Navbar = () => {
                   Appointments
                 </NavLink>
               )}
+              <NavLink to="/messages" className={linkClasses}>
+                <span className="flex items-center gap-1.5">
+                  Messages
+                  <UnreadBadge count={unreadCount} />
+                </span>
+              </NavLink>
               <span className="hidden text-sm text-muted-foreground md:inline">
                 {user?.fullName}
               </span>
@@ -108,6 +119,16 @@ export const Navbar = () => {
                     Appointments
                   </NavLink>
                 )}
+                <NavLink
+                  to="/messages"
+                  className={linkClasses}
+                  onClick={() => setOpen(false)}
+                >
+                  <span className="flex items-center gap-1.5">
+                    Messages
+                    <UnreadBadge count={unreadCount} />
+                  </span>
+                </NavLink>
                 <Button variant="outline" onClick={handleLogout}>
                   Log out
                 </Button>
