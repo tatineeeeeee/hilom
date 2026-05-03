@@ -3,12 +3,7 @@ import type { Response as SupertestResponse } from "supertest";
 import { eq } from "drizzle-orm";
 import { app } from "../src/app";
 import { db } from "../src/config/db";
-import {
-  users,
-  patientProfiles,
-  doctorProfiles,
-  specializations,
-} from "../src/db/schema";
+import { users, patientProfiles, doctorProfiles } from "../src/db/schema";
 import { seedTestSpecializations } from "./helpers/seedSpecializations";
 
 const password = "Test1234";
@@ -20,13 +15,11 @@ const patientBody = (email: string) => ({
   role: "patient" as const,
 });
 
-const doctorBody = (email: string, specializationId: number) => ({
+const doctorBody = (email: string) => ({
   email,
   password,
   fullName: "Test Doctor",
   role: "doctor" as const,
-  specializationId,
-  consultationFee: 1500,
 });
 
 const getRefreshCookie = (response: SupertestResponse): string | null => {
@@ -84,16 +77,11 @@ describe("POST /api/auth", () => {
     expect(doctorRow).toBeFalsy();
   });
 
-  it("creates users + doctor_profiles in one transaction (doctor role)", async () => {
-    const spec = await db.query.specializations.findFirst({
-      where: eq(specializations.name, "General Practice"),
-    });
-    if (!spec) throw new Error("Fixture: General Practice not seeded");
-
+  it("creates a user without a doctor_profiles row (doctor role)", async () => {
     const email = "doctor-tx@example.com";
     const response = await request(app)
       .post("/api/auth/register")
-      .send(doctorBody(email, spec.id));
+      .send(doctorBody(email));
 
     expect(response.status).toBe(201);
 
@@ -107,10 +95,7 @@ describe("POST /api/auth", () => {
     const doctorRow = await db.query.doctorProfiles.findFirst({
       where: eq(doctorProfiles.userId, userRow.id),
     });
-    expect(doctorRow).toBeTruthy();
-    if (!doctorRow) return;
-    expect(doctorRow.specializationId).toBe(spec.id);
-    expect(Number(doctorRow.consultationFee)).toBe(1500);
+    expect(doctorRow).toBeFalsy();
 
     const patientRow = await db.query.patientProfiles.findFirst({
       where: eq(patientProfiles.userId, userRow.id),

@@ -9,6 +9,8 @@ import { requestId } from "./middleware/requestId";
 import { errorHandler } from "./middleware/errorHandler";
 import { authRouter } from "./routes/auth.routes";
 import { specializationRouter } from "./routes/specialization.routes";
+import { profileRouter } from "./routes/profile.routes";
+import { doctorRouter } from "./routes/doctor.routes";
 
 export const app: Express = express();
 
@@ -32,5 +34,7 @@ app.get("/api/health", (_req, res) => {
 
 app.use("/api/auth", authRouter);
 app.use("/api/specializations", specializationRouter);
+app.use("/api/me", profileRouter);
+app.use("/api/doctors", doctorRouter);
 
 app.use(errorHandler);
