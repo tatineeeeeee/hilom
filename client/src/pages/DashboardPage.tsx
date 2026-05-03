@@ -1,5 +1,7 @@
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/features/auth/hooks";
+import { ProfileCompletionBanner } from "@/features/profile/components/ProfileCompletionBanner";
 
 export const DashboardPage = () => {
   const { user } = useAuth();
@@ -19,17 +21,31 @@ export const DashboardPage = () => {
           {user.email}
         </p>
       </header>
+      <ProfileCompletionBanner />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {placeholders.map((p) => (
-          <Card key={p.title}>
-            <CardHeader>
-              <CardTitle className="text-base">{p.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{p.body}</p>
-            </CardContent>
-          </Card>
-        ))}
+        {placeholders.map((p) => {
+          const inner = (
+            <Card className={p.href ? "transition-shadow hover:shadow-md" : ""}>
+              <CardHeader>
+                <CardTitle className="text-base">{p.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{p.body}</p>
+              </CardContent>
+            </Card>
+          );
+          return p.href ? (
+            <Link
+              key={p.title}
+              to={p.href}
+              className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+            >
+              {inner}
+            </Link>
+          ) : (
+            <div key={p.title}>{inner}</div>
+          );
+        })}
       </div>
     </div>
   );
@@ -38,6 +54,7 @@ export const DashboardPage = () => {
 interface Section {
   title: string;
   body: string;
+  href?: string | null;
 }
 
 const roleSections: Record<"patient" | "doctor" | "admin", Section[]> = {
@@ -51,8 +68,9 @@ const roleSections: Record<"patient" | "doctor" | "admin", Section[]> = {
       body: "Prescriptions land here after a completed appointment.",
     },
     {
-      title: "Quick book",
-      body: "Find a doctor by specialization (Phase 3).",
+      title: "Find a doctor",
+      body: "Browse doctors by specialization, rating, and fee.",
+      href: "/doctors",
     },
   ],
   doctor: [
@@ -65,8 +83,9 @@ const roleSections: Record<"patient" | "doctor" | "admin", Section[]> = {
       body: "Patient bookings waiting on your confirmation will show up here.",
     },
     {
-      title: "Earnings & rating",
-      body: "Earnings and rating populate after your first completed consult.",
+      title: "Manage schedule",
+      body: "Set your available hours for each day of the week.",
+      href: "/profile/schedule",
     },
   ],
   admin: [
