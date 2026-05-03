@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { LinkButton } from "@/components/ui/link-button";
 import { useDoctorAppointments, useUpdateAppointmentStatus } from "../hooks";
 import type { DoctorAppointment } from "../schemas";
 
@@ -125,6 +126,13 @@ export const DoctorAppointmentsPage = () => {
 
                   {appt.status === "confirmed" && (
                     <>
+                      <LinkButton
+                        to={`/appointments/${appt.id}/chat`}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Chat
+                      </LinkButton>
                       <Button
                         size="sm"
                         onClick={() => handleAction(appt.id, "completed")}

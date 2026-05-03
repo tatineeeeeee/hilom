@@ -15,6 +15,8 @@ import { DoctorDetailPage } from "@/features/doctors/pages/DoctorDetailPage";
 import { SchedulePage } from "@/features/profile/pages/SchedulePage";
 import { PatientAppointmentsPage } from "@/features/appointments/pages/PatientAppointmentsPage";
 import { DoctorAppointmentsPage } from "@/features/appointments/pages/DoctorAppointmentsPage";
+import { ChatPage } from "@/features/chat/pages/ChatPage";
+import { ConversationsPage } from "@/features/chat/pages/ConversationsPage";
 
 export const AppRoutes = () => {
   return (
@@ -36,6 +38,8 @@ export const AppRoutes = () => {
           <Route path="/profile/schedule" element={<SchedulePage />} />
           <Route path="/appointments" element={<PatientAppointmentsPage />} />
           <Route path="/my-appointments" element={<DoctorAppointmentsPage />} />
+          <Route path="/messages" element={<ConversationsPage />} />
+          <Route path="/appointments/:id/chat" element={<ChatPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

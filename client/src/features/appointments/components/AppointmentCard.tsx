@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { LinkButton } from "@/components/ui/link-button";
 import { useCancelAppointment } from "../hooks";
 import type { Appointment } from "../schemas";
 
@@ -63,6 +64,16 @@ export const AppointmentCard = ({
             >
               Cancel
             </Button>
+          )}
+
+          {appointment.status === "confirmed" && (
+            <LinkButton
+              to={`/appointments/${appointment.id}/chat`}
+              variant="outline"
+              size="sm"
+            >
+              Chat
+            </LinkButton>
           )}
 
           {appointment.status === "completed" &&
