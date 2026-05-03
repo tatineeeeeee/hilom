@@ -36,6 +36,16 @@ export const Navbar = () => {
               <NavLink to="/dashboard" className={linkClasses}>
                 Dashboard
               </NavLink>
+              {user?.role === "patient" && (
+                <NavLink to="/appointments" className={linkClasses}>
+                  Appointments
+                </NavLink>
+              )}
+              {user?.role === "doctor" && (
+                <NavLink to="/my-appointments" className={linkClasses}>
+                  Appointments
+                </NavLink>
+              )}
               <span className="hidden text-sm text-muted-foreground md:inline">
                 {user?.fullName}
               </span>
@@ -69,10 +79,7 @@ export const Navbar = () => {
       </div>
 
       {open && (
-        <nav
-          id="mobile-nav"
-          className="border-t bg-background sm:hidden"
-        >
+        <nav id="mobile-nav" className="border-t bg-background sm:hidden">
           <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-3">
             {isAuthenticated ? (
               <>
@@ -83,6 +90,24 @@ export const Navbar = () => {
                 >
                   Dashboard
                 </NavLink>
+                {user?.role === "patient" && (
+                  <NavLink
+                    to="/appointments"
+                    className={linkClasses}
+                    onClick={() => setOpen(false)}
+                  >
+                    Appointments
+                  </NavLink>
+                )}
+                {user?.role === "doctor" && (
+                  <NavLink
+                    to="/my-appointments"
+                    className={linkClasses}
+                    onClick={() => setOpen(false)}
+                  >
+                    Appointments
+                  </NavLink>
+                )}
                 <Button variant="outline" onClick={handleLogout}>
                   Log out
                 </Button>

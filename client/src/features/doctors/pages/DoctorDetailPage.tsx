@@ -101,7 +101,7 @@ export const DoctorDetailPage = () => {
           <CardTitle className="text-sm">Book a slot</CardTitle>
         </CardHeader>
         <CardContent>
-          <SlotPicker doctorId={doctor.id} />
+          <SlotPicker doctorId={doctor.id} doctorName={doctor.fullName} />
         </CardContent>
       </Card>
     </div>

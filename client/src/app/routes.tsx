@@ -13,6 +13,8 @@ import { NotFoundPage } from "@/pages/NotFoundPage";
 import { DoctorListPage } from "@/features/doctors/pages/DoctorListPage";
 import { DoctorDetailPage } from "@/features/doctors/pages/DoctorDetailPage";
 import { SchedulePage } from "@/features/profile/pages/SchedulePage";
+import { PatientAppointmentsPage } from "@/features/appointments/pages/PatientAppointmentsPage";
+import { DoctorAppointmentsPage } from "@/features/appointments/pages/DoctorAppointmentsPage";
 
 export const AppRoutes = () => {
   return (
@@ -32,6 +34,8 @@ export const AppRoutes = () => {
           <Route path="/doctors" element={<DoctorListPage />} />
           <Route path="/doctors/:id" element={<DoctorDetailPage />} />
           <Route path="/profile/schedule" element={<SchedulePage />} />
+          <Route path="/appointments" element={<PatientAppointmentsPage />} />
+          <Route path="/my-appointments" element={<DoctorAppointmentsPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

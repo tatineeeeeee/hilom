@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useDoctorSlots } from "../hooks";
+import { BookingModal } from "@/features/appointments/components/BookingModal";
+import type { TimeSlot } from "../api";
 
 interface SlotPickerProps {
   doctorId: string;
+  doctorName: string;
 }
 
 const todayISO = (): string => new Date().toISOString().slice(0, 10);
@@ -16,8 +18,9 @@ const maxDateISO = (): string => {
   return d.toISOString().slice(0, 10);
 };
 
-export const SlotPicker = ({ doctorId }: SlotPickerProps) => {
+export const SlotPicker = ({ doctorId, doctorName }: SlotPickerProps) => {
   const [date, setDate] = useState(todayISO());
+  const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
 
   const { data: slots, isPending, isError } = useDoctorSlots(doctorId, date);
 
@@ -31,7 +34,10 @@ export const SlotPicker = ({ doctorId }: SlotPickerProps) => {
           value={date}
           min={todayISO()}
           max={maxDateISO()}
-          onChange={(e) => setDate(e.target.value)}
+          onChange={(e) => {
+            setDate(e.target.value);
+            setSelectedSlot(null);
+          }}
           className="min-h-9 w-full rounded-lg border border-input bg-background px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
@@ -57,14 +63,12 @@ export const SlotPicker = ({ doctorId }: SlotPickerProps) => {
               {slots.map((slot) => (
                 <Button
                   key={slot.start}
-                  variant="outline"
+                  variant={
+                    selectedSlot?.start === slot.start ? "default" : "outline"
+                  }
                   size="sm"
                   className="min-h-9"
-                  onClick={() =>
-                    toast.info(
-                      `Booking opens in Phase 4 (${slot.start}–${slot.end})`,
-                    )
-                  }
+                  onClick={() => setSelectedSlot(slot)}
                 >
                   {slot.start}
                 </Button>
@@ -72,6 +76,16 @@ export const SlotPicker = ({ doctorId }: SlotPickerProps) => {
             </div>
           )}
         </>
+      )}
+
+      {selectedSlot && (
+        <BookingModal
+          doctorId={doctorId}
+          doctorName={doctorName}
+          date={date}
+          slot={selectedSlot}
+          onClose={() => setSelectedSlot(null)}
+        />
       )}
     </div>
   );
