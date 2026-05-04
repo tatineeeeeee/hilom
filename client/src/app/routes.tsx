@@ -20,6 +20,7 @@ import { ConversationsPage } from "@/features/chat/pages/ConversationsPage";
 import { WritePrescriptionPage } from "@/features/prescriptions/pages/WritePrescriptionPage";
 import { ViewPrescriptionPage } from "@/features/prescriptions/pages/ViewPrescriptionPage";
 import { MyPrescriptionsPage } from "@/features/prescriptions/pages/MyPrescriptionsPage";
+import { PaymentPage } from "@/features/payments/pages/PaymentPage";
 
 export const AppRoutes = () => {
   return (
@@ -52,6 +53,7 @@ export const AppRoutes = () => {
             element={<ViewPrescriptionPage />}
           />
           <Route path="/prescriptions" element={<MyPrescriptionsPage />} />
+          <Route path="/payments/:appointmentId" element={<PaymentPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

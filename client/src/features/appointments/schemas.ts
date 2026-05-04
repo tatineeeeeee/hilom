@@ -50,3 +50,16 @@ export interface ReviewInput {
   rating: number;
   comment?: string;
 }
+
+export interface BookingPayment {
+  id: string;
+  appointmentId: string;
+  amount: string;
+  status: "pending" | "escrowed" | "released" | "refunded";
+}
+
+export interface BookingResult {
+  appointment: Appointment;
+  payment: BookingPayment;
+  clientKey: string;
+}

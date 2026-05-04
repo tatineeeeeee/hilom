@@ -38,9 +38,9 @@ export const BookingModal = ({
         reason: reason.trim() || undefined,
       },
       {
-        onSuccess: () => {
+        onSuccess: (result) => {
           toast.success("Appointment booked!");
-          navigate("/appointments");
+          navigate(`/payments/${result.appointment.id}`);
         },
         onError: (err) => {
           if (isAxiosError(err) && err.response?.status === 409) {
