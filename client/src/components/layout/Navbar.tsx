@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { LinkButton } from "@/components/ui/link-button";
 import { useAuth } from "@/features/auth/hooks";
 import { useUnreadCount, useChatSocket } from "@/features/chat/hooks";
+import { usePrescriptionSocket } from "@/features/prescriptions/hooks";
 import { UnreadBadge } from "@/features/chat/components/UnreadBadge";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +14,7 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   useChatSocket();
+  usePrescriptionSocket();
   const { data: unread } = useUnreadCount();
   const unreadCount = isAuthenticated ? (unread ?? 0) : 0;
 
@@ -56,6 +58,9 @@ export const Navbar = () => {
                   Messages
                   <UnreadBadge count={unreadCount} />
                 </span>
+              </NavLink>
+              <NavLink to="/prescriptions" className={linkClasses}>
+                Prescriptions
               </NavLink>
               <span className="hidden text-sm text-muted-foreground md:inline">
                 {user?.fullName}
@@ -128,6 +133,13 @@ export const Navbar = () => {
                     Messages
                     <UnreadBadge count={unreadCount} />
                   </span>
+                </NavLink>
+                <NavLink
+                  to="/prescriptions"
+                  className={linkClasses}
+                  onClick={() => setOpen(false)}
+                >
+                  Prescriptions
                 </NavLink>
                 <Button variant="outline" onClick={handleLogout}>
                   Log out

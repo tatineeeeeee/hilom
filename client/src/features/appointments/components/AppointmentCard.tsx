@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { LinkButton } from "@/components/ui/link-button";
 import { useCancelAppointment } from "../hooks";
 import type { Appointment } from "../schemas";
+import { useAuth } from "@/features/auth/hooks";
 
 const statusColors: Record<Appointment["status"], string> = {
   pending: "bg-amber-100 text-amber-800",
@@ -22,6 +23,7 @@ export const AppointmentCard = ({
   appointment,
   onReview,
 }: AppointmentCardProps) => {
+  const { user } = useAuth();
   const { mutate: cancel, isPending } = useCancelAppointment();
 
   const handleCancel = () => {
@@ -86,6 +88,29 @@ export const AppointmentCard = ({
               >
                 Leave a review
               </Button>
+            )}
+
+          {appointment.status === "completed" &&
+            appointment.hasPrescription && (
+              <LinkButton
+                to={`/appointments/${appointment.id}/prescription`}
+                variant="outline"
+                size="sm"
+              >
+                View prescription
+              </LinkButton>
+            )}
+
+          {appointment.status === "completed" &&
+            !appointment.hasPrescription &&
+            user?.role === "doctor" && (
+              <LinkButton
+                to={`/appointments/${appointment.id}/prescription/new`}
+                variant="outline"
+                size="sm"
+              >
+                Issue prescription
+              </LinkButton>
             )}
         </div>
       </CardContent>

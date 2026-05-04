@@ -9,6 +9,7 @@ export interface Appointment {
   status: "pending" | "confirmed" | "completed" | "cancelled";
   reason: string | null;
   hasReview: boolean;
+  hasPrescription: boolean;
 }
 
 export interface DoctorAppointment {
@@ -20,6 +21,7 @@ export interface DoctorAppointment {
   slotEnd: string;
   status: "pending" | "confirmed" | "completed" | "cancelled";
   reason: string | null;
+  hasPrescription: boolean;
 }
 
 export interface AppointmentsResponse {

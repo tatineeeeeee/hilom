@@ -150,6 +150,26 @@ export const DoctorAppointmentsPage = () => {
                       </Button>
                     </>
                   )}
+
+                  {appt.status === "completed" && !appt.hasPrescription && (
+                    <LinkButton
+                      to={`/appointments/${appt.id}/prescription/new`}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Issue prescription
+                    </LinkButton>
+                  )}
+
+                  {appt.status === "completed" && appt.hasPrescription && (
+                    <LinkButton
+                      to={`/appointments/${appt.id}/prescription`}
+                      variant="outline"
+                      size="sm"
+                    >
+                      View prescription
+                    </LinkButton>
+                  )}
                 </div>
               </CardContent>
             </Card>
