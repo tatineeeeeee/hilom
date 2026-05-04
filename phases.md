@@ -235,7 +235,7 @@ Doctor writes prescription with medications, patient views.
 
 ---
 
-## Phase 7 — Payments `[ ]`
+## Phase 7 — Payments `[x]`
 
 PayMongo integration with app-level escrow (PayMongo has no native escrow — we track hold/release in our DB).
 
@@ -251,12 +251,12 @@ PayMongo integration with app-level escrow (PayMongo has no native escrow — we
 
 **Done when**:
 
-- [ ] Create payment intent → pending
-- [ ] Patient pays → escrowed
-- [ ] Doctor completes → released
-- [ ] Cancel → refunded
-- [ ] Payment history works
-- [ ] Frontend: payment flow in booking (GCash, Maya, card)
+- [x] Create payment intent → pending
+- [x] Patient pays → escrowed
+- [x] Doctor completes → released
+- [x] Cancel → refunded
+- [x] Payment history works
+- [x] Frontend: payment flow in booking (GCash, Maya, card)
 
 ---
 
