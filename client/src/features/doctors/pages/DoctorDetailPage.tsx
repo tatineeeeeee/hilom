@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatPHP } from "@/lib/utils/formatCurrency";
+import { DoctorReviewsSection } from "@/features/reviews/components/DoctorReviewsSection";
 import { useDoctor } from "../hooks";
 import { SlotPicker } from "../components/SlotPicker";
 
@@ -96,7 +97,7 @@ export const DoctorDetailPage = () => {
         </Card>
       )}
 
-      <Card>
+      <Card className="mb-4">
         <CardHeader>
           <CardTitle className="text-sm">Book a slot</CardTitle>
         </CardHeader>
@@ -104,6 +105,8 @@ export const DoctorDetailPage = () => {
           <SlotPicker doctorId={doctor.id} doctorName={doctor.fullName} />
         </CardContent>
       </Card>
+
+      <DoctorReviewsSection doctorId={doctor.id} />
     </div>
   );
 };
