@@ -4,6 +4,7 @@ import {
   appointments,
   doctorProfiles,
   doctorSchedules,
+  payments,
   prescriptions,
   reviews,
   specializations,
@@ -17,12 +18,18 @@ import {
 } from "../utils/manilaTime";
 import { generateSlots } from "./slot.service";
 import { findOrCreateConversation } from "./chat.service";
-import { createPaymentForAppointment } from "./payment.service";
+import {
+  createPaymentForAppointment,
+  refundPayment,
+  releaseEscrow,
+} from "./payment.service";
 import {
   APPOINTMENT_PAGE_SIZE,
   type BookAppointmentInput,
   type ListAppointmentsQuery,
 } from "../schemas/appointment.schema";
+
+export type PaymentStatus = "pending" | "escrowed" | "released" | "refunded";
 
 export interface AppointmentRow {
   id: string;
@@ -37,6 +44,7 @@ export interface AppointmentRow {
   notes: string | null;
   hasReview: boolean;
   hasPrescription: boolean;
+  paymentStatus: PaymentStatus | null;
   createdAt: Date;
 }
 
@@ -160,6 +168,7 @@ export const listPatientAppointments = async (
         notes: appointments.notes,
         reviewId: reviews.id,
         prescriptionId: prescriptions.id,
+        paymentStatus: payments.status,
         createdAt: appointments.createdAt,
       })
       .from(appointments)
@@ -171,6 +180,7 @@ export const listPatientAppointments = async (
       )
       .leftJoin(reviews, eq(reviews.appointmentId, appointments.id))
       .leftJoin(prescriptions, eq(prescriptions.appointmentId, appointments.id))
+      .leftJoin(payments, eq(payments.appointmentId, appointments.id))
       .where(where)
       .orderBy(desc(appointments.createdAt))
       .limit(APPOINTMENT_PAGE_SIZE)
@@ -225,6 +235,7 @@ export interface DoctorAppointmentRow {
   reason: string | null;
   notes: string | null;
   hasPrescription: boolean;
+  paymentStatus: PaymentStatus | null;
   createdAt: Date;
 }
 
@@ -265,11 +276,13 @@ export const listDoctorAppointments = async (
         reason: appointments.reason,
         notes: appointments.notes,
         prescriptionId: prescriptions.id,
+        paymentStatus: payments.status,
         createdAt: appointments.createdAt,
       })
       .from(appointments)
       .innerJoin(users, eq(appointments.patientId, users.id))
       .leftJoin(prescriptions, eq(prescriptions.appointmentId, appointments.id))
+      .leftJoin(payments, eq(payments.appointmentId, appointments.id))
       .where(where)
       .orderBy(desc(appointments.createdAt))
       .limit(APPOINTMENT_PAGE_SIZE)
@@ -339,6 +352,15 @@ export const updateAppointmentStatus = async (
     );
   }
 
+  if (newStatus === "completed") {
+    const payment = await db.query.payments.findFirst({
+      where: eq(payments.appointmentId, appointmentId),
+    });
+    if (!payment || payment.status !== "escrowed") {
+      throw new AppError(409, "Cannot complete an unpaid appointment");
+    }
+  }
+
   const [updated] = await db
     .update(appointments)
     .set({ status: newStatus })
@@ -356,6 +378,14 @@ export const updateAppointmentStatus = async (
         profile.userId,
       );
     }
+  }
+
+  if (newStatus === "completed") {
+    await releaseEscrow(appointmentId);
+  }
+
+  if (newStatus === "cancelled") {
+    await refundPayment(appointmentId);
   }
 
   return updated;

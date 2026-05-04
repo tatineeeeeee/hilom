@@ -6,6 +6,7 @@ import { doctorProfiles, doctorSchedules } from "../src/db/schema";
 import { seedTestSpecializations } from "./helpers/seedSpecializations";
 import { bearer, registerDoctor, registerPatient } from "./helpers/auth";
 import type { TestSession } from "./helpers/auth";
+import { confirmPayment } from "./helpers/payment";
 import {
   todayInManila,
   addDaysToManilaDate,
@@ -373,6 +374,9 @@ describe("PATCH /api/appointments/:id/status", () => {
       .set("Authorization", bearer(docSession))
       .send({ status: "confirmed" });
 
+    // Patient pays
+    await confirmPayment(appointmentId, patient);
+
     // Then complete
     const res = await request(app)
       .patch(`/api/appointments/${appointmentId}/status`)
@@ -456,6 +460,7 @@ describe("PATCH /api/appointments/:id/status", () => {
       .patch(`/api/appointments/${appointmentId}/status`)
       .set("Authorization", bearer(docSession))
       .send({ status: "confirmed" });
+    await confirmPayment(appointmentId, patient);
     await request(app)
       .patch(`/api/appointments/${appointmentId}/status`)
       .set("Authorization", bearer(docSession))

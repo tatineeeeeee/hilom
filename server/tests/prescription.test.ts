@@ -15,6 +15,7 @@ import {
   registerPatient,
   type TestSession,
 } from "./helpers/auth";
+import { confirmPayment } from "./helpers/payment";
 import {
   todayInManila,
   addDaysToManilaDate,
@@ -97,6 +98,7 @@ const createCompletedAppointment = async (
     .patch(`/api/appointments/${id}/status`)
     .set("Authorization", bearer(doctorSession))
     .send({ status: "confirmed" });
+  await confirmPayment(id, patientSession);
   await request(app)
     .patch(`/api/appointments/${id}/status`)
     .set("Authorization", bearer(doctorSession))

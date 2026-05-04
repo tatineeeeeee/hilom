@@ -436,3 +436,161 @@ describe("POST /api/payments/webhook", () => {
     }
   });
 });
+
+describe("Payment lifecycle on appointment status transitions", () => {
+  beforeEach(async () => {
+    await seedTestSpecializations();
+  });
+
+  it("completing a paid appointment releases the payment", async () => {
+    const { session: docSession, profileId } = await setupDoctor(
+      "pay-release@example.com",
+    );
+    const date = nextDate(1);
+    const dow = manilaDateDayOfWeek(date);
+    await seedSchedule(profileId, [
+      { dayOfWeek: dow, startTime: "09:00", endTime: "12:00" },
+    ]);
+    const patient = await registerPatient("pay-release-p@example.com");
+    const { appointmentId } = await bookSlot(
+      patient,
+      profileId,
+      date,
+      "09:00",
+      "09:30",
+    );
+
+    await request(app)
+      .patch(`/api/appointments/${appointmentId}/status`)
+      .set("Authorization", bearer(docSession))
+      .send({ status: "confirmed" });
+    await request(app)
+      .post(`/api/appointments/${appointmentId}/payment/confirm`)
+      .set("Authorization", bearer(patient));
+    await request(app)
+      .patch(`/api/appointments/${appointmentId}/status`)
+      .set("Authorization", bearer(docSession))
+      .send({ status: "completed" });
+
+    const row = await db.query.payments.findFirst({
+      where: eq(payments.appointmentId, appointmentId),
+    });
+    expect(row?.status).toBe("released");
+    expect(row?.releasedAt).toBeTruthy();
+  });
+
+  it("cancelling a paid appointment refunds the payment", async () => {
+    const { session: docSession, profileId } = await setupDoctor(
+      "pay-refund@example.com",
+    );
+    const date = nextDate(2);
+    const dow = manilaDateDayOfWeek(date);
+    await seedSchedule(profileId, [
+      { dayOfWeek: dow, startTime: "09:00", endTime: "12:00" },
+    ]);
+    const patient = await registerPatient("pay-refund-p@example.com");
+    const { appointmentId } = await bookSlot(
+      patient,
+      profileId,
+      date,
+      "09:00",
+      "09:30",
+    );
+
+    await request(app)
+      .patch(`/api/appointments/${appointmentId}/status`)
+      .set("Authorization", bearer(docSession))
+      .send({ status: "confirmed" });
+    await request(app)
+      .post(`/api/appointments/${appointmentId}/payment/confirm`)
+      .set("Authorization", bearer(patient));
+    await request(app)
+      .patch(`/api/appointments/${appointmentId}/status`)
+      .set("Authorization", bearer(docSession))
+      .send({ status: "cancelled" });
+
+    const row = await db.query.payments.findFirst({
+      where: eq(payments.appointmentId, appointmentId),
+    });
+    expect(row?.status).toBe("refunded");
+    expect(row?.refundedAt).toBeTruthy();
+  });
+
+  it("cancelling an unpaid pending appointment closes payment as refunded with no PayMongo call", async () => {
+    const { profileId } = await setupDoctor("pay-cancel-unpaid@example.com");
+    const date = nextDate(3);
+    const dow = manilaDateDayOfWeek(date);
+    await seedSchedule(profileId, [
+      { dayOfWeek: dow, startTime: "09:00", endTime: "12:00" },
+    ]);
+    const patient = await registerPatient("pay-cancel-unpaid-p@example.com");
+    const { appointmentId } = await bookSlot(
+      patient,
+      profileId,
+      date,
+      "09:00",
+      "09:30",
+    );
+
+    await request(app)
+      .patch(`/api/appointments/${appointmentId}/status`)
+      .set("Authorization", bearer(patient))
+      .send({ status: "cancelled" });
+
+    const row = await db.query.payments.findFirst({
+      where: eq(payments.appointmentId, appointmentId),
+    });
+    expect(row?.status).toBe("refunded");
+    expect(row?.refundedAt).toBeTruthy();
+  });
+
+  it("doctor cannot complete an unpaid appointment", async () => {
+    const { session: docSession, profileId } = await setupDoctor(
+      "pay-noun-paid-complete@example.com",
+    );
+    const date = nextDate(4);
+    const dow = manilaDateDayOfWeek(date);
+    await seedSchedule(profileId, [
+      { dayOfWeek: dow, startTime: "09:00", endTime: "12:00" },
+    ]);
+    const patient = await registerPatient("pay-noun-paid-p@example.com");
+    const { appointmentId } = await bookSlot(
+      patient,
+      profileId,
+      date,
+      "09:00",
+      "09:30",
+    );
+
+    await request(app)
+      .patch(`/api/appointments/${appointmentId}/status`)
+      .set("Authorization", bearer(docSession))
+      .send({ status: "confirmed" });
+
+    const res = await request(app)
+      .patch(`/api/appointments/${appointmentId}/status`)
+      .set("Authorization", bearer(docSession))
+      .send({ status: "completed" });
+
+    expect(res.status).toBe(409);
+  });
+
+  it("appointment list rows expose paymentStatus", async () => {
+    const { profileId } = await setupDoctor("pay-list-status@example.com");
+    const date = nextDate(5);
+    const dow = manilaDateDayOfWeek(date);
+    await seedSchedule(profileId, [
+      { dayOfWeek: dow, startTime: "09:00", endTime: "12:00" },
+    ]);
+    const patient = await registerPatient("pay-list-status-p@example.com");
+    await bookSlot(patient, profileId, date, "09:00", "09:30");
+
+    const res = await request(app)
+      .get("/api/appointments")
+      .set("Authorization", bearer(patient));
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.appointments).toHaveLength(1);
+    expect(res.body.data.appointments[0].paymentStatus).toBe("pending");
+  });
+});
