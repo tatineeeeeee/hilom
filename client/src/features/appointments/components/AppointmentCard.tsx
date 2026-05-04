@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LinkButton } from "@/components/ui/link-button";
+import { PaymentStatusBadge } from "@/features/payments/components/PaymentStatusBadge";
 import { useCancelAppointment } from "../hooks";
 import type { Appointment } from "../schemas";
 import { useAuth } from "@/features/auth/hooks";
@@ -56,6 +57,19 @@ export const AppointmentCard = ({
           <Badge className={statusColors[appointment.status]} variant="outline">
             {appointment.status}
           </Badge>
+
+          {appointment.paymentStatus &&
+            appointment.paymentStatus !== "pending" && (
+              <PaymentStatusBadge status={appointment.paymentStatus} />
+            )}
+
+          {appointment.paymentStatus === "pending" &&
+            appointment.status !== "cancelled" &&
+            user?.role === "patient" && (
+              <LinkButton to={`/payments/${appointment.id}`} size="sm">
+                Pay now
+              </LinkButton>
+            )}
 
           {appointment.status === "pending" && (
             <Button

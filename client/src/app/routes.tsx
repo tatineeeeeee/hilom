@@ -21,6 +21,7 @@ import { WritePrescriptionPage } from "@/features/prescriptions/pages/WritePresc
 import { ViewPrescriptionPage } from "@/features/prescriptions/pages/ViewPrescriptionPage";
 import { MyPrescriptionsPage } from "@/features/prescriptions/pages/MyPrescriptionsPage";
 import { PaymentPage } from "@/features/payments/pages/PaymentPage";
+import { MyPaymentsPage } from "@/features/payments/pages/MyPaymentsPage";
 
 export const AppRoutes = () => {
   return (
@@ -54,6 +55,7 @@ export const AppRoutes = () => {
           />
           <Route path="/prescriptions" element={<MyPrescriptionsPage />} />
           <Route path="/payments/:appointmentId" element={<PaymentPage />} />
+          <Route path="/payments" element={<MyPaymentsPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

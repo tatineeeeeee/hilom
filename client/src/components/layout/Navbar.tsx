@@ -62,6 +62,9 @@ export const Navbar = () => {
               <NavLink to="/prescriptions" className={linkClasses}>
                 Prescriptions
               </NavLink>
+              <NavLink to="/payments" className={linkClasses}>
+                Payments
+              </NavLink>
               <span className="hidden text-sm text-muted-foreground md:inline">
                 {user?.fullName}
               </span>
@@ -140,6 +143,13 @@ export const Navbar = () => {
                   onClick={() => setOpen(false)}
                 >
                   Prescriptions
+                </NavLink>
+                <NavLink
+                  to="/payments"
+                  className={linkClasses}
+                  onClick={() => setOpen(false)}
+                >
+                  Payments
                 </NavLink>
                 <Button variant="outline" onClick={handleLogout}>
                   Log out

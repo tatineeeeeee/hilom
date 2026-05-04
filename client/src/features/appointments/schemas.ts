@@ -1,3 +1,5 @@
+export type PaymentStatus = "pending" | "escrowed" | "released" | "refunded";
+
 export interface Appointment {
   id: string;
   doctorId: string;
@@ -10,6 +12,7 @@ export interface Appointment {
   reason: string | null;
   hasReview: boolean;
   hasPrescription: boolean;
+  paymentStatus: PaymentStatus | null;
 }
 
 export interface DoctorAppointment {
@@ -22,6 +25,7 @@ export interface DoctorAppointment {
   status: "pending" | "confirmed" | "completed" | "cancelled";
   reason: string | null;
   hasPrescription: boolean;
+  paymentStatus: PaymentStatus | null;
 }
 
 export interface AppointmentsResponse {
