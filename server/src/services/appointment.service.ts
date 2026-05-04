@@ -17,6 +17,7 @@ import {
 } from "../utils/manilaTime";
 import { generateSlots } from "./slot.service";
 import { findOrCreateConversation } from "./chat.service";
+import { createPaymentForAppointment } from "./payment.service";
 import {
   APPOINTMENT_PAGE_SIZE,
   type BookAppointmentInput,
@@ -114,7 +115,19 @@ export const bookAppointment = async (
       })
       .returning();
 
-    return inserted;
+    if (!inserted) throw new AppError(500, "Failed to create appointment");
+
+    const { payment, clientKey } = await createPaymentForAppointment(
+      {
+        appointmentId: inserted.id,
+        patientId,
+        doctorUserId: profile.userId,
+        amount: profile.consultationFee,
+      },
+      tx,
+    );
+
+    return { appointment: inserted, payment, clientKey };
   });
 };
 

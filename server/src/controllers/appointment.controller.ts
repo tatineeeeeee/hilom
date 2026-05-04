@@ -28,8 +28,8 @@ export const bookAppointment = async (
     });
   }
 
-  const appointment = await bookAppointmentService(req.user.id, parsed.data);
-  res.status(201).json({ success: true, data: { appointment } });
+  const result = await bookAppointmentService(req.user.id, parsed.data);
+  res.status(201).json({ success: true, data: result });
 };
 
 export const listMyAppointments = async (

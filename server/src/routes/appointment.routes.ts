@@ -12,6 +12,10 @@ import {
   writePrescription,
   getPrescription,
 } from "../controllers/prescription.controller";
+import {
+  confirmPaymentMock,
+  getPayment,
+} from "../controllers/payment.controller";
 
 export const appointmentRouter: ExpressRouter = Router();
 
@@ -34,3 +38,9 @@ appointmentRouter.get(
   requireAuth,
   asyncHandler(getPrescription),
 );
+appointmentRouter.post(
+  "/:id/payment/confirm",
+  requireAuth,
+  asyncHandler(confirmPaymentMock),
+);
+appointmentRouter.get("/:id/payment", requireAuth, asyncHandler(getPayment));
