@@ -8,6 +8,10 @@ import {
 } from "../controllers/appointment.controller";
 import { createReview } from "../controllers/review.controller";
 import { getConversationForAppointment } from "../controllers/chat.controller";
+import {
+  writePrescription,
+  getPrescription,
+} from "../controllers/prescription.controller";
 
 export const appointmentRouter: ExpressRouter = Router();
 
@@ -19,4 +23,14 @@ appointmentRouter.get(
   "/:id/conversation",
   requireAuth,
   asyncHandler(getConversationForAppointment),
+);
+appointmentRouter.post(
+  "/:id/prescription",
+  requireAuth,
+  asyncHandler(writePrescription),
+);
+appointmentRouter.get(
+  "/:id/prescription",
+  requireAuth,
+  asyncHandler(getPrescription),
 );

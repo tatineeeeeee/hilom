@@ -4,6 +4,7 @@ import {
   appointments,
   doctorProfiles,
   doctorSchedules,
+  prescriptions,
   reviews,
   specializations,
   users,
@@ -34,6 +35,7 @@ export interface AppointmentRow {
   reason: string | null;
   notes: string | null;
   hasReview: boolean;
+  hasPrescription: boolean;
   createdAt: Date;
 }
 
@@ -144,6 +146,7 @@ export const listPatientAppointments = async (
         reason: appointments.reason,
         notes: appointments.notes,
         reviewId: reviews.id,
+        prescriptionId: prescriptions.id,
         createdAt: appointments.createdAt,
       })
       .from(appointments)
@@ -154,6 +157,7 @@ export const listPatientAppointments = async (
         eq(doctorProfiles.specializationId, specializations.id),
       )
       .leftJoin(reviews, eq(reviews.appointmentId, appointments.id))
+      .leftJoin(prescriptions, eq(prescriptions.appointmentId, appointments.id))
       .where(where)
       .orderBy(desc(appointments.createdAt))
       .limit(APPOINTMENT_PAGE_SIZE)
@@ -164,7 +168,9 @@ export const listPatientAppointments = async (
     appointments: rows.map((r) => ({
       ...r,
       reviewId: undefined,
+      prescriptionId: undefined,
       hasReview: r.reviewId !== null,
+      hasPrescription: r.prescriptionId !== null,
       slotStart: toHHMM(r.slotStart),
       slotEnd: toHHMM(r.slotEnd),
     })),
@@ -205,6 +211,7 @@ export interface DoctorAppointmentRow {
   status: string;
   reason: string | null;
   notes: string | null;
+  hasPrescription: boolean;
   createdAt: Date;
 }
 
@@ -244,10 +251,12 @@ export const listDoctorAppointments = async (
         status: appointments.status,
         reason: appointments.reason,
         notes: appointments.notes,
+        prescriptionId: prescriptions.id,
         createdAt: appointments.createdAt,
       })
       .from(appointments)
       .innerJoin(users, eq(appointments.patientId, users.id))
+      .leftJoin(prescriptions, eq(prescriptions.appointmentId, appointments.id))
       .where(where)
       .orderBy(desc(appointments.createdAt))
       .limit(APPOINTMENT_PAGE_SIZE)
@@ -257,6 +266,8 @@ export const listDoctorAppointments = async (
   return {
     appointments: rows.map((r) => ({
       ...r,
+      prescriptionId: undefined,
+      hasPrescription: r.prescriptionId !== null,
       slotStart: toHHMM(r.slotStart),
       slotEnd: toHHMM(r.slotEnd),
     })),

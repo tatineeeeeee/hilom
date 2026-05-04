@@ -177,6 +177,7 @@ export const prescriptions = pgTable("prescriptions", {
   id: uuid("id").defaultRandom().primaryKey(),
   appointmentId: uuid("appointment_id")
     .references(() => appointments.id)
+    .unique()
     .notNull(),
   doctorId: uuid("doctor_id")
     .references(() => users.id)

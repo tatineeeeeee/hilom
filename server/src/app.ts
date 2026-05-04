@@ -13,6 +13,7 @@ import { profileRouter } from "./routes/profile.routes";
 import { doctorRouter } from "./routes/doctor.routes";
 import { appointmentRouter } from "./routes/appointment.routes";
 import { chatRouter } from "./routes/chat.routes";
+import { prescriptionRouter } from "./routes/prescription.routes";
 
 export const app: Express = express();
 
@@ -45,5 +46,6 @@ app.use("/api/me", profileRouter);
 app.use("/api/doctors", doctorRouter);
 app.use("/api/appointments", appointmentRouter);
 app.use("/api/conversations", chatRouter);
+app.use("/api/prescriptions", prescriptionRouter);
 
 app.use(errorHandler);
