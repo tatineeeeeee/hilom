@@ -50,7 +50,7 @@ JWT auth: register, login, refresh, logout, protected routes, profile setup.
 
 ---
 
-## Phase 2.5 — Operational Foundation `[ ]`
+## Phase 2.5 — Operational Foundation `[x]`
 
 Knock out the five blockers from senior review before more features land. CI, auth tests, structured logging, prod-hardened env, README — the floor that makes everything after this safe.
 
@@ -82,20 +82,20 @@ Knock out the five blockers from senior review before more features land. CI, au
 
 **Done when**:
 
-- [ ] PR opens → CI runs typecheck + lint + tests, blocks merge on red
-- [ ] Auth integration suite covers: register dup, register-creates-profile, login generic-error, refresh rotation, refresh reuse-detection (5 tests minimum)
-- [ ] Production refuses to boot without `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` set (no defaults)
-- [ ] Every HTTP log line carries a request ID; client propagates same ID via `X-Request-Id`
-- [ ] Errors in client + server flow to Sentry (or a structured logger placeholder if Sentry deferred)
-- [ ] SIGTERM drains in-flight requests then closes the DB pool — no hard kills on deploy
-- [ ] Husky pre-commit blocks broken types + non-conventional commit messages
-- [ ] README explains the project, local setup, and architecture in <2 minutes of reading
-- [ ] No direct pushes to `main` allowed (branch protection enforced)
-- [ ] Repo has MIT license and a PR template
+- [x] PR opens → CI runs typecheck + lint + tests, blocks merge on red
+- [x] Auth integration suite covers: register dup, register-creates-profile, login generic-error, refresh rotation, refresh reuse-detection (5 tests minimum)
+- [x] Production refuses to boot without `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` set (no defaults)
+- [x] Every HTTP log line carries a request ID; client propagates same ID via `X-Request-Id`
+- [x] Pino structured logger in place (Sentry deferred to backlog — placeholder satisfied)
+- [x] SIGTERM drains in-flight requests then closes the DB pool — no hard kills on deploy
+- [x] Husky pre-commit blocks broken types + non-conventional commit messages
+- [x] README explains the project, local setup, and architecture in <2 minutes of reading
+- [ ] No direct pushes to `main` allowed (branch protection — needs to be enabled in GitHub settings, not verifiable from repo)
+- [x] Repo has MIT license and a PR template
 
 ---
 
-## Phase 2.6 — Auth Completion `[ ]`
+## Phase 2.6 — Auth Completion `[x]`
 
 Close the auth gap: email verification + password reset. Without these, "auth is done" is a half-truth and recruiters notice.
 
@@ -118,17 +118,17 @@ Close the auth gap: email verification + password reset. Without these, "auth is
 
 **Done when**:
 
-- [ ] Register sends a verification email with a single-use token (15-min expiry)
-- [ ] `GET /api/auth/verify-email?token=...` flips `email_verified_at`, marks token used
-- [ ] `POST /api/auth/forgot-password` sends a reset email (always returns 200 — never reveals if email exists)
-- [ ] Reset link expires in 15 min, single-use; consuming it logs the user out of all sessions (clears `refresh_token_hash`)
-- [ ] Tokens are hashed in DB (SHA-256), never stored raw
-- [ ] Rate limit on `forgot-password` and `verify-email` (3 per hour per email)
-- [ ] Integration tests: verify-email happy path, expired token, replay, wrong token; reset happy path, expired, replay, wrong token (8 tests)
+- [x] Register sends a verification email with a single-use token (15-min expiry)
+- [x] `GET /api/auth/verify-email?token=...` flips `email_verified_at`, marks token used
+- [x] `POST /api/auth/forgot-password` sends a reset email (always returns 200 — never reveals if email exists)
+- [x] Reset link expires in 15 min, single-use; consuming it logs the user out of all sessions (clears `refresh_token_hash`)
+- [x] Tokens are hashed in DB (SHA-256), never stored raw
+- [x] Rate limit on `forgot-password` and `verify-email` (3 per hour per email)
+- [x] Integration tests: verify-email happy path, expired token, replay, wrong token; reset happy path, expired, replay, wrong token (8 tests)
 
 ---
 
-## Phase 3 — Doctors + Specializations `[ ]`
+## Phase 3 — Doctors + Specializations `[x]`
 
 Browse doctors, filter, schedule management, slot generation.
 
@@ -147,16 +147,16 @@ Browse doctors, filter, schedule management, slot generation.
 
 **Done when**:
 
-- [ ] `GET /api/specializations` returns seeded list
-- [ ] `GET /api/doctors` filters by specialization, name, fee, rating
-- [ ] `GET /api/doctors/:id` returns profile with specialization + rating
-- [ ] Doctor updates own profile and weekly schedule
-- [ ] `GET /api/doctors/:id/slots?date=` returns available slots (excludes booked + past)
-- [ ] Frontend: doctor list with filters, detail page, slot picker
+- [x] `GET /api/specializations` returns seeded list
+- [x] `GET /api/doctors` filters by specialization, name, fee, rating
+- [x] `GET /api/doctors/:id` returns profile with specialization + rating
+- [x] Doctor updates own profile and weekly schedule
+- [x] `GET /api/doctors/:id/slots?date=` returns available slots (excludes booked + past)
+- [x] Frontend: doctor list with filters, detail page, slot picker
 
 ---
 
-## Phase 4 — Appointments `[ ]`
+## Phase 4 — Appointments `[x]`
 
 Book, confirm, complete, cancel. Full lifecycle.
 
@@ -174,16 +174,16 @@ Book, confirm, complete, cancel. Full lifecycle.
 
 **Done when**:
 
-- [ ] Patient books available slot → pending
-- [ ] Double-booking prevented (same doctor, same slot)
-- [ ] Doctor confirms → confirmed, completes → completed
-- [ ] Patient or doctor cancels → cancelled
-- [ ] `GET /api/appointments` returns role-appropriate list
-- [ ] Frontend: booking flow, list with status badges, detail with actions
+- [x] Patient books available slot → pending
+- [x] Double-booking prevented (same doctor, same slot)
+- [x] Doctor confirms → confirmed, completes → completed
+- [x] Patient or doctor cancels → cancelled
+- [x] `GET /api/appointments` returns role-appropriate list
+- [x] Frontend: booking flow, list with status badges, detail with actions
 
 ---
 
-## Phase 5 — Real-time Chat `[ ]`
+## Phase 5 — Real-time Chat `[x]`
 
 Socket.io chat, unlocked per confirmed appointment.
 
@@ -203,16 +203,16 @@ Socket.io chat, unlocked per confirmed appointment.
 
 **Done when**:
 
-- [ ] Conversation auto-created when appointment → confirmed
-- [ ] Only patient + doctor in that appointment can access
-- [ ] Messages persist to DB + real-time delivery
-- [ ] Chat history loads on open
-- [ ] Typing indicators + read receipts
-- [ ] Frontend: chat room with bubbles + input
+- [x] Conversation auto-created when appointment → confirmed
+- [x] Only patient + doctor in that appointment can access
+- [x] Messages persist to DB + real-time delivery
+- [x] Chat history loads on open
+- [x] Read receipts (typing indicators explicitly deferred to backlog per `docs/phase-5-plan.md`)
+- [x] Frontend: chat room with bubbles + input + conversation list + Navbar unread badge
 
 ---
 
-## Phase 6 — Prescriptions `[ ]`
+## Phase 6 — Prescriptions `[x]`
 
 Doctor writes prescription with medications, patient views.
 
@@ -228,10 +228,10 @@ Doctor writes prescription with medications, patient views.
 
 **Done when**:
 
-- [ ] Doctor writes prescription for completed appointment (with medications)
-- [ ] Patient views per-appointment + all prescriptions
-- [ ] One prescription per appointment max
-- [ ] Frontend: dynamic medication rows form + view page
+- [x] Doctor writes prescription for completed appointment (with medications)
+- [x] Patient views per-appointment + all prescriptions
+- [x] One prescription per appointment max (DB unique constraint + service guard)
+- [x] Frontend: dynamic medication rows form + view page + list page + Navbar link
 
 ---
 
