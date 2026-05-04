@@ -20,6 +20,7 @@ const completeDoctor = async (
   specId: number,
   fullName = "Test Doctor",
   fee = 1500,
+  verified = true,
 ): Promise<TestSession> => {
   const session = await registerDoctor(email, fullName);
   const res = await request(app)
@@ -34,6 +35,12 @@ const completeDoctor = async (
     });
   if (res.status !== 200) {
     throw new Error(`completeDoctor PUT failed: ${res.status} ${res.text}`);
+  }
+  if (verified) {
+    await db
+      .update(doctorProfiles)
+      .set({ isVerified: true })
+      .where(eq(doctorProfiles.userId, session.userId));
   }
   return session;
 };
@@ -171,5 +178,48 @@ describe("GET /api/doctors/:id", () => {
     expect(doc.slotDurationMinutes).toBe(30);
     expect(typeof doc.specializationName).toBe("string");
     expect(doc.specializationName).toBe("Cardiology");
+  });
+});
+
+describe("doctor verification gate on public list", () => {
+  beforeEach(async () => {
+    await seedTestSpecializations();
+  });
+
+  it("excludes unverified doctors from the public list", async () => {
+    const specId = await getSpecId("General Practice");
+    await completeDoctor("verify-yes@example.com", specId, "Dr. Verified");
+    await completeDoctor(
+      "verify-no@example.com",
+      specId,
+      "Dr. Pending",
+      1500,
+      false,
+    );
+
+    const res = await request(app).get("/api/doctors");
+    expect(res.status).toBe(200);
+    expect(res.body.data.total).toBe(1);
+    const docs = res.body.data.doctors as Array<{ fullName: string }>;
+    expect(docs.map((d) => d.fullName)).toEqual(["Dr. Verified"]);
+  });
+
+  it("still returns an unverified doctor on direct GET /:id", async () => {
+    const specId = await getSpecId("General Practice");
+    const session = await completeDoctor(
+      "verify-direct@example.com",
+      specId,
+      "Dr. Direct",
+      1500,
+      false,
+    );
+    const profile = await db.query.doctorProfiles.findFirst({
+      where: eq(doctorProfiles.userId, session.userId),
+    });
+    if (!profile) throw new Error("Profile missing");
+
+    const res = await request(app).get(`/api/doctors/${profile.id}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data.doctor.isVerified).toBe(false);
   });
 });

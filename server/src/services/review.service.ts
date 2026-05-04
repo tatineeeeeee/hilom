@@ -1,8 +1,12 @@
-import { eq, sql } from "drizzle-orm";
+import { count, desc, eq, sql } from "drizzle-orm";
 import { db } from "../config/db";
-import { appointments, doctorProfiles, reviews } from "../db/schema";
+import { appointments, doctorProfiles, reviews, users } from "../db/schema";
 import { AppError } from "../utils/AppError";
-import type { CreateReviewInput } from "../schemas/review.schema";
+import {
+  REVIEWS_PAGE_SIZE,
+  type CreateReviewInput,
+  type ListDoctorReviewsQuery,
+} from "../schemas/review.schema";
 
 export const createReview = async (
   patientId: string,
@@ -60,4 +64,60 @@ export const createReview = async (
 
     return review;
   });
+};
+
+export interface PublicReview {
+  id: string;
+  rating: number;
+  comment: string | null;
+  patientName: string;
+  createdAt: Date;
+}
+
+export interface PublicReviewsResult {
+  reviews: PublicReview[];
+  total: number;
+  page: number;
+  pageSize: number;
+  averageRating: string | null;
+  ratingCount: number;
+}
+
+export const listDoctorReviews = async (
+  doctorProfileId: string,
+  query: ListDoctorReviewsQuery,
+): Promise<PublicReviewsResult> => {
+  const profile = await db.query.doctorProfiles.findFirst({
+    where: eq(doctorProfiles.id, doctorProfileId),
+  });
+  if (!profile) throw new AppError(404, "Doctor not found");
+
+  const where = eq(reviews.doctorId, profile.userId);
+
+  const [countRows, rows] = await Promise.all([
+    db.select({ count: count() }).from(reviews).where(where),
+    db
+      .select({
+        id: reviews.id,
+        rating: reviews.rating,
+        comment: reviews.comment,
+        patientName: users.fullName,
+        createdAt: reviews.createdAt,
+      })
+      .from(reviews)
+      .innerJoin(users, eq(users.id, reviews.patientId))
+      .where(where)
+      .orderBy(desc(reviews.createdAt))
+      .limit(REVIEWS_PAGE_SIZE)
+      .offset((query.page - 1) * REVIEWS_PAGE_SIZE),
+  ]);
+
+  return {
+    reviews: rows,
+    total: countRows[0]?.count ?? 0,
+    page: query.page,
+    pageSize: REVIEWS_PAGE_SIZE,
+    averageRating: profile.averageRating,
+    ratingCount: countRows[0]?.count ?? 0,
+  };
 };

@@ -10,3 +10,13 @@ export const createReviewSchema = z.object({
 });
 
 export type CreateReviewInput = z.infer<typeof createReviewSchema>;
+
+export const REVIEWS_PAGE_SIZE = 10 as const;
+
+export const listDoctorReviewsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+});
+
+export type ListDoctorReviewsQuery = z.infer<
+  typeof listDoctorReviewsQuerySchema
+>;

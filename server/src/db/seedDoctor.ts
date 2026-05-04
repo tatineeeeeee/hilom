@@ -75,6 +75,7 @@ const seed = async () => {
         consultationFee: DOCTOR.consultationFee,
         clinicAddress: DOCTOR.clinicAddress,
         slotDurationMinutes: DOCTOR.slotDurationMinutes,
+        isVerified: true,
       })
       .returning();
 

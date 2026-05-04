@@ -267,3 +267,222 @@ describe("POST /api/appointments/:id/review", () => {
     expect(Number(profile?.averageRating)).toBe(3);
   });
 });
+
+describe("GET /api/doctors/:id/reviews", () => {
+  beforeEach(async () => {
+    await seedTestSpecializations();
+  });
+
+  const setupDoctorByEmail = async (email: string) => {
+    const specId = await getSpecId("General Practice");
+    const session = await registerDoctor(email);
+    await request(app)
+      .put("/api/me/profile")
+      .set("Authorization", bearer(session))
+      .send({
+        specializationId: specId,
+        bio: "Public reviews test doctor.",
+        yearsOfExperience: 5,
+        consultationFee: 1000,
+        slotDurationMinutes: 30,
+      });
+    const profile = await db.query.doctorProfiles.findFirst({
+      where: eq(doctorProfiles.userId, session.userId),
+    });
+    if (!profile) throw new Error("Doctor profile not found after setup");
+    return { session, profileId: profile.id };
+  };
+
+  const seedPaidReview = async (
+    patient: TestSession,
+    docSession: TestSession,
+    profileId: string,
+    date: string,
+    slotStart: string,
+    slotEnd: string,
+    rating: number,
+    comment: string,
+  ) => {
+    const id = await createCompletedAppointment(
+      patient,
+      docSession,
+      profileId,
+      date,
+      slotStart,
+      slotEnd,
+    );
+    await request(app)
+      .post(`/api/appointments/${id}/review`)
+      .set("Authorization", bearer(patient))
+      .send({ rating, comment });
+  };
+
+  it("returns 200 with reviews ordered by createdAt DESC", async () => {
+    const { session: docSession, profileId } = await setupDoctorByEmail(
+      "pub-list-ok@example.com",
+    );
+    const date = nextDate(1);
+    const dow = manilaDateDayOfWeek(date);
+    await seedSchedule(profileId, [
+      { dayOfWeek: dow, startTime: "09:00", endTime: "18:00" },
+    ]);
+
+    const p1 = await registerPatient("pub-list-ok-p1@example.com");
+    const p2 = await registerPatient("pub-list-ok-p2@example.com");
+    const p3 = await registerPatient("pub-list-ok-p3@example.com");
+    await seedPaidReview(
+      p1,
+      docSession,
+      profileId,
+      date,
+      "09:00",
+      "09:30",
+      5,
+      "first",
+    );
+    await seedPaidReview(
+      p2,
+      docSession,
+      profileId,
+      date,
+      "09:30",
+      "10:00",
+      4,
+      "second",
+    );
+    await seedPaidReview(
+      p3,
+      docSession,
+      profileId,
+      date,
+      "10:00",
+      "10:30",
+      3,
+      "third",
+    );
+
+    const res = await request(app).get(`/api/doctors/${profileId}/reviews`);
+    expect(res.status).toBe(200);
+    expect(res.body.data.reviews).toHaveLength(3);
+    expect(res.body.data.total).toBe(3);
+    const comments = res.body.data.reviews.map(
+      (r: { comment: string }) => r.comment,
+    );
+    expect(comments[0]).toBe("third");
+    expect(comments[2]).toBe("first");
+  });
+
+  it("returns aggregate averageRating and ratingCount", async () => {
+    const { session: docSession, profileId } = await setupDoctorByEmail(
+      "pub-list-agg@example.com",
+    );
+    const date = nextDate(2);
+    const dow = manilaDateDayOfWeek(date);
+    await seedSchedule(profileId, [
+      { dayOfWeek: dow, startTime: "09:00", endTime: "18:00" },
+    ]);
+
+    const p1 = await registerPatient("pub-list-agg-p1@example.com");
+    const p2 = await registerPatient("pub-list-agg-p2@example.com");
+    await seedPaidReview(
+      p1,
+      docSession,
+      profileId,
+      date,
+      "09:00",
+      "09:30",
+      5,
+      "ok",
+    );
+    await seedPaidReview(
+      p2,
+      docSession,
+      profileId,
+      date,
+      "09:30",
+      "10:00",
+      3,
+      "ok",
+    );
+
+    const res = await request(app).get(`/api/doctors/${profileId}/reviews`);
+    expect(res.status).toBe(200);
+    expect(res.body.data.ratingCount).toBe(2);
+    expect(Number(res.body.data.averageRating)).toBe(4);
+  });
+
+  it("paginates with page size 10", async () => {
+    const { session: docSession, profileId } = await setupDoctorByEmail(
+      "pub-list-page@example.com",
+    );
+    const date = nextDate(3);
+    const dow = manilaDateDayOfWeek(date);
+    await seedSchedule(profileId, [
+      { dayOfWeek: dow, startTime: "09:00", endTime: "18:00" },
+    ]);
+
+    const total = 12;
+    for (let i = 0; i < total; i++) {
+      const p = await registerPatient(`pub-list-page-p${i}@example.com`);
+      const minute = i * 30;
+      const startH = 9 + Math.floor(minute / 60);
+      const startM = minute % 60;
+      const endTotal = minute + 30;
+      const endH = 9 + Math.floor(endTotal / 60);
+      const endM = endTotal % 60;
+      const pad = (n: number) => n.toString().padStart(2, "0");
+      await seedPaidReview(
+        p,
+        docSession,
+        profileId,
+        date,
+        `${pad(startH)}:${pad(startM)}`,
+        `${pad(endH)}:${pad(endM)}`,
+        4,
+        `n-${i}`,
+      );
+    }
+
+    const page1 = await request(app).get(
+      `/api/doctors/${profileId}/reviews?page=1`,
+    );
+    expect(page1.body.data.reviews).toHaveLength(10);
+    expect(page1.body.data.total).toBe(12);
+
+    const page2 = await request(app).get(
+      `/api/doctors/${profileId}/reviews?page=2`,
+    );
+    expect(page2.body.data.reviews).toHaveLength(2);
+  });
+
+  it("requires no auth", async () => {
+    const { session: docSession, profileId } = await setupDoctorByEmail(
+      "pub-list-noauth@example.com",
+    );
+    const date = nextDate(4);
+    const dow = manilaDateDayOfWeek(date);
+    await seedSchedule(profileId, [
+      { dayOfWeek: dow, startTime: "09:00", endTime: "12:00" },
+    ]);
+    const p = await registerPatient("pub-list-noauth-p@example.com");
+    await seedPaidReview(
+      p,
+      docSession,
+      profileId,
+      date,
+      "09:00",
+      "09:30",
+      5,
+      "yo",
+    );
+
+    const res = await request(app).get(`/api/doctors/${profileId}/reviews`);
+    expect(res.status).toBe(200);
+  });
+
+  it("returns 404 for an unknown doctor profile id", async () => {
+    const randomId = "00000000-0000-0000-0000-000000000000";
+    const res = await request(app).get(`/api/doctors/${randomId}/reviews`);
+    expect(res.status).toBe(404);
+  });
+});

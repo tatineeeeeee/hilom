@@ -1,7 +1,13 @@
 import type { Request, Response } from "express";
 import { AppError } from "../utils/AppError";
-import { createReviewSchema } from "../schemas/review.schema";
-import { createReview as createReviewService } from "../services/review.service";
+import {
+  createReviewSchema,
+  listDoctorReviewsQuerySchema,
+} from "../schemas/review.schema";
+import {
+  createReview as createReviewService,
+  listDoctorReviews as listDoctorReviewsService,
+} from "../services/review.service";
 
 export const createReview = async (
   req: Request,
@@ -25,4 +31,22 @@ export const createReview = async (
     parsed.data,
   );
   res.status(201).json({ success: true, data: { review } });
+};
+
+export const listDoctorReviews = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const parsed = listDoctorReviewsQuerySchema.safeParse(req.query);
+  if (!parsed.success) {
+    throw new AppError(400, "Invalid query parameters", {
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    });
+  }
+
+  const result = await listDoctorReviewsService(
+    req.params.id ?? "",
+    parsed.data,
+  );
+  res.json({ success: true, data: result });
 };

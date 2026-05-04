@@ -56,7 +56,7 @@ const selectFields = {
 };
 
 const buildWhere = (query: ListDoctorsQuery): SQL | undefined => {
-  const conditions: SQL[] = [];
+  const conditions: SQL[] = [eq(doctorProfiles.isVerified, true)];
 
   if (query.specializationId?.length) {
     conditions.push(
