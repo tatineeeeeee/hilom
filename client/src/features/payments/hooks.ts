@@ -31,6 +31,7 @@ export const useConfirmPaymentMock = (appointmentId: string) => {
       void qc.invalidateQueries({ queryKey: paymentListKey });
       void qc.invalidateQueries({ queryKey: ["myAppointments"] });
       void qc.invalidateQueries({ queryKey: ["doctorAppointments"] });
+      void qc.invalidateQueries({ queryKey: ["doctor-stats"] });
     },
   });
 };

@@ -282,7 +282,7 @@ Star ratings for doctors. Admin panel for verification + management.
 
 ---
 
-## Phase 9 — Dashboards `[ ]`
+## Phase 9 — Dashboards `[x]`
 
 Role-specific dashboards with real data.
 
@@ -293,10 +293,10 @@ Role-specific dashboards with real data.
 
 **Done when**:
 
-- [ ] Patient: upcoming appointments, recent prescriptions, quick book
-- [ ] Doctor: today's schedule, pending confirmations, earnings, rating
-- [ ] Admin: total users, appointments, revenue, unverified doctors
-- [ ] Responsive (mobile + desktop)
+- [x] Patient: upcoming appointments, recent prescriptions, quick book
+- [x] Doctor: today's schedule, pending confirmations, earnings, rating
+- [x] Admin: total users, appointments, revenue, unverified doctors
+- [x] Responsive (mobile + desktop)
 
 ---
 

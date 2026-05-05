@@ -1,8 +1,8 @@
 import { formatPHP } from "@/lib/utils/formatCurrency";
+import { useAdminStats } from "@/features/admin/hooks";
 import { StatTile } from "@/features/dashboard/components/StatTile";
-import { useAdminStats } from "../hooks";
 
-export const AdminStatsPage = () => {
+export const AdminDashboard = () => {
   const { data, isPending, isError } = useAdminStats();
 
   if (isPending) {
@@ -13,16 +13,17 @@ export const AdminStatsPage = () => {
   }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <StatTile
         label="Total users"
         value={data.users.total}
         sublabel={`${data.users.patients} patients · ${data.users.doctors} doctors · ${data.users.admins} admins`}
+        to="/admin/users"
       />
       <StatTile
         label="Appointments"
         value={data.appointments.total}
-        sublabel={`${data.appointments.pending} pending · ${data.appointments.confirmed} confirmed · ${data.appointments.completed} done · ${data.appointments.cancelled} cancelled`}
+        sublabel={`${data.appointments.pending} pending · ${data.appointments.confirmed} confirmed · ${data.appointments.completed} done`}
       />
       <StatTile
         label="Revenue released"
