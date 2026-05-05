@@ -6,6 +6,7 @@ import {
   updateMyProfile,
   getMySchedule,
   updateMySchedule,
+  getDoctorStats,
 } from "../controllers/profile.controller";
 import { listMyDoctorAppointments } from "../controllers/appointment.controller";
 import { getUnreadTotal } from "../controllers/chat.controller";
@@ -23,3 +24,4 @@ profileRouter.get(
   asyncHandler(listMyDoctorAppointments),
 );
 profileRouter.get("/unread-count", asyncHandler(getUnreadTotal));
+profileRouter.get("/doctor-stats", asyncHandler(getDoctorStats));
