@@ -18,6 +18,8 @@ import { paymentRouter } from "./routes/payment.routes";
 import { adminRouter } from "./routes/admin.routes";
 import { asyncHandler } from "./middleware/asyncHandler";
 import { paymongoWebhook } from "./controllers/payment.controller";
+import swaggerUi from "swagger-ui-express";
+import { openapiDocument } from "./openapi";
 
 export const app: Express = express();
 
@@ -49,6 +51,17 @@ app.use(cookieParser());
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
+
+app.get("/api/openapi.json", (_req, res) => {
+  res.json(openapiDocument);
+});
+app.use(
+  "/api/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(openapiDocument, {
+    customSiteTitle: "Hilom API",
+  }),
+);
 
 app.use("/api/auth", authRouter);
 app.use("/api/specializations", specializationRouter);
