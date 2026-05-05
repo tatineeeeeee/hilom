@@ -1,0 +1,36 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      types:
+        patterns:
+          - "@types/*"
+      testing:
+        patterns:
+          - "jest"
+          - "ts-jest"
+          - "supertest"
+          - "vitest"
+          - "@vitest/*"
+          - "@testing-library/*"
+          - "msw"
+          - "@playwright/*"
+          - "jsdom"
+      eslint:
+        patterns:
+          - "eslint*"
+          - "@typescript-eslint/*"
+          - "typescript-eslint"
+      drizzle:
+        patterns:
+          - "drizzle*"
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday

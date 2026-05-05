@@ -15,6 +15,7 @@ const baseSchema = z.object({
   JWT_ACCESS_SECRET: z.string().optional(),
   JWT_REFRESH_SECRET: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
+  REDIS_URL: z.string().optional(),
 });
 
 const parsed = baseSchema.parse(process.env);
