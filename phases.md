@@ -260,7 +260,7 @@ PayMongo integration with app-level escrow (PayMongo has no native escrow — we
 
 ---
 
-## Phase 8 — Reviews + Admin `[ ]`
+## Phase 8 — Reviews + Admin `[x]`
 
 Star ratings for doctors. Admin panel for verification + management.
 
@@ -276,9 +276,9 @@ Star ratings for doctors. Admin panel for verification + management.
 
 **Done when**:
 
-- [ ] Patient reviews after completed appointment (1-5 stars + comment)
-- [ ] One review per appointment, doctor's average_rating updates
-- [ ] Admin: view users, verify/reject doctors, view appointments, dashboard stats
+- [x] Patient reviews after completed appointment (1-5 stars + comment)
+- [x] One review per appointment, doctor's average_rating updates
+- [x] Admin: view users, verify/reject doctors, view appointments, dashboard stats
 
 ---
 
