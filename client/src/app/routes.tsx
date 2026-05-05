@@ -22,6 +22,10 @@ import { ViewPrescriptionPage } from "@/features/prescriptions/pages/ViewPrescri
 import { MyPrescriptionsPage } from "@/features/prescriptions/pages/MyPrescriptionsPage";
 import { PaymentPage } from "@/features/payments/pages/PaymentPage";
 import { MyPaymentsPage } from "@/features/payments/pages/MyPaymentsPage";
+import { AdminLayout } from "@/components/layout/AdminLayout";
+import { AdminStatsPage } from "@/features/admin/pages/AdminStatsPage";
+import { UserManagementPage } from "@/features/admin/pages/UserManagementPage";
+import { DoctorVerificationPage } from "@/features/admin/pages/DoctorVerificationPage";
 
 export const AppRoutes = () => {
   return (
@@ -56,6 +60,12 @@ export const AppRoutes = () => {
           <Route path="/prescriptions" element={<MyPrescriptionsPage />} />
           <Route path="/payments/:appointmentId" element={<PaymentPage />} />
           <Route path="/payments" element={<MyPaymentsPage />} />
+
+          <Route element={<AdminLayout />}>
+            <Route path="/admin" element={<AdminStatsPage />} />
+            <Route path="/admin/users" element={<UserManagementPage />} />
+            <Route path="/admin/doctors" element={<DoctorVerificationPage />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

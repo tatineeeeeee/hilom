@@ -53,18 +53,27 @@ export const Navbar = () => {
                   Appointments
                 </NavLink>
               )}
-              <NavLink to="/messages" className={linkClasses}>
-                <span className="flex items-center gap-1.5">
-                  Messages
-                  <UnreadBadge count={unreadCount} />
-                </span>
-              </NavLink>
-              <NavLink to="/prescriptions" className={linkClasses}>
-                Prescriptions
-              </NavLink>
-              <NavLink to="/payments" className={linkClasses}>
-                Payments
-              </NavLink>
+              {user?.role !== "admin" && (
+                <>
+                  <NavLink to="/messages" className={linkClasses}>
+                    <span className="flex items-center gap-1.5">
+                      Messages
+                      <UnreadBadge count={unreadCount} />
+                    </span>
+                  </NavLink>
+                  <NavLink to="/prescriptions" className={linkClasses}>
+                    Prescriptions
+                  </NavLink>
+                  <NavLink to="/payments" className={linkClasses}>
+                    Payments
+                  </NavLink>
+                </>
+              )}
+              {user?.role === "admin" && (
+                <NavLink to="/admin" className={linkClasses}>
+                  Admin
+                </NavLink>
+              )}
               <span className="hidden text-sm text-muted-foreground md:inline">
                 {user?.fullName}
               </span>
@@ -127,30 +136,43 @@ export const Navbar = () => {
                     Appointments
                   </NavLink>
                 )}
-                <NavLink
-                  to="/messages"
-                  className={linkClasses}
-                  onClick={() => setOpen(false)}
-                >
-                  <span className="flex items-center gap-1.5">
-                    Messages
-                    <UnreadBadge count={unreadCount} />
-                  </span>
-                </NavLink>
-                <NavLink
-                  to="/prescriptions"
-                  className={linkClasses}
-                  onClick={() => setOpen(false)}
-                >
-                  Prescriptions
-                </NavLink>
-                <NavLink
-                  to="/payments"
-                  className={linkClasses}
-                  onClick={() => setOpen(false)}
-                >
-                  Payments
-                </NavLink>
+                {user?.role !== "admin" && (
+                  <>
+                    <NavLink
+                      to="/messages"
+                      className={linkClasses}
+                      onClick={() => setOpen(false)}
+                    >
+                      <span className="flex items-center gap-1.5">
+                        Messages
+                        <UnreadBadge count={unreadCount} />
+                      </span>
+                    </NavLink>
+                    <NavLink
+                      to="/prescriptions"
+                      className={linkClasses}
+                      onClick={() => setOpen(false)}
+                    >
+                      Prescriptions
+                    </NavLink>
+                    <NavLink
+                      to="/payments"
+                      className={linkClasses}
+                      onClick={() => setOpen(false)}
+                    >
+                      Payments
+                    </NavLink>
+                  </>
+                )}
+                {user?.role === "admin" && (
+                  <NavLink
+                    to="/admin"
+                    className={linkClasses}
+                    onClick={() => setOpen(false)}
+                  >
+                    Admin
+                  </NavLink>
+                )}
                 <Button variant="outline" onClick={handleLogout}>
                   Log out
                 </Button>
