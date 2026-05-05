@@ -3,13 +3,15 @@
   "private": true,
   "workspaces": [
     "client",
-    "server"
+    "server",
+    "e2e"
   ],
   "scripts": {
-    "dev": "bun run --filter '*' dev",
-    "typecheck": "bun run --filter '*' typecheck",
-    "lint": "bun run --filter '*' lint",
-    "test": "bun run --filter server test",
+    "dev": "bun run --filter client dev & bun run --filter server dev",
+    "typecheck": "bun run --filter client typecheck && bun run --filter server typecheck",
+    "lint": "bun run --filter client lint && bun run --filter server lint",
+    "test": "bun run --filter server test && bun run --filter client test",
+    "test:e2e": "bun run --filter e2e test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"
