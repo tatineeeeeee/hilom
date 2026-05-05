@@ -1,0 +1,8 @@
+import type { RequestHandler } from "express";
+import { AppError } from "../utils/AppError";
+
+export const requireAdmin: RequestHandler = (req, _res, next) => {
+  if (!req.user) return next(new AppError(401, "Authentication required"));
+  if (req.user.role !== "admin") return next(new AppError(403, "Admin only"));
+  next();
+};

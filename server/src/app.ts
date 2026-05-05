@@ -15,6 +15,7 @@ import { appointmentRouter } from "./routes/appointment.routes";
 import { chatRouter } from "./routes/chat.routes";
 import { prescriptionRouter } from "./routes/prescription.routes";
 import { paymentRouter } from "./routes/payment.routes";
+import { adminRouter } from "./routes/admin.routes";
 import { asyncHandler } from "./middleware/asyncHandler";
 import { paymongoWebhook } from "./controllers/payment.controller";
 
@@ -57,5 +58,6 @@ app.use("/api/appointments", appointmentRouter);
 app.use("/api/conversations", chatRouter);
 app.use("/api/prescriptions", prescriptionRouter);
 app.use("/api/payments", paymentRouter);
+app.use("/api/admin", adminRouter);
 
 app.use(errorHandler);
