@@ -15,4 +15,16 @@ module.exports = {
   },
   testTimeout: 10000,
   clearMocks: true,
+  collectCoverageFrom: [
+    "src/**/*.ts",
+    "!src/db/seed*.ts",
+    "!src/db/schema.ts",
+    "!src/index.ts",
+    "!src/types/**",
+    "!src/config/logger.ts",
+  ],
+  coverageReporters: ["text-summary", "lcov", "json-summary"],
+  coverageDirectory: "<rootDir>/coverage",
+  // No coverage gate yet — measure with `bun run --filter server test:coverage`
+  // first, then ratchet from the measured floor. See CONTRIBUTING.md.
 };

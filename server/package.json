@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings=0",
     "test": "jest --runInBand",
+    "test:coverage": "jest --runInBand --coverage",
     "db:push": "drizzle-kit push",
     "db:push:test": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/hilom_test drizzle-kit push",
     "db:generate": "drizzle-kit generate",
