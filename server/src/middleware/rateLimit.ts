@@ -37,7 +37,7 @@ export const authLimiter = rateLimit({
   limit: 5,
   standardHeaders: "draft-7",
   legacyHeaders: false,
-  skip: () => process.env.NODE_ENV === "test",
+  skip: () => process.env.NODE_ENV !== "production",
   store: buildStore("auth"),
   message: {
     success: false,
@@ -57,7 +57,7 @@ const keyedLimiter = (
     limit: maxPerHour,
     standardHeaders: "draft-7",
     legacyHeaders: false,
-    skip: () => process.env.NODE_ENV === "test",
+    skip: () => process.env.NODE_ENV !== "production",
     store: buildStore(prefix),
     keyGenerator: (req) => keyer(req) ?? req.ip ?? "unknown",
     message: {
