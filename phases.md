@@ -363,6 +363,41 @@ Push the project from "good code" to "I would hire this person." Live demo, real
 
 ---
 
+## Phase 12 — UI / UX Polish `[ ]`
+
+Elevate every screen from "functional" to "portfolio-ready." The focus is visual hierarchy, mobile-first responsiveness, and making the app feel like a real healthcare product at every touchpoint.
+
+**Files**:
+
+- `client/src/pages/dashboard/PatientDashboard.tsx`
+- `client/src/pages/dashboard/DoctorDashboard.tsx`
+- `client/src/pages/dashboard/AdminDashboard.tsx`
+- `client/src/features/profile/pages/ProfileSetupPage.tsx`
+- `client/src/features/appointments/components/AppointmentCard.tsx`
+- `client/src/features/appointments/pages/DoctorAppointmentsPage.tsx`
+- `client/src/features/payments/pages/PaymentPage.tsx`, `MyPaymentsPage.tsx`
+- `client/src/features/prescriptions/pages/ViewPrescriptionPage.tsx`, `WritePrescriptionPage.tsx`
+- `client/src/features/admin/pages/AdminStatsPage.tsx`, `UserManagementPage.tsx`, `DoctorVerificationPage.tsx`
+- `client/src/features/reviews/components/DoctorReviewsSection.tsx`
+
+**Done when**:
+
+- [ ] PatientDashboard: stat tiles with color accents (appointments this month, prescriptions count), upcoming appointment card shows doctor avatar + date countdown, quick-book section with specialty chips
+- [ ] DoctorDashboard: earnings tile with trend indicator, today's schedule as timeline (not flat list), pending confirmations badge with urgency color
+- [ ] AdminDashboard: KPI grid (total users, active doctors, revenue, unverified queue), unverified doctors row shows photo + license date
+- [ ] AppointmentCard: status badge uses color-coded left border (amber=pending, blue=confirmed, green=completed, grey=cancelled), action buttons grouped cleanly
+- [ ] ProfileSetupPage: multi-step feel with progress indicator, field groups visually separated
+- [ ] PaymentPage: clear payment method selector with GCash/Maya/card icons, escrow explainer inline
+- [ ] ViewPrescriptionPage: print-friendly layout, medication list as styled rows not raw text
+- [ ] WritePrescriptionPage: medication rows have better visual separation, clear add/remove affordance
+- [ ] DoctorReviewsSection: star distribution bar chart, reviewer avatar + date
+- [ ] Admin pages: data tables with row hover, bulk action affordance, empty states with icons
+- [ ] All pages: consistent page header pattern (title + optional subtitle + optional action button)
+- [ ] All loading states: skeleton UI (no plain "Loading…" text anywhere)
+- [ ] All empty states: icon + message + contextual CTA (no plain text-only empty states)
+
+---
+
 ## Backlog — deferred items worth tracking
 
 Captured here so they aren't forgotten. None block the phase plan; each is its own future ticket.
