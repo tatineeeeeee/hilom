@@ -1,4 +1,4 @@
-import rateLimit, { type Store } from "express-rate-limit";
+import rateLimit, { ipKeyGenerator, type Store } from "express-rate-limit";
 import { RedisStore } from "rate-limit-redis";
 import { createClient, type RedisClientType } from "redis";
 import type { Request } from "express";
@@ -59,7 +59,8 @@ const keyedLimiter = (
     legacyHeaders: false,
     skip: () => process.env.NODE_ENV !== "production",
     store: buildStore(prefix),
-    keyGenerator: (req) => keyer(req) ?? req.ip ?? "unknown",
+    keyGenerator: (req) =>
+      keyer(req) ?? (req.ip ? ipKeyGenerator(req.ip) : "unknown"),
     message: {
       success: false,
       error: "Too many requests. Try again later.",
