@@ -6,6 +6,15 @@ import { Input } from "@/components/ui/input";
 import { LinkButton } from "@/components/ui/link-button";
 import { useAuth } from "@/features/auth/hooks";
 
+const QUICK_SPECIALTIES = [
+  "General Medicine",
+  "Pediatrics",
+  "Cardiology",
+  "Dermatology",
+  "OB-Gynecology",
+  "Psychiatry",
+];
+
 export const Hero = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -44,7 +53,7 @@ export const Hero = () => {
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by doctor name or specialization…"
+          placeholder="Search by doctor, specialization, or symptom…"
           aria-label="Search doctors"
           className="h-10 border-0 bg-transparent shadow-none focus-visible:ring-0"
         />
@@ -52,6 +61,21 @@ export const Hero = () => {
           Search
         </Button>
       </form>
+
+      <div className="mt-3 flex flex-wrap justify-center gap-2">
+        {QUICK_SPECIALTIES.map((spec) => (
+          <button
+            key={spec}
+            type="button"
+            onClick={() =>
+              navigate(`/doctors?search=${encodeURIComponent(spec)}`)
+            }
+            className="rounded-full border bg-card px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground active:scale-[0.97]"
+          >
+            {spec}
+          </button>
+        ))}
+      </div>
 
       <div className="mt-6 flex w-full max-w-sm flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center">
         {isAuthenticated ? (

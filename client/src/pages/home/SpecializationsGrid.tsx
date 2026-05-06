@@ -16,35 +16,30 @@ export const SpecializationsGrid = () => {
         Browse by specialization
       </h2>
       <p className="mb-8 text-center text-sm text-muted-foreground">
-        Ten specializations and growing. Click one to see verified doctors.
+        Ten specializations and growing. Tap one to see verified doctors.
       </p>
 
       {isPending || !data ? (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {Array.from({ length: 10 }).map((_, i) => (
             <div
               key={i}
-              className="h-24 animate-pulse rounded-xl border bg-muted/40"
+              className="h-28 animate-pulse rounded-xl border bg-muted/40"
             />
           ))}
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {data.map((s) => (
             <Link
               key={s.id}
               to={`/doctors?specializationId=${s.id}`}
-              className="group flex flex-col items-start gap-2 rounded-xl border bg-card p-4 transition-shadow hover:shadow-md"
+              className="group flex flex-col items-center gap-2.5 rounded-xl border bg-card p-4 text-center transition-all hover:border-primary/40 hover:shadow-md active:scale-[0.97]"
             >
-              <div className="rounded-lg bg-primary/10 p-2 text-primary">
+              <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
                 <SpecializationIcon name={s.iconName} className="size-5" />
               </div>
-              <p className="text-sm font-medium">{s.name}</p>
-              {s.description && (
-                <p className="line-clamp-2 text-xs text-muted-foreground">
-                  {s.description}
-                </p>
-              )}
+              <p className="text-xs font-medium leading-snug">{s.name}</p>
             </Link>
           ))}
         </div>
