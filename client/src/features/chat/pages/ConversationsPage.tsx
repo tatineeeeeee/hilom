@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { MessageSquare } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useChatSocket, useConversationList } from "../hooks";
 import { UnreadBadge } from "../components/UnreadBadge";
@@ -6,8 +7,7 @@ import { UnreadBadge } from "../components/UnreadBadge";
 const formatRelative = (iso: string | null): string => {
   if (!iso) return "";
   const d = new Date(iso);
-  const now = Date.now();
-  const diff = now - d.getTime();
+  const diff = Date.now() - d.getTime();
   const minutes = Math.floor(diff / 60_000);
   if (minutes < 1) return "just now";
   if (minutes < 60) return `${minutes}m ago`;
@@ -26,7 +26,17 @@ export const ConversationsPage = () => {
         Messages
       </h1>
 
-      {isPending && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {isPending && (
+        <div className="grid gap-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-16 animate-pulse rounded-xl border bg-muted/40"
+            />
+          ))}
+        </div>
+      )}
+
       {isError && (
         <p className="text-sm text-destructive">
           Could not load conversations.
@@ -34,8 +44,17 @@ export const ConversationsPage = () => {
       )}
 
       {data && data.length === 0 && (
-        <div className="rounded-lg border p-8 text-center">
-          <p className="text-sm text-muted-foreground">No conversations yet.</p>
+        <div className="flex flex-col items-center gap-3 rounded-xl border p-10 text-center">
+          <MessageSquare
+            className="size-10 text-muted-foreground/40"
+            aria-hidden
+          />
+          <div>
+            <p className="font-medium">No conversations yet</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Once an appointment is confirmed, a private chat opens here.
+            </p>
+          </div>
         </div>
       )}
 

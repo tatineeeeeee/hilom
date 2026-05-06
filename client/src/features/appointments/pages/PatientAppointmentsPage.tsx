@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LinkButton } from "@/components/ui/link-button";
+import { cn } from "@/lib/utils";
 import { useMyAppointments } from "../hooks";
 import { AppointmentCard } from "../components/AppointmentCard";
 import { ReviewModal } from "../components/ReviewModal";
@@ -20,7 +22,6 @@ export const PatientAppointmentsPage = () => {
   const [reviewTarget, setReviewTarget] = useState<Appointment | null>(null);
 
   const { data, isPending, isError } = useMyAppointments({ status, page });
-
   const totalPages = data ? Math.ceil(data.total / data.pageSize) : 0;
 
   return (
@@ -29,37 +30,59 @@ export const PatientAppointmentsPage = () => {
         My appointments
       </h1>
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      {/* Status tabs */}
+      <div className="mb-4 flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible sm:pb-0">
         {TABS.map((tab) => (
-          <Button
+          <button
             key={tab.label}
-            variant={status === tab.value ? "default" : "outline"}
-            size="sm"
+            type="button"
+            className={cn(
+              "flex-none rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+              status === tab.value
+                ? "border-primary bg-primary text-primary-foreground"
+                : "bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground",
+            )}
             onClick={() => {
               setStatus(tab.value);
               setPage(1);
             }}
           >
             {tab.label}
-          </Button>
+          </button>
         ))}
       </div>
 
-      {isPending && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {isPending && (
+        <div className="grid gap-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-24 animate-pulse rounded-xl border bg-muted/40"
+            />
+          ))}
+        </div>
+      )}
 
       {isError && (
         <p className="text-sm text-destructive">Could not load appointments.</p>
       )}
 
       {data && data.appointments.length === 0 && (
-        <div className="rounded-lg border p-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            No appointments yet.{" "}
-            <Link to="/doctors" className="text-primary underline">
+        <div className="flex flex-col items-center gap-3 rounded-xl border p-10 text-center">
+          <Calendar className="size-10 text-muted-foreground/40" aria-hidden />
+          <div>
+            <p className="font-medium">No appointments yet</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {status
+                ? `No ${status} appointments.`
+                : "Book your first appointment to get started."}
+            </p>
+          </div>
+          {!status && (
+            <LinkButton to="/doctors" size="sm">
               Find a doctor
-            </Link>{" "}
-            to book your first slot.
-          </p>
+            </LinkButton>
+          )}
         </div>
       )}
 

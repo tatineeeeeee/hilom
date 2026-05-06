@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { FileText } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/features/auth/hooks";
 import { useMyPrescriptions } from "../hooks";
@@ -10,9 +11,6 @@ export const MyPrescriptionsPage = () => {
 
   const isDoctor = user?.role === "doctor";
   const heading = isDoctor ? "Prescriptions issued" : "My prescriptions";
-  const emptyText = isDoctor
-    ? "You haven't issued any prescriptions yet."
-    : "No prescriptions yet.";
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
@@ -20,7 +18,16 @@ export const MyPrescriptionsPage = () => {
         {heading}
       </h1>
 
-      {isPending && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {isPending && (
+        <div className="grid gap-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-16 animate-pulse rounded-xl border bg-muted/40"
+            />
+          ))}
+        </div>
+      )}
 
       {isError && (
         <p className="text-sm text-destructive">
@@ -29,8 +36,20 @@ export const MyPrescriptionsPage = () => {
       )}
 
       {data && data.length === 0 && (
-        <div className="rounded-lg border p-8 text-center">
-          <p className="text-sm text-muted-foreground">{emptyText}</p>
+        <div className="flex flex-col items-center gap-3 rounded-xl border p-10 text-center">
+          <FileText className="size-10 text-muted-foreground/40" aria-hidden />
+          <div>
+            <p className="font-medium">
+              {isDoctor
+                ? "No prescriptions issued yet"
+                : "No prescriptions yet"}
+            </p>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {isDoctor
+                ? "Prescriptions you issue after completed appointments appear here."
+                : "Prescriptions land here after a completed appointment."}
+            </p>
+          </div>
         </div>
       )}
 
