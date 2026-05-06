@@ -11,11 +11,7 @@ const initials = (name: string): string =>
     .join("") || "Dr";
 
 export const FeaturedDoctors = () => {
-  const { data, isPending } = useDoctors({
-    page: 1,
-    sort: "rating",
-  });
-
+  const { data, isPending } = useDoctors({ page: 1, sort: "rating" });
   const doctors = data?.doctors.slice(0, 3) ?? [];
 
   if (!isPending && doctors.length === 0) return null;
@@ -40,16 +36,16 @@ export const FeaturedDoctors = () => {
       </div>
 
       {isPending ? (
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0 [&::-webkit-scrollbar]:hidden">
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="h-40 animate-pulse rounded-xl border bg-muted/40"
+              className="h-44 w-64 flex-none animate-pulse rounded-xl border bg-muted/40 sm:w-auto"
             />
           ))}
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0 [&::-webkit-scrollbar]:hidden">
           {doctors.map((d) => {
             const rating = d.averageRating
               ? Number(d.averageRating).toFixed(1)
@@ -58,7 +54,7 @@ export const FeaturedDoctors = () => {
               <Link
                 key={d.id}
                 to={`/doctors/${d.id}`}
-                className="group rounded-xl border bg-card p-5 transition-shadow hover:shadow-md"
+                className="group w-64 flex-none rounded-xl border bg-card p-5 transition-shadow hover:shadow-md sm:w-auto"
               >
                 <div className="mb-3 flex items-center gap-3">
                   <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">

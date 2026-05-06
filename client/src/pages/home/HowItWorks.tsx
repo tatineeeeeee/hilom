@@ -17,7 +17,7 @@ const STEPS = [
     num: "3",
     icon: CreditCard,
     title: "Pay",
-    body: "Confirm your payment. We hold it in escrow until the visit happens.",
+    body: "Confirm your payment via GCash, Maya, or card. We hold it in escrow until the visit happens.",
   },
   {
     num: "4",
@@ -37,15 +37,20 @@ export const HowItWorks = () => (
     </p>
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {STEPS.map(({ num, icon: Icon, title, body }) => (
-        <div key={num} className="rounded-xl border bg-card p-5">
-          <div className="mb-3 flex items-center gap-2">
-            <span className="flex size-7 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-              {num}
-            </span>
-            <Icon className="size-4 text-muted-foreground" aria-hidden />
+        <div
+          key={num}
+          className="flex items-start gap-4 rounded-xl border bg-card p-5 sm:flex-col sm:gap-0"
+        >
+          <div className="flex shrink-0 size-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground sm:mb-3">
+            {num}
           </div>
-          <h3 className="mb-1 text-sm font-semibold">{title}</h3>
-          <p className="text-xs text-muted-foreground">{body}</p>
+          <div>
+            <div className="mb-1 flex items-center gap-2">
+              <h3 className="text-sm font-semibold">{title}</h3>
+              <Icon className="size-3.5 text-muted-foreground" aria-hidden />
+            </div>
+            <p className="text-xs text-muted-foreground">{body}</p>
+          </div>
         </div>
       ))}
     </div>

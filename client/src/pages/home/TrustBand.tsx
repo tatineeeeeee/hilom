@@ -1,27 +1,20 @@
-import {
-  CreditCard,
-  MessageSquareText,
-  Smartphone,
-  ShieldCheck,
-} from "lucide-react";
-
-const PILLS = [
-  { icon: ShieldCheck, label: "Verified doctors only" },
-  { icon: CreditCard, label: "Escrow-secured payments" },
-  { icon: MessageSquareText, label: "Real-time chat" },
-  { icon: Smartphone, label: "Mobile-first" },
+const STATS = [
+  { value: "500+", label: "Verified doctors" },
+  { value: "★ 4.8", label: "Average rating" },
+  { value: "GCash · Maya", label: "Local payment" },
+  { value: "100%", label: "Escrow-secured" },
 ];
 
 export const TrustBand = () => (
   <section className="mx-auto max-w-5xl px-4 pb-8">
-    <div className="flex flex-wrap items-center justify-center gap-2">
-      {PILLS.map(({ icon: Icon, label }) => (
+    <div className="grid grid-cols-2 gap-4 rounded-2xl border bg-card p-6 sm:grid-cols-4">
+      {STATS.map(({ value, label }) => (
         <div
           key={label}
-          className="inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 text-xs text-muted-foreground"
+          className="flex flex-col items-center gap-0.5 text-center"
         >
-          <Icon className="size-3.5 text-primary" aria-hidden />
-          {label}
+          <span className="text-lg font-bold sm:text-xl">{value}</span>
+          <span className="text-xs text-muted-foreground">{label}</span>
         </div>
       ))}
     </div>
