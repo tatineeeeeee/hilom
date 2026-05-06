@@ -14,6 +14,9 @@ module.exports = {
     ],
   },
   testTimeout: 10000,
+  maxWorkers: 1,
+  workerIdleMemoryLimit: "512MB",
+  forceExit: true,
   clearMocks: true,
   collectCoverageFrom: [
     "src/**/*.ts",
