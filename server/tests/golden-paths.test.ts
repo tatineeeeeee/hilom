@@ -160,16 +160,21 @@ describe("Golden path: book → pay → chat → complete → review", () => {
         });
       });
 
-      const received = new Promise<{ content: string }>((resolve, reject) => {
-        const t = setTimeout(
-          () => reject(new Error("message:new timeout")),
-          3000,
-        );
-        docSocket.on("message:new", (payload: { content: string }) => {
-          clearTimeout(t);
-          resolve(payload);
-        });
-      });
+      const received = new Promise<{ message: { content: string } }>(
+        (resolve, reject) => {
+          const t = setTimeout(
+            () => reject(new Error("message:new timeout")),
+            3000,
+          );
+          docSocket.on(
+            "message:new",
+            (payload: { message: { content: string } }) => {
+              clearTimeout(t);
+              resolve(payload);
+            },
+          );
+        },
+      );
 
       const send = await request(app)
         .post(`/api/conversations/${conversationId}/messages`)
@@ -178,7 +183,7 @@ describe("Golden path: book → pay → chat → complete → review", () => {
       expect(send.status).toBe(201);
 
       const payload = await received;
-      expect(payload.content).toBe("Hi doctor!");
+      expect(payload.message.content).toBe("Hi doctor!");
     } finally {
       docSocket.disconnect();
     }
