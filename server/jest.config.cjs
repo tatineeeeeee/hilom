@@ -15,8 +15,7 @@ module.exports = {
     ],
   },
   testTimeout: 10000,
-  maxWorkers: 1,
-  workerIdleMemoryLimit: "512MB",
+  runInBand: true,
   forceExit: true,
   clearMocks: true,
   collectCoverageFrom: [
