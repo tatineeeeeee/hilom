@@ -7,7 +7,7 @@
     "e2e"
   ],
   "scripts": {
-    "dev": "bun run --filter client dev & bun run --filter server dev",
+    "dev": "concurrently \"bun run --filter server dev\" \"bun run --filter client dev\"",
     "typecheck": "bun run --filter client typecheck && bun run --filter server typecheck",
     "lint": "bun run --filter client lint && bun run --filter server lint",
     "test": "bun run --filter server test && bun run --filter client test",
@@ -37,6 +37,7 @@
     "@types/nodemailer": "^8.0.0",
     "@types/supertest": "^7.2.0",
     "client": "workspace:*",
+    "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
