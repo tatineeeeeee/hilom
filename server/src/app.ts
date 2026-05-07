@@ -33,11 +33,16 @@ const allowedOrigins =
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 
 morgan.token("id", (req) => (req as express.Request).id ?? "-");
-app.use(
-  morgan(":id :method :url :status :res[content-length] - :response-time ms", {
-    stream: { write: (msg) => logger.info(msg.trim()) },
-  }),
-);
+if (env.NODE_ENV !== "test") {
+  app.use(
+    morgan(
+      ":id :method :url :status :res[content-length] - :response-time ms",
+      {
+        stream: { write: (msg) => logger.info(msg.trim()) },
+      },
+    ),
+  );
+}
 
 app.post(
   "/api/payments/webhook",

@@ -2,9 +2,10 @@ import pino from "pino";
 import { env } from "./env";
 
 const isProd = env.NODE_ENV === "production";
+const isTest = env.NODE_ENV === "test";
 
 export const logger = pino({
-  level: isProd ? "info" : "debug",
+  level: isTest ? "silent" : isProd ? "info" : "debug",
   base: { service: "hilom-server", env: env.NODE_ENV },
   redact: {
     paths: [
@@ -14,7 +15,7 @@ export const logger = pino({
     ],
     censor: "[redacted]",
   },
-  ...(isProd
+  ...(isProd || isTest
     ? {}
     : {
         transport: {
