@@ -77,13 +77,15 @@ describe("Golden path: book → pay → chat → complete → review", () => {
   let httpServer: http.Server;
   let port: number;
 
-  beforeAll((done) => {
+  beforeAll(async () => {
     httpServer = http.createServer(app);
     initSocket(httpServer);
-    httpServer.listen(0, () => {
-      const addr = httpServer.address() as AddressInfo;
-      port = addr.port;
-      done();
+    await new Promise<void>((resolve) => {
+      httpServer.listen(0, () => {
+        const addr = httpServer.address() as AddressInfo;
+        port = addr.port;
+        resolve();
+      });
     });
   });
 
