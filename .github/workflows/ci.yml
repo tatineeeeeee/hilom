@@ -44,7 +44,7 @@ jobs:
       - name: Lint
         run: bun run lint
       - name: Server tests
-        run: bun run --filter server test
+        run: bun run --filter server test -- --reporter=verbose
       - name: Client tests
         run: bun run --filter client test
       - name: Upload coverage artifacts

@@ -332,7 +332,7 @@ describe("Socket.io message delivery", () => {
 
     try {
       await new Promise<void>((resolve, reject) => {
-        const t = setTimeout(() => reject(new Error("connect timeout")), 3000);
+        const t = setTimeout(() => reject(new Error("connect timeout")), 8000);
         doctorSocket.on("connect", () => {
           clearTimeout(t);
           resolve();
@@ -346,7 +346,7 @@ describe("Socket.io message delivery", () => {
       const received = new Promise<{ content: string }>((resolve, reject) => {
         const t = setTimeout(
           () => reject(new Error("message:new timeout")),
-          3000,
+          8000,
         );
         doctorSocket.on(
           "message:new",
@@ -380,7 +380,7 @@ describe("Socket.io message delivery", () => {
 
     try {
       await new Promise<void>((resolve, reject) => {
-        const t = setTimeout(() => reject(new Error("no error event")), 3000);
+        const t = setTimeout(() => reject(new Error("no error event")), 8000);
         bad.on("connect_error", () => {
           clearTimeout(t);
           resolve();

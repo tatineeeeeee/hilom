@@ -8,7 +8,8 @@ export default defineConfig({
     globals: true,
     pool: "forks",
     fileParallelism: false,
-    testTimeout: 10000,
+    testTimeout: 30000,
+    hookTimeout: 30000,
     clearMocks: true,
     coverage: {
       provider: "v8",

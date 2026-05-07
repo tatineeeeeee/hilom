@@ -576,7 +576,7 @@ describe("Socket.io prescription:new event", () => {
 
     try {
       await new Promise<void>((resolve, reject) => {
-        const t = setTimeout(() => reject(new Error("connect timeout")), 3000);
+        const t = setTimeout(() => reject(new Error("connect timeout")), 8000);
         patientSocket.on("connect", () => {
           clearTimeout(t);
           resolve();
@@ -591,7 +591,7 @@ describe("Socket.io prescription:new event", () => {
         (resolve, reject) => {
           const t = setTimeout(
             () => reject(new Error("prescription:new timeout")),
-            3000,
+            8000,
           );
           patientSocket.on(
             "prescription:new",

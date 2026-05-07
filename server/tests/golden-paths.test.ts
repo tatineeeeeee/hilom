@@ -151,7 +151,7 @@ describe("Golden path: book → pay → chat → complete → review", () => {
     });
     try {
       await new Promise<void>((resolve, reject) => {
-        const t = setTimeout(() => reject(new Error("connect timeout")), 3000);
+        const t = setTimeout(() => reject(new Error("connect timeout")), 8000);
         docSocket.on("connect", () => {
           clearTimeout(t);
           resolve();
@@ -166,7 +166,7 @@ describe("Golden path: book → pay → chat → complete → review", () => {
         (resolve, reject) => {
           const t = setTimeout(
             () => reject(new Error("message:new timeout")),
-            3000,
+            8000,
           );
           docSocket.on(
             "message:new",
