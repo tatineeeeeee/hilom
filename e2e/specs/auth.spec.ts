@@ -11,10 +11,13 @@ test.describe("auth", () => {
     await page.getByLabel(/full name/i).fill("E2E User");
     await page.getByLabel(/email/i).fill(email);
     await page.getByLabel(/^password$/i).fill(PASSWORD);
-    // Pick the "patient" role if a chooser exists; otherwise this is a no-op.
-    const patientChoice = page.getByRole("radio", { name: /patient/i });
-    if (await patientChoice.count()) await patientChoice.first().check();
-    await page.getByRole("button", { name: /sign up|create account|register/i }).click();
+    await page.getByLabel(/confirm password/i).fill(PASSWORD);
+    // Pick the "patient" role tab if it exists; otherwise this is a no-op.
+    const patientChoice = page.getByRole("tab", { name: /patient/i });
+    if (await patientChoice.count()) await patientChoice.first().click();
+    await page
+      .getByRole("button", { name: /create.*account|sign up|register/i })
+      .click();
 
     await expect(page).toHaveURL(/\/dashboard|\/profile\/setup/, { timeout: 10_000 });
 
