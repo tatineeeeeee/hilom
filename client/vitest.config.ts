@@ -11,6 +11,9 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
+    env: {
+      VITE_API_URL: "http://localhost:4000/api",
+    },
     coverage: {
       provider: "v8",
       reporter: ["text-summary", "lcov", "json-summary"],
