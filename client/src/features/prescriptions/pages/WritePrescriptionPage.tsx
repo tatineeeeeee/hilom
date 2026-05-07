@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useAuth } from "@/features/auth/hooks";
 import { MedicationRow } from "../components/MedicationRow";
 import { useWritePrescription } from "../hooks";
@@ -78,17 +79,7 @@ export const WritePrescriptionPage = () => {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6">
-      <button
-        type="button"
-        onClick={() => navigate(-1)}
-        className="mb-4 text-sm text-muted-foreground hover:text-foreground"
-      >
-        ← Back
-      </button>
-
-      <h1 className="mb-6 text-xl font-semibold tracking-tight sm:text-2xl">
-        Issue prescription
-      </h1>
+      <PageHeader title="Issue prescription" />
 
       <div className="mb-6 grid gap-1.5">
         <Label htmlFor="rx-notes">
@@ -105,6 +96,13 @@ export const WritePrescriptionPage = () => {
         <p className="text-right text-xs text-muted-foreground">
           {notes.length}/4000
         </p>
+      </div>
+
+      <div className="mb-3 flex items-center gap-2">
+        <p className="text-sm font-semibold">Medications</p>
+        <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+          {medications.length}
+        </span>
       </div>
 
       <div className="mb-4 grid gap-3">
