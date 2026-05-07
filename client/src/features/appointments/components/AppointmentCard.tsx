@@ -8,11 +8,18 @@ import { useCancelAppointment } from "../hooks";
 import type { Appointment } from "../schemas";
 import { useAuth } from "@/features/auth/hooks";
 
-const statusColors: Record<Appointment["status"], string> = {
+const statusBadgeColors: Record<Appointment["status"], string> = {
   pending: "bg-amber-100 text-amber-800",
   confirmed: "bg-blue-100 text-blue-800",
   completed: "bg-green-100 text-green-800",
   cancelled: "bg-muted text-muted-foreground",
+};
+
+const statusBarColors: Record<Appointment["status"], string> = {
+  pending: "bg-amber-400",
+  confirmed: "bg-blue-400",
+  completed: "bg-green-500",
+  cancelled: "bg-muted-foreground/30",
 };
 
 interface AppointmentCardProps {
@@ -35,8 +42,11 @@ export const AppointmentCard = ({
   };
 
   return (
-    <Card>
-      <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <Card className="relative overflow-hidden">
+      <div
+        className={`absolute inset-y-0 left-0 w-1 ${statusBarColors[appointment.status]}`}
+      />
+      <CardContent className="flex flex-col gap-3 p-4 pl-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="grid gap-1">
           <p className="text-sm font-medium">{appointment.doctorName}</p>
           <p className="text-xs text-muted-foreground">
@@ -54,7 +64,10 @@ export const AppointmentCard = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Badge className={statusColors[appointment.status]} variant="outline">
+          <Badge
+            className={statusBadgeColors[appointment.status]}
+            variant="outline"
+          >
             {appointment.status}
           </Badge>
 
