@@ -14,6 +14,7 @@ import {
   type PatientProfileUpdateInput,
 } from "../schemas/profile.schema";
 import { scheduleArraySchema } from "../schemas/schedule.schema";
+import { getDoctorStats as getDoctorStatsService } from "../services/doctor.service";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -221,4 +222,16 @@ export const updateMySchedule = async (
   });
 
   res.json({ success: true, data: { schedule: updated } });
+};
+
+export const getDoctorStats = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  if (!req.user) throw new AppError(401, "Authentication required");
+  if (req.user.role !== "doctor") {
+    throw new AppError(403, "Only doctors have stats");
+  }
+  const stats = await getDoctorStatsService(req.user.id);
+  res.json({ success: true, data: { stats } });
 };

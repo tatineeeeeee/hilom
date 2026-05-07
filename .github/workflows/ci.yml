@@ -42,5 +42,65 @@ jobs:
         run: bun run typecheck
       - name: Lint
         run: bun run lint
-      - name: Test
+      - name: Server tests
+        run: bun run --filter server test -- --reporter=verbose
+      - name: Client tests
+        run: bun run --filter client test
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            server/coverage
+            client/coverage
+          if-no-files-found: ignore
+
+  e2e:
+    name: playwright e2e
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'pull_request'
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: hilom_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/hilom_test
+      JWT_ACCESS_SECRET: test-access-secret-padded-to-thirty-two-chars
+      JWT_REFRESH_SECRET: test-refresh-secret-padded-to-thirty-two-chars
+      NODE_ENV: test
+      CLIENT_URL: http://localhost:5174
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Push test schema
+        working-directory: server
+        run: bunx drizzle-kit push
+      - name: Install Playwright browsers
+        working-directory: e2e
+        run: bunx playwright install --with-deps chromium
+      - name: Run E2E
+        working-directory: e2e
         run: bun run test
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: e2e/playwright-report
+          if-no-files-found: ignore

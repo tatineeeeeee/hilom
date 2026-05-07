@@ -49,6 +49,8 @@ export const useCancelAppointment = () => {
     mutationFn: cancelAppointment,
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["myAppointments"] });
+      void qc.invalidateQueries({ queryKey: ["payments"] });
+      void qc.invalidateQueries({ queryKey: ["doctor-stats"] });
     },
   });
 };
@@ -60,6 +62,9 @@ export const useUpdateAppointmentStatus = () => {
       updateAppointmentStatus(id, status),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["doctorAppointments"] });
+      void qc.invalidateQueries({ queryKey: ["myAppointments"] });
+      void qc.invalidateQueries({ queryKey: ["payments"] });
+      void qc.invalidateQueries({ queryKey: ["doctor-stats"] });
     },
   });
 };

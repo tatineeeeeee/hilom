@@ -1,3 +1,5 @@
+export type PaymentStatus = "pending" | "escrowed" | "released" | "refunded";
+
 export interface Appointment {
   id: string;
   doctorId: string;
@@ -9,6 +11,8 @@ export interface Appointment {
   status: "pending" | "confirmed" | "completed" | "cancelled";
   reason: string | null;
   hasReview: boolean;
+  hasPrescription: boolean;
+  paymentStatus: PaymentStatus | null;
 }
 
 export interface DoctorAppointment {
@@ -20,6 +24,8 @@ export interface DoctorAppointment {
   slotEnd: string;
   status: "pending" | "confirmed" | "completed" | "cancelled";
   reason: string | null;
+  hasPrescription: boolean;
+  paymentStatus: PaymentStatus | null;
 }
 
 export interface AppointmentsResponse {
@@ -47,4 +53,17 @@ export interface BookInput {
 export interface ReviewInput {
   rating: number;
   comment?: string;
+}
+
+export interface BookingPayment {
+  id: string;
+  appointmentId: string;
+  amount: string;
+  status: "pending" | "escrowed" | "released" | "refunded";
+}
+
+export interface BookingResult {
+  appointment: Appointment;
+  payment: BookingPayment;
+  clientKey: string;
 }

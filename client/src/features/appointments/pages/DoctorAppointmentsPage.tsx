@@ -1,16 +1,27 @@
 import { useState } from "react";
+import { CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { LinkButton } from "@/components/ui/link-button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useDoctorAppointments, useUpdateAppointmentStatus } from "../hooks";
 import type { DoctorAppointment } from "../schemas";
 
-const statusColors: Record<DoctorAppointment["status"], string> = {
+const statusBadgeColors: Record<DoctorAppointment["status"], string> = {
   pending: "bg-amber-100 text-amber-800",
   confirmed: "bg-blue-100 text-blue-800",
   completed: "bg-green-100 text-green-800",
   cancelled: "bg-muted text-muted-foreground",
+};
+
+const statusBarColors: Record<DoctorAppointment["status"], string> = {
+  pending: "bg-amber-400",
+  confirmed: "bg-blue-400",
+  completed: "bg-green-500",
+  cancelled: "bg-muted-foreground/30",
 };
 
 const TABS = [
@@ -43,9 +54,7 @@ export const DoctorAppointmentsPage = () => {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
-      <h1 className="mb-4 text-xl font-semibold tracking-tight sm:text-2xl">
-        Patient appointments
-      </h1>
+      <PageHeader title="Patient appointments" />
 
       <div className="mb-4 flex flex-wrap gap-2">
         {TABS.map((tab) => (
@@ -63,25 +72,40 @@ export const DoctorAppointmentsPage = () => {
         ))}
       </div>
 
-      {isPending && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {isPending && (
+        <div className="grid gap-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 rounded-xl" />
+          ))}
+        </div>
+      )}
 
       {isError && (
         <p className="text-sm text-destructive">Could not load appointments.</p>
       )}
 
       {data && data.appointments.length === 0 && (
-        <div className="rounded-lg border p-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            No appointments to show.
-          </p>
+        <div className="flex flex-col items-center gap-3 rounded-xl border p-10 text-center">
+          <CalendarDays className="size-10 text-muted-foreground/40" />
+          <div>
+            <p className="font-medium">No appointments to show</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {status
+                ? `No ${status} appointments.`
+                : "Patients will appear here after they book."}
+            </p>
+          </div>
         </div>
       )}
 
       {data && data.appointments.length > 0 && (
         <div className="grid gap-3">
           {data.appointments.map((appt) => (
-            <Card key={appt.id}>
-              <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <Card key={appt.id} className="relative overflow-hidden">
+              <div
+                className={`absolute inset-y-0 left-0 w-1 ${statusBarColors[appt.status]}`}
+              />
+              <CardContent className="flex flex-col gap-3 p-4 pl-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="grid gap-1">
                   <p className="text-sm font-medium">{appt.patientName}</p>
                   <p className="text-xs text-muted-foreground">
@@ -97,7 +121,7 @@ export const DoctorAppointmentsPage = () => {
 
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge
-                    className={statusColors[appt.status]}
+                    className={statusBadgeColors[appt.status]}
                     variant="outline"
                   >
                     {appt.status}
@@ -125,6 +149,13 @@ export const DoctorAppointmentsPage = () => {
 
                   {appt.status === "confirmed" && (
                     <>
+                      <LinkButton
+                        to={`/appointments/${appt.id}/chat`}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Chat
+                      </LinkButton>
                       <Button
                         size="sm"
                         onClick={() => handleAction(appt.id, "completed")}
@@ -141,6 +172,26 @@ export const DoctorAppointmentsPage = () => {
                         Cancel
                       </Button>
                     </>
+                  )}
+
+                  {appt.status === "completed" && !appt.hasPrescription && (
+                    <LinkButton
+                      to={`/appointments/${appt.id}/prescription/new`}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Issue prescription
+                    </LinkButton>
+                  )}
+
+                  {appt.status === "completed" && appt.hasPrescription && (
+                    <LinkButton
+                      to={`/appointments/${appt.id}/prescription`}
+                      variant="outline"
+                      size="sm"
+                    >
+                      View prescription
+                    </LinkButton>
                   )}
                 </div>
               </CardContent>

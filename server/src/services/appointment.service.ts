@@ -4,6 +4,8 @@ import {
   appointments,
   doctorProfiles,
   doctorSchedules,
+  payments,
+  prescriptions,
   reviews,
   specializations,
   users,
@@ -15,11 +17,19 @@ import {
   addDaysToManilaDate,
 } from "../utils/manilaTime";
 import { generateSlots } from "./slot.service";
+import { findOrCreateConversation } from "./chat.service";
+import {
+  createPaymentForAppointment,
+  refundPayment,
+  releaseEscrow,
+} from "./payment.service";
 import {
   APPOINTMENT_PAGE_SIZE,
   type BookAppointmentInput,
   type ListAppointmentsQuery,
 } from "../schemas/appointment.schema";
+
+export type PaymentStatus = "pending" | "escrowed" | "released" | "refunded";
 
 export interface AppointmentRow {
   id: string;
@@ -33,6 +43,8 @@ export interface AppointmentRow {
   reason: string | null;
   notes: string | null;
   hasReview: boolean;
+  hasPrescription: boolean;
+  paymentStatus: PaymentStatus | null;
   createdAt: Date;
 }
 
@@ -111,7 +123,19 @@ export const bookAppointment = async (
       })
       .returning();
 
-    return inserted;
+    if (!inserted) throw new AppError(500, "Failed to create appointment");
+
+    const { payment, clientKey } = await createPaymentForAppointment(
+      {
+        appointmentId: inserted.id,
+        patientId,
+        doctorUserId: profile.userId,
+        amount: profile.consultationFee,
+      },
+      tx,
+    );
+
+    return { appointment: inserted, payment, clientKey };
   });
 };
 
@@ -143,6 +167,8 @@ export const listPatientAppointments = async (
         reason: appointments.reason,
         notes: appointments.notes,
         reviewId: reviews.id,
+        prescriptionId: prescriptions.id,
+        paymentStatus: payments.status,
         createdAt: appointments.createdAt,
       })
       .from(appointments)
@@ -153,6 +179,8 @@ export const listPatientAppointments = async (
         eq(doctorProfiles.specializationId, specializations.id),
       )
       .leftJoin(reviews, eq(reviews.appointmentId, appointments.id))
+      .leftJoin(prescriptions, eq(prescriptions.appointmentId, appointments.id))
+      .leftJoin(payments, eq(payments.appointmentId, appointments.id))
       .where(where)
       .orderBy(desc(appointments.createdAt))
       .limit(APPOINTMENT_PAGE_SIZE)
@@ -163,7 +191,9 @@ export const listPatientAppointments = async (
     appointments: rows.map((r) => ({
       ...r,
       reviewId: undefined,
+      prescriptionId: undefined,
       hasReview: r.reviewId !== null,
+      hasPrescription: r.prescriptionId !== null,
       slotStart: toHHMM(r.slotStart),
       slotEnd: toHHMM(r.slotEnd),
     })),
@@ -204,6 +234,8 @@ export interface DoctorAppointmentRow {
   status: string;
   reason: string | null;
   notes: string | null;
+  hasPrescription: boolean;
+  paymentStatus: PaymentStatus | null;
   createdAt: Date;
 }
 
@@ -243,10 +275,14 @@ export const listDoctorAppointments = async (
         status: appointments.status,
         reason: appointments.reason,
         notes: appointments.notes,
+        prescriptionId: prescriptions.id,
+        paymentStatus: payments.status,
         createdAt: appointments.createdAt,
       })
       .from(appointments)
       .innerJoin(users, eq(appointments.patientId, users.id))
+      .leftJoin(prescriptions, eq(prescriptions.appointmentId, appointments.id))
+      .leftJoin(payments, eq(payments.appointmentId, appointments.id))
       .where(where)
       .orderBy(desc(appointments.createdAt))
       .limit(APPOINTMENT_PAGE_SIZE)
@@ -256,6 +292,8 @@ export const listDoctorAppointments = async (
   return {
     appointments: rows.map((r) => ({
       ...r,
+      prescriptionId: undefined,
+      hasPrescription: r.prescriptionId !== null,
       slotStart: toHHMM(r.slotStart),
       slotEnd: toHHMM(r.slotEnd),
     })),
@@ -314,11 +352,41 @@ export const updateAppointmentStatus = async (
     );
   }
 
+  if (newStatus === "completed") {
+    const payment = await db.query.payments.findFirst({
+      where: eq(payments.appointmentId, appointmentId),
+    });
+    if (!payment || payment.status !== "escrowed") {
+      throw new AppError(409, "Cannot complete an unpaid appointment");
+    }
+  }
+
   const [updated] = await db
     .update(appointments)
     .set({ status: newStatus })
     .where(eq(appointments.id, appointmentId))
     .returning();
+
+  if (newStatus === "confirmed" && updated) {
+    const profile = await db.query.doctorProfiles.findFirst({
+      where: eq(doctorProfiles.id, appointment.doctorId),
+    });
+    if (profile) {
+      await findOrCreateConversation(
+        appointmentId,
+        appointment.patientId,
+        profile.userId,
+      );
+    }
+  }
+
+  if (newStatus === "completed") {
+    await releaseEscrow(appointmentId);
+  }
+
+  if (newStatus === "cancelled") {
+    await refundPayment(appointmentId);
+  }
 
   return updated;
 };

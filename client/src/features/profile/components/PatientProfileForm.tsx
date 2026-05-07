@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/forms/FormField";
 import { extractApiError } from "@/lib/helpers/errors";
@@ -76,73 +77,93 @@ export const PatientProfileForm = ({ initial }: PatientProfileFormProps) => {
         </Alert>
       )}
 
-      <FormField
-        id="dateOfBirth"
-        label="Date of birth"
-        type="date"
-        max={todayIso}
-        error={errors.dateOfBirth?.message}
-        {...register("dateOfBirth")}
-      />
+      <div>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Personal information
+        </p>
+        <div className="grid gap-4">
+          <FormField
+            id="dateOfBirth"
+            label="Date of birth"
+            type="date"
+            max={todayIso}
+            error={errors.dateOfBirth?.message}
+            {...register("dateOfBirth")}
+          />
 
-      <div className="grid gap-1.5">
-        <Label htmlFor="bloodType">Blood type</Label>
-        <select
-          id="bloodType"
-          {...register("bloodType")}
-          aria-invalid={errors.bloodType !== undefined}
-          aria-describedby={errors.bloodType ? "bloodType-error" : undefined}
-          className={cn(
-            "min-h-11 rounded-md border border-input bg-background px-3 text-sm",
-            "focus:outline-none focus:ring-2 focus:ring-ring",
-            errors.bloodType && "border-destructive",
-          )}
-        >
-          <option value="">Select blood type (optional)</option>
-          {bloodTypeValues.map((bt) => (
-            <option key={bt} value={bt}>
-              {bt}
-            </option>
-          ))}
-        </select>
-        {errors.bloodType && (
-          <p id="bloodType-error" className="text-xs text-destructive">
-            {errors.bloodType.message}
-          </p>
-        )}
+          <div className="grid gap-1.5">
+            <Label htmlFor="bloodType">Blood type</Label>
+            <select
+              id="bloodType"
+              {...register("bloodType")}
+              aria-invalid={errors.bloodType !== undefined}
+              aria-describedby={
+                errors.bloodType ? "bloodType-error" : undefined
+              }
+              className={cn(
+                "min-h-11 rounded-md border border-input bg-background px-3 text-sm",
+                "focus:outline-none focus:ring-2 focus:ring-ring",
+                errors.bloodType && "border-destructive",
+              )}
+            >
+              <option value="">Select blood type (optional)</option>
+              {bloodTypeValues.map((bt) => (
+                <option key={bt} value={bt}>
+                  {bt}
+                </option>
+              ))}
+            </select>
+            {errors.bloodType && (
+              <p id="bloodType-error" className="text-xs text-destructive">
+                {errors.bloodType.message}
+              </p>
+            )}
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label htmlFor="allergies">Known allergies</Label>
+            <Textarea
+              id="allergies"
+              placeholder="e.g. Peanuts, penicillin"
+              rows={3}
+              aria-invalid={errors.allergies ? true : undefined}
+              {...register("allergies")}
+            />
+            {errors.allergies && (
+              <p className="text-xs text-destructive">
+                {errors.allergies.message}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="grid gap-1.5">
-        <Label htmlFor="allergies">Known allergies</Label>
-        <Textarea
-          id="allergies"
-          placeholder="e.g. Peanuts, penicillin"
-          rows={3}
-          aria-invalid={errors.allergies !== undefined}
-          {...register("allergies")}
-        />
-        {errors.allergies && (
-          <p className="text-xs text-destructive">{errors.allergies.message}</p>
-        )}
+      <Separator />
+
+      <div>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Emergency contact
+        </p>
+        <div className="grid gap-4">
+          <FormField
+            id="emergencyContactName"
+            label="Contact name"
+            autoComplete="name"
+            error={errors.emergencyContactName?.message}
+            {...register("emergencyContactName")}
+          />
+
+          <FormField
+            id="emergencyContactPhone"
+            label="Contact phone"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            error={errors.emergencyContactPhone?.message}
+            {...register("emergencyContactPhone")}
+          />
+        </div>
       </div>
-
-      <FormField
-        id="emergencyContactName"
-        label="Emergency contact name"
-        autoComplete="name"
-        error={errors.emergencyContactName?.message}
-        {...register("emergencyContactName")}
-      />
-
-      <FormField
-        id="emergencyContactPhone"
-        label="Emergency contact phone"
-        type="tel"
-        inputMode="tel"
-        autoComplete="tel"
-        error={errors.emergencyContactPhone?.message}
-        {...register("emergencyContactPhone")}
-      />
 
       <Button type="submit" className="min-h-11 w-full" disabled={isSubmitting}>
         {isSubmitting ? "Saving…" : "Save profile"}

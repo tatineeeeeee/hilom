@@ -1,20 +1,21 @@
 import { apiClient } from "@/lib/api/client";
 import type { ApiSuccess } from "@/lib/api/types";
 import type {
-  Appointment,
   AppointmentsResponse,
   BookInput,
+  BookingResult,
   DoctorAppointmentsResponse,
   ReviewInput,
 } from "./schemas";
 
 export const bookAppointment = async (
   input: BookInput,
-): Promise<Appointment> => {
-  const { data } = await apiClient().post<
-    ApiSuccess<{ appointment: Appointment }>
-  >("/appointments", input);
-  return data.data.appointment;
+): Promise<BookingResult> => {
+  const { data } = await apiClient().post<ApiSuccess<BookingResult>>(
+    "/appointments",
+    input,
+  );
+  return data.data;
 };
 
 export const listMyAppointments = async (params: {

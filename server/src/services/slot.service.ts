@@ -19,10 +19,13 @@ export interface TimeSlot {
 
 const toHHMM = (t: string): string => t.slice(0, 5);
 
-const addMinutes = (hhmm: string, minutes: number): string => {
+const toMinutes = (hhmm: string): number => {
   const [h, m] = hhmm.split(":").map(Number);
-  const total = (h ?? 0) * 60 + (m ?? 0) + minutes;
-  const hh = Math.floor(total / 60) % 24;
+  return (h ?? 0) * 60 + (m ?? 0);
+};
+
+const fromMinutes = (total: number): string => {
+  const hh = Math.floor(total / 60);
   const mm = total % 60;
   return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
 };
@@ -52,15 +55,19 @@ export const generateSlots = ({
   const row = schedule.find((r) => r.dayOfWeek === dow && r.isActive);
   if (!row) return [];
 
-  const startHHMM = toHHMM(row.startTime);
-  const endHHMM = toHHMM(row.endTime);
+  const startMin = toMinutes(toHHMM(row.startTime));
+  const endMin = toMinutes(toHHMM(row.endTime));
 
   const slots: TimeSlot[] = [];
-  let cursor = startHHMM;
-  while (addMinutes(cursor, slotDurationMinutes) <= endHHMM) {
-    const end = addMinutes(cursor, slotDurationMinutes);
-    slots.push({ start: cursor, end });
-    cursor = end;
+  for (
+    let cur = startMin;
+    cur + slotDurationMinutes <= endMin;
+    cur += slotDurationMinutes
+  ) {
+    slots.push({
+      start: fromMinutes(cur),
+      end: fromMinutes(cur + slotDurationMinutes),
+    });
   }
 
   const active = slots.filter(

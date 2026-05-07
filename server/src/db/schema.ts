@@ -177,6 +177,7 @@ export const prescriptions = pgTable("prescriptions", {
   id: uuid("id").defaultRandom().primaryKey(),
   appointmentId: uuid("appointment_id")
     .references(() => appointments.id)
+    .unique()
     .notNull(),
   doctorId: uuid("doctor_id")
     .references(() => users.id)
@@ -204,6 +205,7 @@ export const payments = pgTable("payments", {
   id: uuid("id").defaultRandom().primaryKey(),
   appointmentId: uuid("appointment_id")
     .references(() => appointments.id)
+    .unique()
     .notNull(),
   patientId: uuid("patient_id")
     .references(() => users.id)
@@ -217,7 +219,9 @@ export const payments = pgTable("payments", {
     length: 255,
   }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  paidAt: timestamp("paid_at"),
   releasedAt: timestamp("released_at"),
+  refundedAt: timestamp("refunded_at"),
 });
 
 export const reviews = pgTable("reviews", {

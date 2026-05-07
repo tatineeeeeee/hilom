@@ -15,6 +15,17 @@ import { DoctorDetailPage } from "@/features/doctors/pages/DoctorDetailPage";
 import { SchedulePage } from "@/features/profile/pages/SchedulePage";
 import { PatientAppointmentsPage } from "@/features/appointments/pages/PatientAppointmentsPage";
 import { DoctorAppointmentsPage } from "@/features/appointments/pages/DoctorAppointmentsPage";
+import { ChatPage } from "@/features/chat/pages/ChatPage";
+import { ConversationsPage } from "@/features/chat/pages/ConversationsPage";
+import { WritePrescriptionPage } from "@/features/prescriptions/pages/WritePrescriptionPage";
+import { ViewPrescriptionPage } from "@/features/prescriptions/pages/ViewPrescriptionPage";
+import { MyPrescriptionsPage } from "@/features/prescriptions/pages/MyPrescriptionsPage";
+import { PaymentPage } from "@/features/payments/pages/PaymentPage";
+import { MyPaymentsPage } from "@/features/payments/pages/MyPaymentsPage";
+import { AdminLayout } from "@/components/layout/AdminLayout";
+import { AdminStatsPage } from "@/features/admin/pages/AdminStatsPage";
+import { UserManagementPage } from "@/features/admin/pages/UserManagementPage";
+import { DoctorVerificationPage } from "@/features/admin/pages/DoctorVerificationPage";
 
 export const AppRoutes = () => {
   return (
@@ -36,6 +47,25 @@ export const AppRoutes = () => {
           <Route path="/profile/schedule" element={<SchedulePage />} />
           <Route path="/appointments" element={<PatientAppointmentsPage />} />
           <Route path="/my-appointments" element={<DoctorAppointmentsPage />} />
+          <Route path="/messages" element={<ConversationsPage />} />
+          <Route path="/appointments/:id/chat" element={<ChatPage />} />
+          <Route
+            path="/appointments/:id/prescription/new"
+            element={<WritePrescriptionPage />}
+          />
+          <Route
+            path="/appointments/:id/prescription"
+            element={<ViewPrescriptionPage />}
+          />
+          <Route path="/prescriptions" element={<MyPrescriptionsPage />} />
+          <Route path="/payments/:appointmentId" element={<PaymentPage />} />
+          <Route path="/payments" element={<MyPaymentsPage />} />
+
+          <Route element={<AdminLayout />}>
+            <Route path="/admin" element={<AdminStatsPage />} />
+            <Route path="/admin/users" element={<UserManagementPage />} />
+            <Route path="/admin/doctors" element={<DoctorVerificationPage />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

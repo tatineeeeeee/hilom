@@ -11,9 +11,11 @@ const baseSchema = z.object({
   PORT: z.coerce.number().default(4000),
   CLIENT_URL: z.string().default("http://localhost:5173"),
   PAYMONGO_SECRET_KEY: z.string().default(""),
+  PAYMONGO_WEBHOOK_SECRET: z.string().default(""),
   JWT_ACCESS_SECRET: z.string().optional(),
   JWT_REFRESH_SECRET: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
+  REDIS_URL: z.string().optional(),
 });
 
 const parsed = baseSchema.parse(process.env);

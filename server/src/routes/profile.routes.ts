@@ -6,8 +6,10 @@ import {
   updateMyProfile,
   getMySchedule,
   updateMySchedule,
+  getDoctorStats,
 } from "../controllers/profile.controller";
 import { listMyDoctorAppointments } from "../controllers/appointment.controller";
+import { getUnreadTotal } from "../controllers/chat.controller";
 
 export const profileRouter: ExpressRouter = Router();
 
@@ -21,3 +23,5 @@ profileRouter.get(
   "/doctor-appointments",
   asyncHandler(listMyDoctorAppointments),
 );
+profileRouter.get("/unread-count", asyncHandler(getUnreadTotal));
+profileRouter.get("/doctor-stats", asyncHandler(getDoctorStats));
