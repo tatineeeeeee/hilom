@@ -230,11 +230,11 @@ describe("GET /api/me/doctor-stats", () => {
     const { session, profileId } = await setupDoctor(
       "stats-earnings@example.com",
     );
-    const today = todayInManila();
-    const todayDow = manilaDateDayOfWeek(today);
+    const bookDate = addDaysToManilaDate(todayInManila(), 1);
+    const bookDow = manilaDateDayOfWeek(bookDate);
     await db.insert(doctorSchedules).values({
       doctorId: profileId,
-      dayOfWeek: todayDow,
+      dayOfWeek: bookDow,
       startTime: "00:00",
       endTime: "23:30",
       isActive: true,
@@ -251,7 +251,7 @@ describe("GET /api/me/doctor-stats", () => {
         .set("Authorization", bearer(patient))
         .send({
           doctorId: profileId,
-          appointmentDate: today,
+          appointmentDate: bookDate,
           slotStart,
           slotEnd,
         });
@@ -279,11 +279,11 @@ describe("GET /api/me/doctor-stats", () => {
   it("earnings.last30Days excludes payments released > 30 days ago", async () => {
     const { session, profileId } = await setupDoctor("stats-30d@example.com");
     const docSession = session;
-    const today = todayInManila();
-    const todayDow = manilaDateDayOfWeek(today);
+    const bookDate = addDaysToManilaDate(todayInManila(), 1);
+    const bookDow = manilaDateDayOfWeek(bookDate);
     await db.insert(doctorSchedules).values({
       doctorId: profileId,
-      dayOfWeek: todayDow,
+      dayOfWeek: bookDow,
       startTime: "00:00",
       endTime: "23:30",
       isActive: true,
@@ -295,7 +295,7 @@ describe("GET /api/me/doctor-stats", () => {
       .set("Authorization", bearer(patient))
       .send({
         doctorId: profileId,
-        appointmentDate: today,
+        appointmentDate: bookDate,
         slotStart: "08:00",
         slotEnd: "08:30",
       });
@@ -330,11 +330,11 @@ describe("GET /api/me/doctor-stats", () => {
       "stats-rating@example.com",
     );
     const docSession = session;
-    const today = todayInManila();
-    const todayDow = manilaDateDayOfWeek(today);
+    const bookDate = addDaysToManilaDate(todayInManila(), 1);
+    const bookDow = manilaDateDayOfWeek(bookDate);
     await db.insert(doctorSchedules).values({
       doctorId: profileId,
-      dayOfWeek: todayDow,
+      dayOfWeek: bookDow,
       startTime: "00:00",
       endTime: "23:30",
       isActive: true,
@@ -356,7 +356,7 @@ describe("GET /api/me/doctor-stats", () => {
         .set("Authorization", bearer(patient))
         .send({
           doctorId: profileId,
-          appointmentDate: today,
+          appointmentDate: bookDate,
           slotStart: slot,
           slotEnd,
         });
