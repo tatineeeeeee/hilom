@@ -396,6 +396,18 @@ Elevate every screen from "functional" to "portfolio-ready." The focus is visual
 - [ ] All loading states: skeleton UI (no plain "Loading…" text anywhere)
 - [ ] All empty states: icon + message + contextual CTA (no plain text-only empty states)
 
+**Migrate server tests from Jest → Vitest**:
+
+- [ ] Remove `jest`, `ts-jest`, `@types/jest` from `server/package.json`
+- [ ] Add `vitest`, `@vitest/coverage-v8` as devDependencies
+- [ ] Replace `server/jest.config.cjs` with `server/vitest.config.ts`
+- [ ] Update `server/package.json` test scripts (`jest --shard` → `vitest run`)
+- [ ] Update `.github/workflows/ci.yml` (remove `NODE_OPTIONS`, simplify test step)
+- [ ] Verify all 15 test files pass with Vitest (API is ~95% identical to Jest)
+- [ ] Remove `server/tsconfig.test.json` if no longer needed
+
+**Why:** Jest + ts-jest accumulates 4 GB+ on the CI runner requiring `--shard` workarounds. Vitest uses esbuild (native TS support, no ts-jest), peaks at ~800 MB, and `vmMemoryLimit` actually works unlike Jest's broken `workerIdleMemoryLimit`.
+
 ---
 
 ## Backlog — deferred items worth tracking

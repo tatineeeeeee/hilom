@@ -5,7 +5,7 @@
     "moduleResolution": "node",
     "noEmit": true,
     "isolatedModules": true,
-    "types": ["node", "jest"]
+    "types": ["node", "vitest/globals"]
   },
   "include": ["src/**/*", "tests/**/*"]
 }
