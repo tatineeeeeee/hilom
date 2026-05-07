@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-    name: typecheck + lint + tests
     runs-on: ubuntu-latest
     services:
       postgres:
