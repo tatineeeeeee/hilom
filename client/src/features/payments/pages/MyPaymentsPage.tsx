@@ -1,5 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import { Banknote } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LinkButton } from "@/components/ui/link-button";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useAuth } from "@/features/auth/hooks";
 import { formatPHP } from "@/lib/utils/formatCurrency";
 import { PaymentStatusBadge } from "../components/PaymentStatusBadge";
@@ -18,26 +22,43 @@ export const MyPaymentsPage = () => {
   const { data, isPending, isError } = useMyPayments();
 
   const isDoctor = user?.role === "doctor";
-  const heading = isDoctor ? "Payments received" : "My payments";
-  const emptyText = isDoctor
-    ? "No payments yet."
-    : "You haven't paid for any appointments yet.";
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
-      <h1 className="mb-4 text-xl font-semibold tracking-tight sm:text-2xl">
-        {heading}
-      </h1>
+      <PageHeader title={isDoctor ? "Payments received" : "My payments"} />
 
-      {isPending && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {isPending && (
+        <div className="grid gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-16 rounded-xl" />
+          ))}
+        </div>
+      )}
 
       {isError && (
         <p className="text-sm text-destructive">Could not load payments.</p>
       )}
 
       {data && data.length === 0 && (
-        <div className="rounded-lg border p-8 text-center">
-          <p className="text-sm text-muted-foreground">{emptyText}</p>
+        <div className="flex flex-col items-center gap-3 rounded-xl border p-10 text-center">
+          <Banknote className="size-10 text-muted-foreground/40" />
+          <div>
+            <p className="font-medium">
+              {isDoctor
+                ? "No payments received yet."
+                : "You haven't made any payments yet."}
+            </p>
+            {!isDoctor && (
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                Book an appointment to get started.
+              </p>
+            )}
+          </div>
+          {!isDoctor && (
+            <LinkButton to="/doctors" size="sm">
+              Find a doctor →
+            </LinkButton>
+          )}
         </div>
       )}
 

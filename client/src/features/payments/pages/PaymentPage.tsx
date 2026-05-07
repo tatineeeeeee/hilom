@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { LinkButton } from "@/components/ui/link-button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { formatPHP } from "@/lib/utils/formatCurrency";
 import { useAuth } from "@/features/auth/hooks";
 import { PaymentMethodSelector } from "../components/PaymentMethodSelector";
@@ -29,7 +31,13 @@ export const PaymentPage = () => {
   if (isPending) {
     return (
       <div className="mx-auto max-w-xl px-4 py-6">
-        <p className="text-sm text-muted-foreground">Loading payment…</p>
+        <PageHeader title="Payment" />
+        <div className="grid gap-3">
+          <Skeleton className="h-24 rounded-lg" />
+          <Skeleton className="h-14 rounded-lg" />
+          <Skeleton className="h-14 rounded-lg" />
+          <Skeleton className="h-14 rounded-lg" />
+        </div>
       </div>
     );
   }
@@ -59,20 +67,18 @@ export const PaymentPage = () => {
 
   return (
     <div className="mx-auto max-w-xl px-4 py-6">
-      <button
-        type="button"
-        onClick={() => navigate(-1)}
-        className="mb-4 text-sm text-muted-foreground hover:text-foreground"
-      >
-        ← Back
-      </button>
-
-      <h1 className="mb-1 text-xl font-semibold tracking-tight sm:text-2xl">
-        Payment
-      </h1>
-      <p className="mb-6 text-sm text-muted-foreground">
-        Consultation fee for your appointment
-      </p>
+      <PageHeader
+        title="Payment"
+        subtitle="Consultation fee for your appointment"
+        action={
+          <Link
+            to="/appointments"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            ← Back
+          </Link>
+        }
+      />
 
       <div className="mb-6 rounded-lg border p-5 text-center">
         <p className="text-xs uppercase tracking-wide text-muted-foreground">
