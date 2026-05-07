@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { UserRow } from "../components/UserRow";
 import { useAdminUsers } from "../hooks";
 
@@ -57,13 +59,28 @@ export const UserManagementPage = () => {
         className="mb-4"
       />
 
-      {isPending && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {isPending && (
+        <div className="grid gap-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-16 rounded-xl" />
+          ))}
+        </div>
+      )}
+
       {isError && (
         <p className="text-sm text-destructive">Could not load users.</p>
       )}
 
       {data && data.rows.length === 0 && (
-        <p className="text-sm text-muted-foreground">No users match.</p>
+        <div className="flex flex-col items-center gap-3 rounded-xl border p-10 text-center">
+          <Users className="size-10 text-muted-foreground/40" />
+          <div>
+            <p className="font-medium">No users match your search.</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Try a different name, email, or role filter.
+            </p>
+          </div>
+        </div>
       )}
 
       {data && data.rows.length > 0 && (
