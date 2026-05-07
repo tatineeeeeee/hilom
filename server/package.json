@@ -16,7 +16,9 @@
     "db:generate": "drizzle-kit generate",
     "db:seed": "tsx src/db/seed.ts",
     "db:seed:doctor": "tsx src/db/seedDoctor.ts",
-    "db:seed:admin": "tsx src/db/seedAdmin.ts"
+    "db:seed:admin": "tsx src/db/seedAdmin.ts",
+    "db:seed:all": "tsx src/db/seedAll.ts",
+    "db:seed:extras": "tsx src/db/seedExtras.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
