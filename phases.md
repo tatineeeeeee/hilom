@@ -396,17 +396,15 @@ Elevate every screen from "functional" to "portfolio-ready." The focus is visual
 - [ ] All loading states: skeleton UI (no plain "Loading…" text anywhere)
 - [ ] All empty states: icon + message + contextual CTA (no plain text-only empty states)
 
-**Migrate server tests from Jest → Vitest**:
+**Migrate server tests to PGLite (in-memory Postgres)**:
 
-- [ ] Remove `jest`, `ts-jest`, `@types/jest` from `server/package.json`
-- [ ] Add `vitest`, `@vitest/coverage-v8` as devDependencies
-- [ ] Replace `server/jest.config.cjs` with `server/vitest.config.ts`
-- [ ] Update `server/package.json` test scripts (`jest --shard` → `vitest run`)
-- [ ] Update `.github/workflows/ci.yml` (remove `NODE_OPTIONS`, simplify test step)
-- [ ] Verify all 15 test files pass with Vitest (API is ~95% identical to Jest)
-- [ ] Remove `server/tsconfig.test.json` if no longer needed
+- [ ] Add `@electric-sql/pglite` as devDependency
+- [ ] Replace pg.Pool with PGLite-backed adapter for test env in `server/src/config/db.ts`
+- [ ] Drop the `postgres` GitHub Actions service from `.github/workflows/ci.yml`
+- [ ] Drop `bunx drizzle-kit push` step (PGLite gets schema applied in test setup)
+- [ ] Verify all test files pass with PGLite
 
-**Why:** Jest + ts-jest accumulates 4 GB+ on the CI runner requiring `--shard` workarounds. Vitest uses esbuild (native TS support, no ts-jest), peaks at ~800 MB, and `vmMemoryLimit` actually works unlike Jest's broken `workerIdleMemoryLimit`.
+**Why:** Tests currently spin up a real Postgres container per CI run + share a Pool across test files. PGLite runs Postgres in-memory in the same Node process, eliminating both the container boot time (~10-15 s) and the cross-file connection-pool memory accumulation that forced `pool: "forks" + fileParallelism: false`. Expected wins: faster CI, simpler config, lower memory ceiling.
 
 ---
 

@@ -57,16 +57,18 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-app.get("/api/openapi.json", (_req, res) => {
-  res.json(openapiDocument);
-});
-app.use(
-  "/api/docs",
-  swaggerUi.serve,
-  swaggerUi.setup(openapiDocument, {
-    customSiteTitle: "Hilom API",
-  }),
-);
+if (env.NODE_ENV !== "test") {
+  app.get("/api/openapi.json", (_req, res) => {
+    res.json(openapiDocument);
+  });
+  app.use(
+    "/api/docs",
+    swaggerUi.serve,
+    swaggerUi.setup(openapiDocument, {
+      customSiteTitle: "Hilom API",
+    }),
+  );
+}
 
 app.use("/api/auth", authRouter);
 app.use("/api/specializations", specializationRouter);
