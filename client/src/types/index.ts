@@ -15,4 +15,5 @@ export interface Specialization {
   name: string;
   description: string | null;
   iconName: string | null;
+  doctorCount: number;
 }

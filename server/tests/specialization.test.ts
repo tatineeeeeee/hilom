@@ -18,10 +18,15 @@ describe("GET /api/specializations", () => {
     const res = await request(app).get("/api/specializations");
     expect(res.status).toBe(200);
 
-    const specs = res.body.data as Array<{ id: number; name: string }>;
+    const specs = res.body.data as Array<{
+      id: number;
+      name: string;
+      doctorCount: number;
+    }>;
     expect(specs.length).toBeGreaterThanOrEqual(3);
     expect(typeof specs[0].id).toBe("number");
     expect(typeof specs[0].name).toBe("string");
+    expect(typeof specs[0].doctorCount).toBe("number");
 
     const names = specs.map((s) => s.name);
     expect(names).toContain("General Practice");

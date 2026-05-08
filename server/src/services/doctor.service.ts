@@ -4,8 +4,10 @@ import {
   count,
   desc,
   eq,
+  gte,
   ilike,
   inArray,
+  lt,
   ne,
   sql,
   type SQL,
@@ -166,7 +168,12 @@ export interface DoctorStatsScheduleRow {
 export interface DoctorStats {
   todaySchedule: DoctorStatsScheduleRow[];
   pendingConfirmations: number;
-  earnings: { last30Days: string; allTime: string };
+  hasStalePending: boolean;
+  earnings: {
+    last30Days: string;
+    allTime: string;
+    last7Days: { date: string; amount: string }[];
+  };
   rating: { average: string | null; count: number };
 }
 
@@ -185,59 +192,96 @@ export const getDoctorStats = async (
   const today = todayInManila();
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setUTCDate(thirtyDaysAgo.getUTCDate() - 30);
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setUTCDate(sevenDaysAgo.getUTCDate() - 6);
+  sevenDaysAgo.setUTCHours(0, 0, 0, 0);
+  const staleCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-  const [scheduleRows, pendingRows, earningsRows, reviewCountRows] =
-    await Promise.all([
-      db
-        .select({
-          id: appointments.id,
-          patientName: users.fullName,
-          slotStart: appointments.slotStart,
-          slotEnd: appointments.slotEnd,
-          status: appointments.status,
-          paymentStatus: payments.status,
-        })
-        .from(appointments)
-        .innerJoin(users, eq(users.id, appointments.patientId))
-        .leftJoin(payments, eq(payments.appointmentId, appointments.id))
-        .where(
-          and(
-            eq(appointments.doctorId, profile.id),
-            eq(appointments.appointmentDate, today),
-            ne(appointments.status, "cancelled"),
-          ),
-        )
-        .orderBy(asc(appointments.slotStart))
-        .limit(TODAY_SCHEDULE_LIMIT),
-
-      db
-        .select({ count: count() })
-        .from(appointments)
-        .where(
-          and(
-            eq(appointments.doctorId, profile.id),
-            eq(appointments.status, "pending"),
-          ),
+  const [
+    scheduleRows,
+    pendingRows,
+    earningsRows,
+    reviewCountRows,
+    dailyEarningsRows,
+    stalePendingRows,
+  ] = await Promise.all([
+    db
+      .select({
+        id: appointments.id,
+        patientName: users.fullName,
+        slotStart: appointments.slotStart,
+        slotEnd: appointments.slotEnd,
+        status: appointments.status,
+        paymentStatus: payments.status,
+      })
+      .from(appointments)
+      .innerJoin(users, eq(users.id, appointments.patientId))
+      .leftJoin(payments, eq(payments.appointmentId, appointments.id))
+      .where(
+        and(
+          eq(appointments.doctorId, profile.id),
+          eq(appointments.appointmentDate, today),
+          ne(appointments.status, "cancelled"),
         ),
+      )
+      .orderBy(asc(appointments.slotStart))
+      .limit(TODAY_SCHEDULE_LIMIT),
 
-      db
-        .select({
-          last30Days: sql<string>`COALESCE(SUM(CASE WHEN ${payments.releasedAt} >= ${thirtyDaysAgo} THEN ${payments.amount} ELSE 0 END), 0)::text`,
-          allTime: sql<string>`COALESCE(SUM(${payments.amount}), 0)::text`,
-        })
-        .from(payments)
-        .where(
-          and(
-            eq(payments.doctorId, doctorUserId),
-            eq(payments.status, "released"),
-          ),
+    db
+      .select({ count: count() })
+      .from(appointments)
+      .where(
+        and(
+          eq(appointments.doctorId, profile.id),
+          eq(appointments.status, "pending"),
         ),
+      ),
 
-      db
-        .select({ count: count() })
-        .from(reviews)
-        .where(eq(reviews.doctorId, doctorUserId)),
-    ]);
+    db
+      .select({
+        last30Days: sql<string>`COALESCE(SUM(CASE WHEN ${payments.releasedAt} >= ${thirtyDaysAgo} THEN ${payments.amount} ELSE 0 END), 0)::text`,
+        allTime: sql<string>`COALESCE(SUM(${payments.amount}), 0)::text`,
+      })
+      .from(payments)
+      .where(
+        and(
+          eq(payments.doctorId, doctorUserId),
+          eq(payments.status, "released"),
+        ),
+      ),
+
+    db
+      .select({ count: count() })
+      .from(reviews)
+      .where(eq(reviews.doctorId, doctorUserId)),
+
+    db
+      .select({
+        date: sql<string>`date_trunc('day', ${payments.releasedAt})::date`,
+        amount: sql<string>`SUM(${payments.amount})::text`,
+      })
+      .from(payments)
+      .where(
+        and(
+          eq(payments.doctorId, doctorUserId),
+          eq(payments.status, "released"),
+          gte(payments.releasedAt, sevenDaysAgo),
+        ),
+      )
+      .groupBy(sql`date_trunc('day', ${payments.releasedAt})`)
+      .orderBy(sql`date_trunc('day', ${payments.releasedAt})`),
+
+    db
+      .select({ count: count() })
+      .from(appointments)
+      .where(
+        and(
+          eq(appointments.doctorId, profile.id),
+          eq(appointments.status, "pending"),
+          lt(appointments.createdAt, staleCutoff),
+        ),
+      ),
+  ]);
 
   return {
     todaySchedule: scheduleRows.map((r) => ({
@@ -246,9 +290,14 @@ export const getDoctorStats = async (
       slotEnd: toHHMM(r.slotEnd),
     })),
     pendingConfirmations: pendingRows[0]?.count ?? 0,
+    hasStalePending: (stalePendingRows[0]?.count ?? 0) > 0,
     earnings: {
       last30Days: earningsRows[0]?.last30Days ?? "0",
       allTime: earningsRows[0]?.allTime ?? "0",
+      last7Days: dailyEarningsRows.map((r) => ({
+        date: r.date,
+        amount: r.amount,
+      })),
     },
     rating: {
       average: profile.averageRating,
