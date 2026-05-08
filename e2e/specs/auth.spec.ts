@@ -21,9 +21,9 @@ test.describe("auth", () => {
 
     await expect(page).toHaveURL(/\/dashboard|\/profile\/setup/, { timeout: 10_000 });
 
-    // Whatever lands first, the user's first name greets them on the dashboard.
+    // GreetingHeader renders "Good {morning|afternoon|evening}, {firstName}".
     await page.goto("/dashboard");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText(/welcome/i);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(/E2E/);
 
     // Logout via Navbar.
     await page.getByRole("button", { name: /log out/i }).click();
