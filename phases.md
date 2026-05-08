@@ -363,9 +363,11 @@ Push the project from "good code" to "I would hire this person." Live demo, real
 
 ---
 
-## Phase 12 — UI / UX Polish `[ ]`
+## Phase 12 — UI / UX Polish `[~]`
 
 Elevate every screen from "functional" to "portfolio-ready." The focus is visual hierarchy, mobile-first responsiveness, and making the app feel like a real healthcare product at every touchpoint.
+
+> Slices A (dashboards), B (appointments/payments/profile/prescriptions), and C (reviews/admin) shipped. Dashboards still feel sparse and admin-panel-like — Phase 13 takes the second pass before the live deploy.
 
 **Files**:
 
@@ -382,19 +384,19 @@ Elevate every screen from "functional" to "portfolio-ready." The focus is visual
 
 **Done when**:
 
-- [ ] PatientDashboard: stat tiles with color accents (appointments this month, prescriptions count), upcoming appointment card shows doctor avatar + date countdown, quick-book section with specialty chips
-- [ ] DoctorDashboard: earnings tile with trend indicator, today's schedule as timeline (not flat list), pending confirmations badge with urgency color
-- [ ] AdminDashboard: KPI grid (total users, active doctors, revenue, unverified queue), unverified doctors row shows photo + license date
-- [ ] AppointmentCard: status badge uses color-coded left border (amber=pending, blue=confirmed, green=completed, grey=cancelled), action buttons grouped cleanly
-- [ ] ProfileSetupPage: multi-step feel with progress indicator, field groups visually separated
-- [ ] PaymentPage: clear payment method selector with GCash/Maya/card icons, escrow explainer inline
-- [ ] ViewPrescriptionPage: print-friendly layout, medication list as styled rows not raw text
-- [ ] WritePrescriptionPage: medication rows have better visual separation, clear add/remove affordance
-- [ ] DoctorReviewsSection: star distribution bar chart, reviewer avatar + date
-- [ ] Admin pages: data tables with row hover, bulk action affordance, empty states with icons
-- [ ] All pages: consistent page header pattern (title + optional subtitle + optional action button)
-- [ ] All loading states: skeleton UI (no plain "Loading…" text anywhere)
-- [ ] All empty states: icon + message + contextual CTA (no plain text-only empty states)
+- [x] PatientDashboard: stat tiles with color accents (appointments this month, prescriptions count), upcoming appointment card shows doctor avatar + date countdown, quick-book section with specialty chips
+- [x] DoctorDashboard: earnings tile with trend indicator, today's schedule as timeline (not flat list), pending confirmations badge with urgency color
+- [x] AdminDashboard: KPI grid (total users, active doctors, revenue, unverified queue), unverified doctors row shows photo + license date
+- [x] AppointmentCard: status indicator with color (initial: left border; final: avatar + dot badge), action buttons grouped cleanly
+- [x] ProfileSetupPage: multi-step feel with progress indicator, field groups visually separated
+- [x] PaymentPage: clear payment method selector with GCash/Maya/card icons, escrow explainer inline
+- [x] ViewPrescriptionPage: print-friendly layout, medication list as styled rows not raw text
+- [x] WritePrescriptionPage: medication rows have better visual separation, clear add/remove affordance
+- [x] DoctorReviewsSection: star distribution bar chart, reviewer avatar + date
+- [x] Admin pages: skeleton loading, empty states with icons (bulk action affordance deferred)
+- [x] All pages: consistent page header pattern (title + optional subtitle + optional action button)
+- [x] All loading states: skeleton UI (no plain "Loading…" text anywhere)
+- [x] All empty states: icon + message + contextual CTA (no plain text-only empty states)
 
 **Migrate server tests to PGLite (in-memory Postgres)**:
 
@@ -405,6 +407,56 @@ Elevate every screen from "functional" to "portfolio-ready." The focus is visual
 - [ ] Verify all test files pass with PGLite
 
 **Why:** Tests currently spin up a real Postgres container per CI run + share a Pool across test files. PGLite runs Postgres in-memory in the same Node process, eliminating both the container boot time (~10-15 s) and the cross-file connection-pool memory accumulation that forced `pool: "forks" + fileParallelism: false`. Expected wins: faster CI, simpler config, lower memory ceiling.
+
+---
+
+## Phase 13 — Pre-launch Dashboard & UX 2.0 `[ ]`
+
+The Slice A/B/C polish made screens consistent, but dashboards still feel like an admin panel — sparse, vanity-metric tiles, no personality, no inline actions. This phase is the final pass _before_ Phase 11 Deploy: make the patient/doctor home pages feel like a real healthcare product so the live demo lands well.
+
+> **Order matters: Phase 13 ships before Phase 11 Deploy.** Going live with the current dashboards undersells the rest of the work.
+
+**Files**:
+
+- `client/src/pages/dashboard/PatientDashboard.tsx`
+- `client/src/pages/dashboard/DoctorDashboard.tsx`
+- `client/src/features/dashboard/components/GreetingHeader.tsx` _(new)_
+- `client/src/features/dashboard/components/UpcomingHero.tsx` _(new)_
+- `client/src/features/dashboard/components/RecentDoctorsRow.tsx` _(new)_
+- `client/src/features/dashboard/components/SpecialtyGrid.tsx` _(new)_
+- `client/src/features/specializations/api.ts` _(extend — return doctor count per specialty)_
+- `server/src/controllers/specialization.controller.ts` _(extend — `LEFT JOIN doctor_profiles` + count, `WHERE is_verified = true`)_
+- `client/src/features/messages/hooks.ts` _(add `useUnreadCount` for actionable tile)_
+
+**Patient dashboard — Done when**:
+
+- [ ] **Greeting header**: "Good morning/afternoon/evening, {firstName}" + today's date (locale-aware), optional subtle illustration or accent
+- [ ] **Hero upcoming-appointment card**: doubled in visual weight (larger avatar, larger date/time, full-width). Shows inline actions directly: `[Pay now]` (if pending payment), `[Chat]` (if confirmed), `[Reschedule]`, `[View prescription]` — patient never has to leave the dashboard for the next action
+- [ ] **Actionable stat tiles** (replace vanity metrics): "Active prescriptions" (with refill CTA when any nearing end-date), "Unread messages" (with deep-link to chat), "Last visit" (relative time + "Book again")
+- [ ] **Recent doctors row**: avatar grid (h-12 w-12) of last 3-4 doctors the patient has seen, click → doctor detail with "Book again" pre-filled
+- [ ] **Specialty grid**: replace hardcoded `SPECIALTIES = [...]` array with API data, show doctor count per specialty (`Cardiology · 12 doctors`), use small Lucide icons per specialty
+- [ ] **Empty-state polish**: when patient has no history, hero shows "Book your first visit" CTA + an illustration; recent-doctors row hidden; specialty grid still visible
+
+**Doctor dashboard — Done when**:
+
+- [ ] **Greeting header**: same pattern, "Dr. {lastName}" with today's date
+- [ ] **Today's schedule as a true timeline**: vertical timeline with hour markers (08, 09, 10, …), appointments as cards anchored to slot times, gaps visible (so "free slot from 11–12" is obvious)
+- [ ] **Pending confirmations stays prominent** with urgency dot when older than 24 h
+- [ ] **"Quick reply" message tile**: shows count of unread chats with patient avatar previews, click → conversation
+- [ ] **Earnings tile**: keep, but add 7-day sparkline (small inline SVG, no chart library)
+
+**Cross-cutting**:
+
+- [ ] Server: `GET /api/specializations` returns `{ id, name, doctorCount }` (count of verified doctors per specialty); existing callers still work because new field is additive
+- [ ] Server: `GET /api/messages/unread-count` returns total unread count for the user (or extend existing endpoint)
+- [ ] Client: dashboards use `Suspense`-style skeleton sections (each section loads independently — greeting renders instantly, hero waits for appointments, specialty grid waits for API)
+- [ ] Mobile: every section stacks cleanly under 375 px; hero card stays single column, recent-doctors row scrolls horizontally
+- [ ] No new heavy deps (no chart library — sparkline is hand-drawn SVG, illustration is a Lucide icon at large size or inline SVG)
+
+**Optional stretch**:
+
+- [ ] "Health tip of the day" surface (rotating static content) — low effort, adds warmth
+- [ ] Patient: "Refill due in 3 days" banner if any prescription medication has duration nearing expiry (computed client-side from `prescriptionMedications.duration` + issue date)
 
 ---
 
