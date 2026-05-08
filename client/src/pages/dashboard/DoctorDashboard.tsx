@@ -1,6 +1,5 @@
 import {
-  Bell,
-  Clock,
+  MessageCircle,
   Minus,
   Star,
   TrendingDown,
@@ -10,10 +9,30 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatTile } from "@/features/dashboard/components/StatTile";
-import { AppointmentRow } from "@/features/dashboard/components/AppointmentRow";
+import { DaySchedule } from "@/features/dashboard/components/DaySchedule";
+import { GreetingHeader } from "@/features/dashboard/components/GreetingHeader";
 import { useDoctorStats } from "@/features/dashboard/hooks";
+import { useUnreadCount } from "@/features/chat/hooks";
+import { useAuthStore } from "@/features/auth/store";
 import { formatPHP } from "@/lib/utils/formatCurrency";
 import type { DoctorStats } from "@/features/dashboard/schemas";
+
+const sparkPoints = (days: { date: string; amount: string }[]): string => {
+  if (days.length === 0) return "0,15 100,15";
+  const values = days.map((d) => parseFloat(d.amount));
+  const max = Math.max(...values);
+  if (max === 0)
+    return values
+      .map((_, i) => `${(i / (values.length - 1)) * 100},15`)
+      .join(" ");
+  return values
+    .map((v, i) => {
+      const x = values.length === 1 ? 50 : (i / (values.length - 1)) * 100;
+      const y = 30 - (v / max) * 26 - 2;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+};
 
 const EarningsTile = ({ earnings }: { earnings: DoctorStats["earnings"] }) => {
   const last30 = parseFloat(earnings.last30Days);
@@ -42,6 +61,8 @@ const EarningsTile = ({ earnings }: { earnings: DoctorStats["earnings"] }) => {
     trendClass = "text-muted-foreground";
   }
 
+  const points = sparkPoints(earnings.last7Days);
+
   return (
     <Link
       to="/payments"
@@ -59,7 +80,7 @@ const EarningsTile = ({ earnings }: { earnings: DoctorStats["earnings"] }) => {
               {formatPHP(earnings.last30Days)}
             </p>
             <span
-              className={`flex items-center gap-1 text-xs font-medium pb-0.5 ${trendClass}`}
+              className={`flex items-center gap-1 pb-0.5 text-xs font-medium ${trendClass}`}
             >
               {trendIcon}
               {trendLabel}
@@ -68,6 +89,21 @@ const EarningsTile = ({ earnings }: { earnings: DoctorStats["earnings"] }) => {
           <p className="mt-1 text-xs text-muted-foreground">
             {formatPHP(earnings.allTime)} all-time
           </p>
+          <svg
+            viewBox="0 0 100 30"
+            className="mt-3 h-8 w-full text-primary/60"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <polyline
+              points={points}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </CardContent>
       </Card>
     </Link>
@@ -85,56 +121,10 @@ const pendingSublabel = (count: number): string => {
   return `${count} patients waiting`;
 };
 
-const ScheduleSection = ({
-  schedule,
-}: {
-  schedule: DoctorStats["todaySchedule"];
-}) => {
-  const today = new Date().toLocaleDateString("en-PH", {
-    weekday: "long",
-    month: "short",
-    day: "numeric",
-  });
-
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base">Today's schedule</CardTitle>
-          <span className="text-xs text-muted-foreground">{today}</span>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {schedule.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-6 text-center">
-            <Clock className="h-6 w-6 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              Nothing scheduled today.
-            </p>
-            <Link
-              to="/my-appointments"
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              Manage schedule →
-            </Link>
-          </div>
-        ) : (
-          <ul className="grid gap-1">
-            {schedule.map((row) => (
-              <li key={row.id}>
-                <AppointmentRow row={row} variant="timeline" />
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
-
 const DoctorDashboardSkeleton = () => (
   <div className="space-y-4">
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-4">
+      <Skeleton className="h-28 rounded-xl" />
       <Skeleton className="h-28 rounded-xl" />
       <Skeleton className="h-28 rounded-xl" />
       <Skeleton className="h-28 rounded-xl" />
@@ -144,7 +134,9 @@ const DoctorDashboardSkeleton = () => (
 );
 
 export const DoctorDashboard = () => {
+  const fullName = useAuthStore((s) => s.user?.fullName ?? "");
   const { data, isPending, isError } = useDoctorStats();
+  const { data: unread } = useUnreadCount();
 
   if (isPending) return <DoctorDashboardSkeleton />;
   if (isError || !data) {
@@ -155,14 +147,31 @@ export const DoctorDashboard = () => {
     ? Number(data.rating.average).toFixed(1)
     : "—";
 
+  const pendingLabel = (
+    <span className="flex items-center gap-1.5">
+      Pending
+      {data.hasStalePending && (
+        <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
+      )}
+    </span>
+  );
+
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-3">
+      <GreetingHeader variant="doctor" fullName={fullName} />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <EarningsTile earnings={data.earnings} />
         <StatTile
-          icon={<Bell />}
+          icon={<MessageCircle />}
+          accent="blue"
+          label="Messages"
+          value={unread ?? 0}
+          sublabel="unread"
+          to="/messages"
+        />
+        <StatTile
+          label={pendingLabel}
           accent={pendingAccent(data.pendingConfirmations)}
-          label="Pending"
           value={data.pendingConfirmations}
           sublabel={pendingSublabel(data.pendingConfirmations)}
           to="/my-appointments"
@@ -175,7 +184,7 @@ export const DoctorDashboard = () => {
           sublabel={`${data.rating.count} ${data.rating.count === 1 ? "review" : "reviews"}`}
         />
       </div>
-      <ScheduleSection schedule={data.todaySchedule} />
+      <DaySchedule schedule={data.todaySchedule} />
     </div>
   );
 };

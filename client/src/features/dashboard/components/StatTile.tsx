@@ -14,7 +14,7 @@ const accentClasses = {
 } as const satisfies Record<TileAccent, string>;
 
 interface StatTileProps {
-  label: string;
+  label: ReactNode;
   value: string | number;
   sublabel?: string;
   to?: string;
