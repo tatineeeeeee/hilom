@@ -10,6 +10,11 @@ export interface DoctorStatsScheduleRow {
 export interface DoctorStats {
   todaySchedule: DoctorStatsScheduleRow[];
   pendingConfirmations: number;
-  earnings: { last30Days: string; allTime: string };
+  hasStalePending: boolean;
+  earnings: {
+    last30Days: string;
+    allTime: string;
+    last7Days: { date: string; amount: string }[];
+  };
   rating: { average: string | null; count: number };
 }
