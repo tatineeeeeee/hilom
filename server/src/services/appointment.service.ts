@@ -105,23 +105,36 @@ export const bookAppointment = async (
       where: and(
         eq(appointments.doctorId, input.doctorId),
         eq(appointments.appointmentDate, input.appointmentDate),
-        eq(appointments.slotStart, input.slotStart + ":00"),
+        eq(appointments.slotStart, input.slotStart),
         inArray(appointments.status, ["pending", "confirmed"]),
       ),
     });
     if (conflict) throw new AppError(409, "Slot is no longer available");
 
-    const [inserted] = await tx
-      .insert(appointments)
-      .values({
-        patientId,
-        doctorId: input.doctorId,
-        appointmentDate: input.appointmentDate,
-        slotStart: input.slotStart,
-        slotEnd: input.slotEnd,
-        reason: input.reason ?? null,
-      })
-      .returning();
+    let inserted: typeof appointments.$inferSelect | undefined;
+    try {
+      [inserted] = await tx
+        .insert(appointments)
+        .values({
+          patientId,
+          doctorId: input.doctorId,
+          appointmentDate: input.appointmentDate,
+          slotStart: input.slotStart,
+          slotEnd: input.slotEnd,
+          reason: input.reason ?? null,
+        })
+        .returning();
+    } catch (err) {
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "code" in err &&
+        err.code === "23505"
+      ) {
+        throw new AppError(409, "Slot is no longer available");
+      }
+      throw err;
+    }
 
     if (!inserted) throw new AppError(500, "Failed to create appointment");
 
@@ -326,7 +339,7 @@ export const updateAppointmentStatus = async (
   const appointment = await findAppointmentById(appointmentId);
   if (!appointment) throw new AppError(404, "Appointment not found");
 
-  const currentStatus = appointment.status as AppointmentStatus;
+  const currentStatus = appointment.status;
 
   // Authorization: verify the requesting user owns this appointment
   if (requestingUser.role === "patient") {
