@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "../config/db";
 import { users, patientProfiles } from "../db/schema";
 import { AppError } from "../utils/AppError";
@@ -14,10 +14,15 @@ import {
 import { registerSchema, loginSchema } from "../schemas/auth.schema";
 import { sendVerificationEmail } from "./emailVerification.controller";
 
+type UserRole = "patient" | "doctor" | "admin";
+
+const isUserRole = (v: unknown): v is UserRole =>
+  v === "patient" || v === "doctor" || v === "admin";
+
 interface PublicUser {
   id: string;
   email: string;
-  role: "patient" | "doctor" | "admin";
+  role: UserRole;
   fullName: string;
   avatarUrl: string | null;
   phone: string | null;
@@ -50,35 +55,41 @@ const issueTokensForUser = async (
 export const register = async (req: Request, res: Response): Promise<void> => {
   const input = registerSchema.parse(req.body);
 
-  const existing = await db.query.users.findFirst({
-    where: eq(users.email, input.email),
-  });
-  if (existing) {
-    throw new AppError(409, "Email already registered");
-  }
-
   const passwordHash = await hashPassword(input.password);
 
-  const created = await db.transaction(async (tx) => {
-    const [user] = await tx
-      .insert(users)
-      .values({
-        email: input.email,
-        passwordHash,
-        role: input.role,
-        fullName: input.fullName,
-        phone: input.phone ?? null,
-      })
-      .returning();
+  let created: typeof users.$inferSelect;
+  try {
+    created = await db.transaction(async (tx) => {
+      const [user] = await tx
+        .insert(users)
+        .values({
+          email: input.email,
+          passwordHash,
+          role: input.role,
+          fullName: input.fullName,
+          phone: input.phone ?? null,
+        })
+        .returning();
 
-    if (!user) throw new AppError(500, "Failed to create user");
+      if (!user) throw new AppError(500, "Failed to create user");
 
-    if (input.role === "patient") {
-      await tx.insert(patientProfiles).values({ userId: user.id });
+      if (input.role === "patient") {
+        await tx.insert(patientProfiles).values({ userId: user.id });
+      }
+
+      return user;
+    });
+  } catch (err: unknown) {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "code" in err &&
+      err.code === "23505"
+    ) {
+      throw new AppError(409, "Email already registered");
     }
-
-    return user;
-  });
+    throw err;
+  }
 
   const { accessToken, refreshToken } = await issueTokensForUser(
     created.id,
@@ -125,32 +136,70 @@ export const refresh = async (req: Request, res: Response): Promise<void> => {
   }
 
   const payload = verifyRefresh(cookieToken);
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, payload.sub),
+  const incomingHash = hashOpaqueToken(cookieToken);
+
+  type TxResult =
+    | { type: "ok"; accessToken: string; refreshToken: string; role: string }
+    | { type: "invalid" }
+    | { type: "reuse" };
+
+  const txResult = await db.transaction(async (tx) => {
+    const locked = await tx.execute(
+      sql`select id, role, refresh_token_hash from users where id = ${payload.sub} for update`,
+    );
+    const row = locked.rows[0];
+    if (!row || typeof row.refresh_token_hash !== "string") {
+      return { type: "invalid" } satisfies TxResult;
+    }
+
+    if (row.refresh_token_hash !== incomingHash) {
+      return { type: "reuse" } satisfies TxResult;
+    }
+
+    if (!isUserRole(row.role)) {
+      throw new AppError(500, "Invalid user role in database");
+    }
+
+    const accessToken = signAccess({ sub: payload.sub, role: row.role });
+    const refreshToken = signRefresh({ sub: payload.sub });
+    await tx
+      .update(users)
+      .set({ refreshTokenHash: hashOpaqueToken(refreshToken) })
+      .where(eq(users.id, payload.sub));
+
+    return {
+      type: "ok",
+      accessToken,
+      refreshToken,
+      role: row.role,
+    } satisfies TxResult;
   });
-  if (!user || !user.refreshTokenHash) {
+
+  if (txResult.type === "invalid") {
     throw new AppError(401, "Invalid refresh token");
   }
 
-  const incomingHash = hashOpaqueToken(cookieToken);
-  if (incomingHash !== user.refreshTokenHash) {
+  if (txResult.type === "reuse") {
     await db
       .update(users)
       .set({ refreshTokenHash: null })
-      .where(eq(users.id, user.id));
+      .where(eq(users.id, payload.sub));
     clearRefreshCookie(res);
     throw new AppError(401, "Refresh token reuse detected");
   }
 
-  const { accessToken, refreshToken } = await issueTokensForUser(
-    user.id,
-    user.role,
-  );
-  setRefreshCookie(res, refreshToken);
+  const result = txResult;
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, payload.sub),
+  });
+  if (!user) throw new AppError(401, "Invalid refresh token");
+
+  setRefreshCookie(res, result.refreshToken);
 
   res.json({
     success: true,
-    data: { accessToken, user: toPublicUser(user) },
+    data: { accessToken: result.accessToken, user: toPublicUser(user) },
   });
 };
 
