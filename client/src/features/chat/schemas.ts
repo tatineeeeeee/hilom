@@ -29,3 +29,10 @@ export interface ConversationListItem {
   lastMessageAt: string | null;
   unreadCount: number;
 }
+
+export interface ConversationsResponse {
+  conversations: ConversationListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}

@@ -43,7 +43,7 @@ export const ConversationsPage = () => {
         </p>
       )}
 
-      {data && data.length === 0 && (
+      {data && data.conversations.length === 0 && (
         <div className="flex flex-col items-center gap-3 rounded-xl border p-10 text-center">
           <MessageSquare
             className="size-10 text-muted-foreground/40"
@@ -58,9 +58,9 @@ export const ConversationsPage = () => {
         </div>
       )}
 
-      {data && data.length > 0 && (
+      {data && data.conversations.length > 0 && (
         <div className="grid gap-2">
-          {data.map((c) => (
+          {data.conversations.map((c) => (
             <Card key={c.id}>
               <Link to={`/appointments/${c.appointmentId}/chat`}>
                 <CardContent className="flex items-center gap-3 p-3">

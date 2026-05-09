@@ -39,7 +39,7 @@ export const MyPaymentsPage = () => {
         <p className="text-sm text-destructive">Could not load payments.</p>
       )}
 
-      {data && data.length === 0 && (
+      {data && data.payments.length === 0 && (
         <div className="flex flex-col items-center gap-3 rounded-xl border p-10 text-center">
           <Banknote className="size-10 text-muted-foreground/40" />
           <div>
@@ -62,9 +62,9 @@ export const MyPaymentsPage = () => {
         </div>
       )}
 
-      {data && data.length > 0 && (
+      {data && data.payments.length > 0 && (
         <div className="grid gap-3">
-          {data.map((p) => (
+          {data.payments.map((p) => (
             <Card
               key={p.id}
               className="cursor-pointer transition-colors hover:bg-muted/40"

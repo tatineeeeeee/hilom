@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+export const listPrescriptionsQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+});
+export type ListPrescriptionsQuery = z.infer<
+  typeof listPrescriptionsQuerySchema
+>;
+export const PRESCRIPTIONS_PAGE_SIZE = 20;
+
 export const medicationInputSchema = z.object({
   medicationName: z.string().trim().min(1).max(255),
   dosage: z.string().trim().min(1).max(100),

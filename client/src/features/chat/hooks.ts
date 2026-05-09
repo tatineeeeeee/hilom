@@ -18,7 +18,8 @@ export const conversationKey = (appointmentId: string) =>
 export const messagesKey = (conversationId: string) =>
   ["messages", conversationId] as const;
 
-export const conversationListKey = ["conversations"] as const;
+export const conversationListKey = (page = 1) =>
+  ["conversations", page] as const;
 export const unreadKey = ["unreadCount"] as const;
 
 export const useConversation = (appointmentId: string) =>
@@ -58,11 +59,11 @@ export const useSendMessage = (conversationId: string | undefined) => {
   });
 };
 
-export const useConversationList = () => {
+export const useConversationList = (page = 1) => {
   const isAuthenticated = useAuthStore((s) => s.user !== null);
   return useQuery({
-    queryKey: conversationListKey,
-    queryFn: listConversations,
+    queryKey: conversationListKey(page),
+    queryFn: () => listConversations({ page }),
     staleTime: 15_000,
     enabled: isAuthenticated,
   });
@@ -85,7 +86,7 @@ export const useMarkRead = () => {
     mutationFn: markConversationRead,
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: unreadKey });
-      void qc.invalidateQueries({ queryKey: conversationListKey });
+      void qc.invalidateQueries({ queryKey: ["conversations"] });
     },
   });
 };
@@ -125,12 +126,12 @@ export const useChatSocket = (): void => {
         },
       );
       void qc.invalidateQueries({ queryKey: unreadKey });
-      void qc.invalidateQueries({ queryKey: conversationListKey });
+      void qc.invalidateQueries({ queryKey: ["conversations"] });
     };
 
     const handleRead = () => {
       void qc.invalidateQueries({ queryKey: unreadKey });
-      void qc.invalidateQueries({ queryKey: conversationListKey });
+      void qc.invalidateQueries({ queryKey: ["conversations"] });
     };
 
     socket.on("message:new", handleMessage);

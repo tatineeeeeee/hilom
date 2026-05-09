@@ -8,7 +8,8 @@ import type { WritePrescriptionInput } from "./schemas";
 export const prescriptionByAppointmentKey = (appointmentId: string) =>
   ["prescription", appointmentId] as const;
 
-export const prescriptionListKey = ["prescriptions"] as const;
+export const prescriptionListKey = (page = 1) =>
+  ["prescriptions", page] as const;
 
 export const usePrescriptionByAppointment = (
   appointmentId: string | undefined,
@@ -34,18 +35,18 @@ export const useWritePrescription = (appointmentId: string) => {
       void qc.invalidateQueries({
         queryKey: prescriptionByAppointmentKey(appointmentId),
       });
-      void qc.invalidateQueries({ queryKey: prescriptionListKey });
+      void qc.invalidateQueries({ queryKey: ["prescriptions"] });
       void qc.invalidateQueries({ queryKey: ["appointments"] });
       void qc.invalidateQueries({ queryKey: ["doctor-appointments"] });
     },
   });
 };
 
-export const useMyPrescriptions = () => {
+export const useMyPrescriptions = (page = 1) => {
   const isAuthenticated = useAuthStore((s) => s.user !== null);
   return useQuery({
-    queryKey: prescriptionListKey,
-    queryFn: listMyPrescriptions,
+    queryKey: prescriptionListKey(page),
+    queryFn: () => listMyPrescriptions({ page }),
     staleTime: 30_000,
     enabled: isAuthenticated,
   });
@@ -75,7 +76,7 @@ export const usePrescriptionSocket = (): void => {
 
     const handle = (payload: unknown) => {
       if (!isPrescriptionNew(payload)) return;
-      void qc.invalidateQueries({ queryKey: prescriptionListKey });
+      void qc.invalidateQueries({ queryKey: ["prescriptions"] });
       void qc.invalidateQueries({ queryKey: ["appointments"] });
       void qc.invalidateQueries({
         queryKey: prescriptionByAppointmentKey(payload.appointmentId),

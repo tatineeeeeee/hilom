@@ -1,4 +1,5 @@
-export type PaymentStatus = "pending" | "escrowed" | "released" | "refunded";
+import type { PaymentStatus } from "@/types";
+export type { PaymentStatus };
 
 export interface Payment {
   id: string;
@@ -17,4 +18,11 @@ export interface Payment {
 export interface PaymentListItem extends Payment {
   otherPartyName: string;
   appointmentDate: string;
+}
+
+export interface PaymentsResponse {
+  payments: PaymentListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
 }

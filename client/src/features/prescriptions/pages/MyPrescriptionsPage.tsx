@@ -35,7 +35,7 @@ export const MyPrescriptionsPage = () => {
         </p>
       )}
 
-      {data && data.length === 0 && (
+      {data && data.prescriptions.length === 0 && (
         <div className="flex flex-col items-center gap-3 rounded-xl border p-10 text-center">
           <FileText className="size-10 text-muted-foreground/40" aria-hidden />
           <div>
@@ -53,9 +53,9 @@ export const MyPrescriptionsPage = () => {
         </div>
       )}
 
-      {data && data.length > 0 && (
+      {data && data.prescriptions.length > 0 && (
         <div className="grid gap-3">
-          {data.map((rx) => (
+          {data.prescriptions.map((rx) => (
             <Card
               key={rx.id}
               className="cursor-pointer transition-colors hover:bg-muted/40"
