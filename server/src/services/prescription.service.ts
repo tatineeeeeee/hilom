@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { count, desc, eq, inArray } from "drizzle-orm";
 import { db } from "../config/db";
 import {
   appointments,
@@ -9,7 +9,11 @@ import {
 } from "../db/schema";
 import { AppError } from "../utils/AppError";
 import { emitToUser } from "../socket";
-import type { WritePrescriptionInput } from "../schemas/prescription.schema";
+import {
+  type WritePrescriptionInput,
+  type ListPrescriptionsQuery,
+  PRESCRIPTIONS_PAGE_SIZE,
+} from "../schemas/prescription.schema";
 
 export interface MedicationRow {
   id: string;
@@ -43,6 +47,13 @@ export interface PrescriptionListItem {
   otherPartyName: string;
   medicationCount: number;
   createdAt: Date;
+}
+
+export interface PrescriptionsResult {
+  prescriptions: PrescriptionListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 export const writePrescription = async (
@@ -169,9 +180,20 @@ export const getPrescriptionByAppointment = async (
 export const listMyPrescriptions = async (
   userId: string,
   role: string,
-): Promise<PrescriptionListItem[]> => {
-  if (role === "patient") {
-    const rows = await db
+  query: ListPrescriptionsQuery,
+): Promise<PrescriptionsResult> => {
+  const where =
+    role === "patient"
+      ? eq(prescriptions.patientId, userId)
+      : eq(prescriptions.doctorId, userId);
+  const joinUser =
+    role === "patient"
+      ? eq(users.id, prescriptions.doctorId)
+      : eq(users.id, prescriptions.patientId);
+
+  const [countRows, rows] = await Promise.all([
+    db.select({ total: count() }).from(prescriptions).where(where),
+    db
       .select({
         id: prescriptions.id,
         appointmentId: prescriptions.appointmentId,
@@ -181,28 +203,20 @@ export const listMyPrescriptions = async (
       })
       .from(prescriptions)
       .innerJoin(appointments, eq(appointments.id, prescriptions.appointmentId))
-      .innerJoin(users, eq(users.id, prescriptions.doctorId))
-      .where(eq(prescriptions.patientId, userId))
-      .orderBy(desc(prescriptions.createdAt));
+      .innerJoin(users, joinUser)
+      .where(where)
+      .orderBy(desc(prescriptions.createdAt))
+      .limit(PRESCRIPTIONS_PAGE_SIZE)
+      .offset((query.page - 1) * PRESCRIPTIONS_PAGE_SIZE),
+  ]);
 
-    return await attachMedicationCounts(rows);
-  }
-
-  const rows = await db
-    .select({
-      id: prescriptions.id,
-      appointmentId: prescriptions.appointmentId,
-      appointmentDate: appointments.appointmentDate,
-      otherPartyName: users.fullName,
-      createdAt: prescriptions.createdAt,
-    })
-    .from(prescriptions)
-    .innerJoin(appointments, eq(appointments.id, prescriptions.appointmentId))
-    .innerJoin(users, eq(users.id, prescriptions.patientId))
-    .where(eq(prescriptions.doctorId, userId))
-    .orderBy(desc(prescriptions.createdAt));
-
-  return await attachMedicationCounts(rows);
+  const items = await attachMedicationCounts(rows);
+  return {
+    prescriptions: items,
+    total: countRows[0]?.total ?? 0,
+    page: query.page,
+    pageSize: PRESCRIPTIONS_PAGE_SIZE,
+  };
 };
 
 const attachMedicationCounts = async (
@@ -216,17 +230,17 @@ const attachMedicationCounts = async (
 ): Promise<PrescriptionListItem[]> => {
   if (rows.length === 0) return [];
 
-  const counts = await Promise.all(
-    rows.map(async (r) => {
-      const meds = await db
-        .select({ id: prescriptionMedications.id })
-        .from(prescriptionMedications)
-        .where(eq(prescriptionMedications.prescriptionId, r.id));
-      return { id: r.id, count: meds.length };
-    }),
-  );
+  const ids = rows.map((r) => r.id);
+  const countRows = await db
+    .select({
+      prescriptionId: prescriptionMedications.prescriptionId,
+      total: count(),
+    })
+    .from(prescriptionMedications)
+    .where(inArray(prescriptionMedications.prescriptionId, ids))
+    .groupBy(prescriptionMedications.prescriptionId);
 
-  const countMap = new Map(counts.map((c) => [c.id, c.count]));
+  const countMap = new Map(countRows.map((c) => [c.prescriptionId, c.total]));
 
   return rows.map((r) => ({
     ...r,

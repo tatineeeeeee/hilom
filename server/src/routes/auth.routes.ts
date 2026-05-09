@@ -4,7 +4,9 @@ import { requireAuth } from "../middleware/auth.middleware";
 import {
   authLimiter,
   forgotPasswordLimiter,
+  refreshLimiter,
   resendVerificationLimiter,
+  tokenConsumerLimiter,
 } from "../middleware/rateLimit";
 import {
   register,
@@ -26,11 +28,15 @@ export const authRouter: ExpressRouter = Router();
 
 authRouter.post("/register", authLimiter, asyncHandler(register));
 authRouter.post("/login", authLimiter, asyncHandler(login));
-authRouter.post("/refresh", asyncHandler(refresh));
+authRouter.post("/refresh", refreshLimiter, asyncHandler(refresh));
 authRouter.post("/logout", requireAuth, asyncHandler(logout));
 authRouter.get("/me", requireAuth, asyncHandler(me));
 
-authRouter.get("/verify-email", asyncHandler(verifyEmail));
+authRouter.get(
+  "/verify-email",
+  tokenConsumerLimiter,
+  asyncHandler(verifyEmail),
+);
 authRouter.post(
   "/resend-verification",
   requireAuth,
@@ -42,4 +48,8 @@ authRouter.post(
   forgotPasswordLimiter,
   asyncHandler(requestPasswordReset),
 );
-authRouter.post("/reset-password", asyncHandler(resetPassword));
+authRouter.post(
+  "/reset-password",
+  tokenConsumerLimiter,
+  asyncHandler(resetPassword),
+);

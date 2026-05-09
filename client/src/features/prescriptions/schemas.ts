@@ -29,6 +29,13 @@ export interface PrescriptionListItem {
   createdAt: string;
 }
 
+export interface PrescriptionsResponse {
+  prescriptions: PrescriptionListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface WritePrescriptionInput {
   notes?: string;
   medications: MedicationInput[];

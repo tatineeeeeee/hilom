@@ -1,9 +1,13 @@
-import { and, count, desc, eq, lt, ne, or } from "drizzle-orm";
+import { and, count, desc, eq, inArray, lt, ne, or } from "drizzle-orm";
 import { db } from "../config/db";
 import { conversations, messages, users } from "../db/schema";
 import { AppError } from "../utils/AppError";
 import { emitToUser } from "../socket";
-import type { MessagesQuery } from "../schemas/chat.schema";
+import {
+  type MessagesQuery,
+  type ListConversationsQuery,
+  CONVERSATIONS_PAGE_SIZE,
+} from "../schemas/chat.schema";
 
 export interface ConversationRow {
   id: string;
@@ -142,61 +146,92 @@ export interface ConversationListItem {
   unreadCount: number;
 }
 
+export interface ConversationsResult {
+  conversations: ConversationListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export const listConversations = async (
   userId: string,
-): Promise<ConversationListItem[]> => {
-  const convs = await db
-    .select()
-    .from(conversations)
-    .where(
-      or(
-        eq(conversations.patientId, userId),
-        eq(conversations.doctorId, userId),
-      ),
-    );
-
-  const items = await Promise.all(
-    convs.map(async (c) => {
-      const otherId = c.patientId === userId ? c.doctorId : c.patientId;
-
-      const [otherUser, lastMsg, unread] = await Promise.all([
-        db
-          .select({ id: users.id, fullName: users.fullName })
-          .from(users)
-          .where(eq(users.id, otherId))
-          .limit(1),
-        db
-          .select({
-            content: messages.content,
-            createdAt: messages.createdAt,
-          })
-          .from(messages)
-          .where(eq(messages.conversationId, c.id))
-          .orderBy(desc(messages.createdAt))
-          .limit(1),
-        db
-          .select({ value: count() })
-          .from(messages)
-          .where(
-            and(
-              eq(messages.conversationId, c.id),
-              eq(messages.isRead, false),
-              ne(messages.senderId, userId),
-            ),
-          ),
-      ]);
-
-      return {
-        id: c.id,
-        appointmentId: c.appointmentId,
-        otherPartyId: otherId,
-        otherPartyName: otherUser[0]?.fullName ?? "Unknown",
-        lastMessageContent: lastMsg[0]?.content ?? null,
-        lastMessageAt: lastMsg[0]?.createdAt ?? null,
-        unreadCount: unread[0]?.value ?? 0,
-      };
-    }),
+  query: ListConversationsQuery,
+): Promise<ConversationsResult> => {
+  const where = or(
+    eq(conversations.patientId, userId),
+    eq(conversations.doctorId, userId),
   );
+
+  const [countRows, convs] = await Promise.all([
+    db.select({ total: count() }).from(conversations).where(where),
+    db
+      .select()
+      .from(conversations)
+      .where(where)
+      .orderBy(desc(conversations.createdAt))
+      .limit(CONVERSATIONS_PAGE_SIZE)
+      .offset((query.page - 1) * CONVERSATIONS_PAGE_SIZE),
+  ]);
+
+  if (convs.length === 0) {
+    return {
+      conversations: [],
+      total: 0,
+      page: query.page,
+      pageSize: CONVERSATIONS_PAGE_SIZE,
+    };
+  }
+
+  const convIds = convs.map((c) => c.id);
+  const allPartyIds = [
+    ...new Set(convs.flatMap((c) => [c.patientId, c.doctorId])),
+  ];
+
+  // 3 parallel queries instead of 3 per conversation
+  const [userRows, lastMsgRows, unreadRows] = await Promise.all([
+    db
+      .select({ id: users.id, fullName: users.fullName })
+      .from(users)
+      .where(inArray(users.id, allPartyIds)),
+    db
+      .selectDistinctOn([messages.conversationId], {
+        conversationId: messages.conversationId,
+        content: messages.content,
+        createdAt: messages.createdAt,
+      })
+      .from(messages)
+      .where(inArray(messages.conversationId, convIds))
+      .orderBy(messages.conversationId, desc(messages.createdAt)),
+    db
+      .select({ conversationId: messages.conversationId, total: count() })
+      .from(messages)
+      .where(
+        and(
+          inArray(messages.conversationId, convIds),
+          eq(messages.isRead, false),
+          ne(messages.senderId, userId),
+        ),
+      )
+      .groupBy(messages.conversationId),
+  ]);
+
+  const userMap = new Map(userRows.map((u) => [u.id, u.fullName]));
+  const lastMsgMap = new Map(lastMsgRows.map((m) => [m.conversationId, m]));
+  const unreadMap = new Map(unreadRows.map((r) => [r.conversationId, r.total]));
+
+  const items: ConversationListItem[] = convs.map((c) => {
+    const otherId = c.patientId === userId ? c.doctorId : c.patientId;
+    const lastMsg = lastMsgMap.get(c.id);
+    return {
+      id: c.id,
+      appointmentId: c.appointmentId,
+      otherPartyId: otherId,
+      otherPartyName: userMap.get(otherId) ?? "Unknown",
+      lastMessageContent: lastMsg?.content ?? null,
+      lastMessageAt: lastMsg?.createdAt ?? null,
+      unreadCount: unreadMap.get(c.id) ?? 0,
+    };
+  });
 
   items.sort((a, b) => {
     const at = a.lastMessageAt?.getTime() ?? 0;
@@ -204,7 +239,12 @@ export const listConversations = async (
     return bt - at;
   });
 
-  return items;
+  return {
+    conversations: items,
+    total: countRows[0]?.total ?? 0,
+    page: query.page,
+    pageSize: CONVERSATIONS_PAGE_SIZE,
+  };
 };
 
 export const markConversationRead = async (

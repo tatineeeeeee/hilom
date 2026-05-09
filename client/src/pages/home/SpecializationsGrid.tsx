@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { listSpecializations } from "@/features/auth/api";
+import { listSpecializations } from "@/features/specializations/api";
 import { SpecializationIcon } from "./SpecializationIcon";
 
 export const SpecializationsGrid = () => {

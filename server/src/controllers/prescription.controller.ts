@@ -1,6 +1,9 @@
 import type { Request, Response } from "express";
 import { AppError } from "../utils/AppError";
-import { writePrescriptionSchema } from "../schemas/prescription.schema";
+import {
+  listPrescriptionsQuerySchema,
+  writePrescriptionSchema,
+} from "../schemas/prescription.schema";
 import {
   writePrescription as writePrescriptionService,
   getPrescriptionByAppointment,
@@ -50,9 +53,17 @@ export const listMyPrescriptions = async (
 ): Promise<void> => {
   if (!req.user) throw new AppError(401, "Authentication required");
 
-  const prescriptionList = await listMyPrescriptionsService(
+  const parsed = listPrescriptionsQuerySchema.safeParse(req.query);
+  if (!parsed.success) {
+    throw new AppError(400, "Invalid query", {
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    });
+  }
+
+  const result = await listMyPrescriptionsService(
     req.user.id,
     req.user.role,
+    parsed.data,
   );
-  res.json({ success: true, data: { prescriptions: prescriptionList } });
+  res.json({ success: true, data: result });
 };

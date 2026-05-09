@@ -1,6 +1,10 @@
 import type { Request, Response } from "express";
 import { AppError } from "../utils/AppError";
-import { messagesQuerySchema, sendMessageSchema } from "../schemas/chat.schema";
+import {
+  listConversationsQuerySchema,
+  messagesQuerySchema,
+  sendMessageSchema,
+} from "../schemas/chat.schema";
 import {
   getConversationByAppointment,
   listMessages,
@@ -65,8 +69,14 @@ export const listMyConversations = async (
   res: Response,
 ): Promise<void> => {
   if (!req.user) throw new AppError(401, "Authentication required");
-  const items = await listConversations(req.user.id);
-  res.json({ success: true, data: { conversations: items } });
+  const parsed = listConversationsQuerySchema.safeParse(req.query);
+  if (!parsed.success) {
+    throw new AppError(400, "Invalid query", {
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    });
+  }
+  const result = await listConversations(req.user.id, parsed.data);
+  res.json({ success: true, data: result });
 };
 
 export const markRead = async (req: Request, res: Response): Promise<void> => {

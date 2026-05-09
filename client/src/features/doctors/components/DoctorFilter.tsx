@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { listSpecializations } from "@/features/auth/api";
+import { listSpecializations } from "@/features/specializations/api";
 import type { DoctorFilters } from "../schemas";
 
 interface DoctorFilterProps {

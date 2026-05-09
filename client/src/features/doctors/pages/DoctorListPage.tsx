@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { useDoctors } from "../hooks";
 import { DoctorCard } from "../components/DoctorCard";
 import { DoctorFilter } from "../components/DoctorFilter";
-import { listSpecializations } from "@/features/auth/api";
+import { listSpecializations } from "@/features/specializations/api";
 import type { DoctorFilters } from "../schemas";
 
 const SORT_LABELS: Record<string, string> = {

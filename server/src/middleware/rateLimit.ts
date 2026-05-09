@@ -1,18 +1,21 @@
 import rateLimit, { ipKeyGenerator, type Store } from "express-rate-limit";
 import { RedisStore } from "rate-limit-redis";
-import { createClient, type RedisClientType } from "redis";
+import { createClient } from "redis";
+import { z } from "zod";
 import type { Request } from "express";
 import { env } from "../config/env";
 import { logger } from "../config/logger";
 
-let redisClient: RedisClientType | null = null;
+type RedisClient = ReturnType<typeof createClient>;
 
-const getRedisClient = (): RedisClientType | null => {
+let redisClient: RedisClient | null = null;
+
+const getRedisClient = (): RedisClient | null => {
   if (env.NODE_ENV !== "production") return null;
   if (!env.REDIS_URL) return null;
   if (redisClient) return redisClient;
 
-  const client = createClient({ url: env.REDIS_URL }) as RedisClientType;
+  const client = createClient({ url: env.REDIS_URL });
   client.on("error", (err: Error) => {
     logger.error({ err }, "redis connection error");
   });
@@ -45,6 +48,32 @@ export const authLimiter = rateLimit({
   },
 });
 
+export const refreshLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  skip: () => process.env.NODE_ENV !== "production",
+  store: buildStore("refresh"),
+  message: {
+    success: false,
+    error: "Too many refresh requests. Try again later.",
+  },
+});
+
+export const tokenConsumerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 30,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  skip: () => process.env.NODE_ENV !== "production",
+  store: buildStore("token-consume"),
+  message: {
+    success: false,
+    error: "Too many requests. Try again later.",
+  },
+});
+
 type KeyExtractor = (req: Request) => string | undefined;
 
 const keyedLimiter = (
@@ -67,13 +96,11 @@ const keyedLimiter = (
     },
   });
 
+const emailBodySchema = z.object({ email: z.string() });
+
 export const forgotPasswordLimiter = keyedLimiter("forgot", 3, (req) => {
-  const body: unknown = req.body;
-  if (typeof body !== "object" || body === null || !("email" in body)) {
-    return undefined;
-  }
-  const email = (body as { email: unknown }).email;
-  return typeof email === "string" ? email.toLowerCase() : undefined;
+  const parsed = emailBodySchema.safeParse(req.body);
+  return parsed.success ? parsed.data.email.toLowerCase() : undefined;
 });
 
 export const resendVerificationLimiter = keyedLimiter(

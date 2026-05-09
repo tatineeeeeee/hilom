@@ -1,8 +1,12 @@
-import { desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, inArray } from "drizzle-orm";
 import { db } from "../config/db";
 import { appointments, doctorProfiles, payments, users } from "../db/schema";
 import { AppError } from "../utils/AppError";
 import { createPaymentIntent, refundPaymentIntent } from "./paymongo.service";
+import {
+  type ListPaymentsQuery,
+  PAYMENTS_PAGE_SIZE,
+} from "../schemas/payment.schema";
 
 export interface PaymentRow {
   id: string;
@@ -21,6 +25,13 @@ export interface PaymentRow {
 export interface PaymentListItem extends PaymentRow {
   otherPartyName: string;
   appointmentDate: string;
+}
+
+export interface PaymentsResult {
+  payments: PaymentListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 interface CreatePaymentInput {
@@ -129,25 +140,38 @@ export const refundPayment = async (
   tx?: Tx,
 ): Promise<void> => {
   const runner = tx ?? db;
+
   const payment = await runner.query.payments.findFirst({
     where: eq(payments.appointmentId, appointmentId),
   });
   if (!payment) return;
   if (payment.status === "refunded") return;
 
-  if (payment.status === "escrowed" || payment.status === "released") {
-    if (payment.paymongoPaymentIntentId) {
-      await refundPaymentIntent(
-        payment.paymongoPaymentIntentId,
-        centavosFromDecimal(payment.amount),
-      );
-    }
-  }
+  const needsPayMongoRefund =
+    (payment.status === "escrowed" || payment.status === "released") &&
+    payment.paymongoPaymentIntentId !== null;
 
-  await runner
+  // Atomic conditional UPDATE: only one concurrent caller will win.
+  // The WHERE guard prevents double-processing even under concurrent calls.
+  const [updated] = await runner
     .update(payments)
     .set({ status: "refunded", refundedAt: new Date() })
-    .where(eq(payments.id, payment.id));
+    .where(
+      and(
+        eq(payments.id, payment.id),
+        inArray(payments.status, ["pending", "escrowed", "released"]),
+      ),
+    )
+    .returning();
+
+  if (!updated) return;
+
+  if (needsPayMongoRefund && payment.paymongoPaymentIntentId) {
+    await refundPaymentIntent(
+      payment.paymongoPaymentIntentId,
+      centavosFromDecimal(payment.amount),
+    );
+  }
 };
 
 export const getPaymentByAppointment = async (
@@ -178,9 +202,20 @@ export const getPaymentByAppointment = async (
 export const listMyPayments = async (
   userId: string,
   role: string,
-): Promise<PaymentListItem[]> => {
-  if (role === "patient") {
-    const rows = await db
+  query: ListPaymentsQuery,
+): Promise<PaymentsResult> => {
+  const where =
+    role === "patient"
+      ? eq(payments.patientId, userId)
+      : eq(payments.doctorId, userId);
+  const joinUser =
+    role === "patient"
+      ? eq(users.id, payments.doctorId)
+      : eq(users.id, payments.patientId);
+
+  const [countRows, rows] = await Promise.all([
+    db.select({ total: count() }).from(payments).where(where),
+    db
       .select({
         id: payments.id,
         appointmentId: payments.appointmentId,
@@ -198,50 +233,39 @@ export const listMyPayments = async (
       })
       .from(payments)
       .innerJoin(appointments, eq(appointments.id, payments.appointmentId))
-      .innerJoin(users, eq(users.id, payments.doctorId))
-      .where(eq(payments.patientId, userId))
-      .orderBy(desc(payments.createdAt));
-    return rows;
-  }
+      .innerJoin(users, joinUser)
+      .where(where)
+      .orderBy(desc(payments.createdAt))
+      .limit(PAYMENTS_PAGE_SIZE)
+      .offset((query.page - 1) * PAYMENTS_PAGE_SIZE),
+  ]);
 
-  const rows = await db
-    .select({
-      id: payments.id,
-      appointmentId: payments.appointmentId,
-      patientId: payments.patientId,
-      doctorId: payments.doctorId,
-      amount: payments.amount,
-      status: payments.status,
-      paymongoPaymentIntentId: payments.paymongoPaymentIntentId,
-      createdAt: payments.createdAt,
-      paidAt: payments.paidAt,
-      releasedAt: payments.releasedAt,
-      refundedAt: payments.refundedAt,
-      otherPartyName: users.fullName,
-      appointmentDate: appointments.appointmentDate,
-    })
-    .from(payments)
-    .innerJoin(appointments, eq(appointments.id, payments.appointmentId))
-    .innerJoin(users, eq(users.id, payments.patientId))
-    .where(eq(payments.doctorId, userId))
-    .orderBy(desc(payments.createdAt));
-  return rows;
+  return {
+    payments: rows,
+    total: countRows[0]?.total ?? 0,
+    page: query.page,
+    pageSize: PAYMENTS_PAGE_SIZE,
+  };
 };
 
 export const markPaidByIntentId = async (
   intentId: string,
 ): Promise<PaymentRow | null> => {
-  const payment = await db.query.payments.findFirst({
-    where: eq(payments.paymongoPaymentIntentId, intentId),
-  });
-  if (!payment) return null;
-  if (payment.status !== "pending") return payment;
-
   const [updated] = await db
     .update(payments)
     .set({ status: "escrowed", paidAt: new Date() })
-    .where(eq(payments.id, payment.id))
+    .where(
+      and(
+        eq(payments.paymongoPaymentIntentId, intentId),
+        eq(payments.status, "pending"),
+      ),
+    )
     .returning();
 
-  return updated ?? null;
+  if (updated) return updated;
+
+  const existing = await db.query.payments.findFirst({
+    where: eq(payments.paymongoPaymentIntentId, intentId),
+  });
+  return existing ?? null;
 };

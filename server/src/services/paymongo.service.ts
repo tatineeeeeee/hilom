@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { z } from "zod";
 import { env } from "../config/env";
 import { logger } from "../config/logger";
 import { AppError } from "../utils/AppError";
@@ -27,28 +28,24 @@ const PAYMONGO_BASE = "https://api.paymongo.com/v1";
 const basicAuth = (): string =>
   `Basic ${Buffer.from(`${env.PAYMONGO_SECRET_KEY}:`).toString("base64")}`;
 
-interface PayMongoIntentResponse {
-  data: {
-    id: string;
-    attributes: {
-      status: string;
-      client_key: string;
-    };
-  };
-}
+const intentResponseSchema = z.object({
+  data: z.object({
+    id: z.string(),
+    attributes: z.object({
+      status: z.string(),
+      client_key: z.string(),
+    }),
+  }),
+});
 
-const isIntentResponse = (v: unknown): v is PayMongoIntentResponse => {
-  if (typeof v !== "object" || v === null) return false;
-  const obj = v as Record<string, unknown>;
-  if (typeof obj.data !== "object" || obj.data === null) return false;
-  const data = obj.data as Record<string, unknown>;
-  if (typeof data.id !== "string") return false;
-  if (typeof data.attributes !== "object" || data.attributes === null)
-    return false;
-  const attrs = data.attributes as Record<string, unknown>;
-  return (
-    typeof attrs.status === "string" && typeof attrs.client_key === "string"
-  );
+type PayMongoIntentResponse = z.infer<typeof intentResponseSchema>;
+
+const parseIntentResponse = (v: unknown): PayMongoIntentResponse => {
+  const parsed = intentResponseSchema.safeParse(v);
+  if (!parsed.success) {
+    throw new AppError(502, "Payment provider returned unexpected payload");
+  }
+  return parsed.data;
 };
 
 export const createPaymentIntent = async (
@@ -92,14 +89,12 @@ export const createPaymentIntent = async (
   }
 
   const json: unknown = await res.json();
-  if (!isIntentResponse(json)) {
-    throw new AppError(502, "Payment provider returned unexpected payload");
-  }
+  const parsed = parseIntentResponse(json);
 
   return {
-    intentId: json.data.id,
-    clientKey: json.data.attributes.client_key,
-    status: json.data.attributes.status,
+    intentId: parsed.data.id,
+    clientKey: parsed.data.attributes.client_key,
+    status: parsed.data.attributes.status,
   };
 };
 
@@ -117,10 +112,8 @@ export const retrievePaymentIntent = async (
   if (!res.ok) throw new AppError(502, "Payment provider error");
 
   const json: unknown = await res.json();
-  if (!isIntentResponse(json)) {
-    throw new AppError(502, "Payment provider returned unexpected payload");
-  }
-  return { id: json.data.id, status: json.data.attributes.status };
+  const parsed = parseIntentResponse(json);
+  return { id: parsed.data.id, status: parsed.data.attributes.status };
 };
 
 export const refundPaymentIntent = async (
@@ -151,22 +144,20 @@ export const refundPaymentIntent = async (
   if (!res.ok) throw new AppError(502, "Payment provider error");
 
   const json: unknown = await res.json();
-  if (
-    typeof json !== "object" ||
-    json === null ||
-    !("data" in json) ||
-    typeof (json as { data: unknown }).data !== "object"
-  ) {
+  const refundSchema = z.object({
+    data: z.object({
+      id: z.string(),
+      attributes: z.object({ status: z.string() }),
+    }),
+  });
+  const refund = refundSchema.safeParse(json);
+  if (!refund.success) {
     throw new AppError(502, "Payment provider returned unexpected payload");
   }
-  const data = (json as { data: Record<string, unknown> }).data;
-  const id = typeof data.id === "string" ? data.id : "";
-  const attrs =
-    typeof data.attributes === "object" && data.attributes !== null
-      ? (data.attributes as Record<string, unknown>)
-      : {};
-  const status = typeof attrs.status === "string" ? attrs.status : "unknown";
-  return { id, status };
+  return {
+    id: refund.data.data.id,
+    status: refund.data.data.attributes.status,
+  };
 };
 
 export const verifyWebhookSignature = (

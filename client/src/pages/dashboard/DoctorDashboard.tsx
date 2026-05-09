@@ -8,7 +8,7 @@ import {
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { StatTile } from "@/features/dashboard/components/StatTile";
+import { StatTile } from "@/components/ui/StatTile";
 import { DaySchedule } from "@/features/dashboard/components/DaySchedule";
 import { GreetingHeader } from "@/features/dashboard/components/GreetingHeader";
 import { useDoctorStats } from "@/features/dashboard/hooks";

@@ -2,7 +2,7 @@ import { apiClient } from "@/lib/api/client";
 import type { ApiSuccess } from "@/lib/api/types";
 import type {
   Conversation,
-  ConversationListItem,
+  ConversationsResponse,
   Message,
   MessagesPage,
 } from "./schemas";
@@ -41,12 +41,18 @@ export const sendMessage = async (
   return data.data.message;
 };
 
-export const listConversations = async (): Promise<ConversationListItem[]> => {
-  const { data } =
-    await apiClient().get<
-      ApiSuccess<{ conversations: ConversationListItem[] }>
-    >("/conversations");
-  return data.data.conversations;
+export const listConversations = async (
+  params: {
+    page?: number;
+  } = {},
+): Promise<ConversationsResponse> => {
+  const search = new URLSearchParams();
+  if (params.page) search.set("page", String(params.page));
+  const qs = search.toString();
+  const { data } = await apiClient().get<ApiSuccess<ConversationsResponse>>(
+    `/conversations${qs ? `?${qs}` : ""}`,
+  );
+  return data.data;
 };
 
 export const markConversationRead = async (

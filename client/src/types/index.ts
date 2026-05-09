@@ -1,5 +1,7 @@
 export type Role = "patient" | "doctor" | "admin";
 
+export type PaymentStatus = "pending" | "escrowed" | "released" | "refunded";
+
 export interface User {
   id: string;
   email: string;

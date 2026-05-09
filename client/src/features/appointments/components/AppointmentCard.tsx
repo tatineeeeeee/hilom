@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LinkButton } from "@/components/ui/link-button";
-import { PaymentStatusBadge } from "@/features/payments/components/PaymentStatusBadge";
+import { PaymentStatusBadge } from "@/components/ui/PaymentStatusBadge";
 import { useCancelAppointment } from "../hooks";
 import type { Appointment } from "../schemas";
 import { useAuth } from "@/features/auth/hooks";

@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+export const listPaymentsQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+});
+export type ListPaymentsQuery = z.infer<typeof listPaymentsQuerySchema>;
+export const PAYMENTS_PAGE_SIZE = 20;
+
 export const paymongoWebhookSchema = z.object({
   data: z.object({
     id: z.string().min(1),

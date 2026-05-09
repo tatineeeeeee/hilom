@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/api/client";
 import type { ApiSuccess } from "@/lib/api/types";
-import type { Specialization, User } from "@/types";
+import type { User } from "@/types";
 import type {
   LoginInput,
   RegisterDoctorInput,
@@ -46,12 +46,6 @@ export const getMe = async (): Promise<User> => {
   const { data } =
     await apiClient().get<ApiSuccess<{ user: User }>>("/auth/me");
   return data.data.user;
-};
-
-export const listSpecializations = async (): Promise<Specialization[]> => {
-  const { data } =
-    await apiClient().get<ApiSuccess<Specialization[]>>("/specializations");
-  return data.data;
 };
 
 export const verifyEmail = async (token: string): Promise<void> => {

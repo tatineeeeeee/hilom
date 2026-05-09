@@ -2,7 +2,7 @@ import { apiClient } from "@/lib/api/client";
 import type { ApiSuccess } from "@/lib/api/types";
 import type {
   Prescription,
-  PrescriptionListItem,
+  PrescriptionsResponse,
   WritePrescriptionInput,
 } from "./schemas";
 
@@ -25,12 +25,16 @@ export const getPrescription = async (
   return data.data.prescription;
 };
 
-export const listMyPrescriptions = async (): Promise<
-  PrescriptionListItem[]
-> => {
-  const { data } =
-    await apiClient().get<
-      ApiSuccess<{ prescriptions: PrescriptionListItem[] }>
-    >("/prescriptions");
-  return data.data.prescriptions;
+export const listMyPrescriptions = async (
+  params: {
+    page?: number;
+  } = {},
+): Promise<PrescriptionsResponse> => {
+  const search = new URLSearchParams();
+  if (params.page) search.set("page", String(params.page));
+  const qs = search.toString();
+  const { data } = await apiClient().get<ApiSuccess<PrescriptionsResponse>>(
+    `/prescriptions${qs ? `?${qs}` : ""}`,
+  );
+  return data.data;
 };
