@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   pgTable,
   pgEnum,
@@ -12,6 +13,7 @@ import {
   time,
   serial,
   unique,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 // Enums
@@ -128,22 +130,30 @@ export const patientProfiles = pgTable("patient_profiles", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const appointments = pgTable("appointments", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  patientId: uuid("patient_id")
-    .references(() => users.id)
-    .notNull(),
-  doctorId: uuid("doctor_id")
-    .references(() => doctorProfiles.id)
-    .notNull(),
-  appointmentDate: date("appointment_date").notNull(),
-  slotStart: time("slot_start").notNull(),
-  slotEnd: time("slot_end").notNull(),
-  status: appointmentStatusEnum("status").default("pending").notNull(),
-  reason: text("reason"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+export const appointments = pgTable(
+  "appointments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    patientId: uuid("patient_id")
+      .references(() => users.id)
+      .notNull(),
+    doctorId: uuid("doctor_id")
+      .references(() => doctorProfiles.id)
+      .notNull(),
+    appointmentDate: date("appointment_date").notNull(),
+    slotStart: time("slot_start").notNull(),
+    slotEnd: time("slot_end").notNull(),
+    status: appointmentStatusEnum("status").default("pending").notNull(),
+    reason: text("reason"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("appointments_active_slot_idx")
+      .on(table.doctorId, table.appointmentDate, table.slotStart)
+      .where(sql`status in ('pending', 'confirmed')`),
+  ],
+);
 
 export const conversations = pgTable("conversations", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -222,6 +232,11 @@ export const payments = pgTable("payments", {
   paidAt: timestamp("paid_at"),
   releasedAt: timestamp("released_at"),
   refundedAt: timestamp("refunded_at"),
+});
+
+export const paymongoWebhookEvents = pgTable("paymongo_webhook_events", {
+  eventId: varchar("event_id", { length: 255 }).primaryKey(),
+  receivedAt: timestamp("received_at").defaultNow().notNull(),
 });
 
 export const reviews = pgTable("reviews", {
