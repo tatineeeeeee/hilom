@@ -1,11 +1,7 @@
 import { useCallback, useEffect } from "react";
+import type { User } from "@/types";
 import { useAuthStore } from "./store";
-import {
-  loginUser,
-  logoutUser,
-  refreshSession,
-  registerUser,
-} from "./api";
+import { loginUser, logoutUser, refreshSession, registerUser } from "./api";
 import type { LoginInput } from "./schemas";
 import type { RegisterDoctorInput, RegisterPatientInput } from "./schemas";
 
@@ -53,26 +49,43 @@ export const useAuth = () => {
   };
 };
 
+// Module-level dedup so React Strict Mode's double-invocation of useEffect
+// does not send two /auth/refresh requests with the same cookie, which would
+// trigger the refresh-rotation reuse-detection and clear the session.
+let ongoingBootstrap: Promise<{
+  accessToken: string;
+  user: User;
+} | null> | null = null;
+
 export const useBootstrapAuth = (): void => {
   const setSession = useAuthStore((s) => s.setSession);
   const setInitializing = useAuthStore((s) => s.setInitializing);
   const clear = useAuthStore((s) => s.clear);
 
   useEffect(() => {
-    let cancelled = false;
+    let active = true;
+
     const run = async () => {
-      try {
-        const session = await refreshSession();
-        if (!cancelled) setSession(session);
-      } catch {
-        if (!cancelled) clear();
-      } finally {
-        if (!cancelled) setInitializing(false);
+      if (!ongoingBootstrap) {
+        ongoingBootstrap = refreshSession()
+          .catch(() => null)
+          .finally(() => {
+            ongoingBootstrap = null;
+          });
       }
+      const session = await ongoingBootstrap;
+      if (!active) return;
+      if (session) {
+        setSession(session);
+      } else {
+        clear();
+      }
+      setInitializing(false);
     };
+
     void run();
     return () => {
-      cancelled = true;
+      active = false;
     };
   }, [setSession, setInitializing, clear]);
 };
