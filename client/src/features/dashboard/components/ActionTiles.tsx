@@ -1,5 +1,5 @@
 import { Clock, MessageCircle, Pill } from "lucide-react";
-import { StatTile } from "./StatTile";
+import { StatTile } from "@/components/ui/StatTile";
 import { useMyAppointments } from "@/features/appointments/hooks";
 import { useMyPrescriptions } from "@/features/prescriptions/hooks";
 import { useUnreadCount } from "@/features/chat/hooks";
@@ -25,7 +25,7 @@ export const ActionTiles = () => {
   const { data: rxData } = useMyPrescriptions();
   const { data: unread } = useUnreadCount();
 
-  const rxCount = rxData?.length ?? 0;
+  const rxCount = rxData?.total ?? 0;
   const unreadCount = unread ?? 0;
 
   const lastVisit = (apptData?.appointments ?? [])

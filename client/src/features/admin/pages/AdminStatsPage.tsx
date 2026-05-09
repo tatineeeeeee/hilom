@@ -1,6 +1,6 @@
 import { AlertCircle, Banknote, Stethoscope, Users } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { StatTile } from "@/features/dashboard/components/StatTile";
+import { StatTile } from "@/components/ui/StatTile";
 import { formatPHP } from "@/lib/utils/formatCurrency";
 import { useAdminStats } from "../hooks";
 
