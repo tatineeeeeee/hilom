@@ -1,6 +1,8 @@
 import type { Request, Response } from "express";
 import { AppError } from "../utils/AppError";
 import { logger } from "../config/logger";
+import { db } from "../config/db";
+import { paymongoWebhookEvents } from "../db/schema";
 import {
   confirmPayment,
   getPaymentByAppointment,
@@ -11,7 +13,10 @@ import {
   isStubMode,
   verifyWebhookSignature,
 } from "../services/paymongo.service";
-import { paymongoWebhookSchema } from "../schemas/payment.schema";
+import {
+  listPaymentsQuerySchema,
+  paymongoWebhookSchema,
+} from "../schemas/payment.schema";
 
 export const confirmPaymentMock = async (
   req: Request,
@@ -48,8 +53,19 @@ export const listMyPayments = async (
 ): Promise<void> => {
   if (!req.user) throw new AppError(401, "Authentication required");
 
-  const payments = await listMyPaymentsService(req.user.id, req.user.role);
-  res.json({ success: true, data: { payments } });
+  const parsed = listPaymentsQuerySchema.safeParse(req.query);
+  if (!parsed.success) {
+    throw new AppError(400, "Invalid query", {
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    });
+  }
+
+  const result = await listMyPaymentsService(
+    req.user.id,
+    req.user.role,
+    parsed.data,
+  );
+  res.json({ success: true, data: result });
 };
 
 export const paymongoWebhook = async (
@@ -80,7 +96,24 @@ export const paymongoWebhook = async (
 
   const parsed = paymongoWebhookSchema.safeParse(parsedJson);
   if (!parsed.success) {
+    logger.warn(
+      { fieldErrors: parsed.error.flatten().fieldErrors },
+      "paymongo webhook payload failed schema validation",
+    );
     res.status(200).json({ success: true, data: { received: false } });
+    return;
+  }
+
+  const eventId = parsed.data.data.id;
+  const [recorded] = await db
+    .insert(paymongoWebhookEvents)
+    .values({ eventId })
+    .onConflictDoNothing({ target: paymongoWebhookEvents.eventId })
+    .returning();
+  if (!recorded) {
+    res
+      .status(200)
+      .json({ success: true, data: { received: true, duplicate: true } });
     return;
   }
 
