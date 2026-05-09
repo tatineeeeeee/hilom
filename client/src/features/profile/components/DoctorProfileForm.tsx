@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/forms/FormField";
-import { listSpecializations } from "@/features/auth/api";
+import { listSpecializations } from "@/features/specializations/api";
 import { extractApiError } from "@/lib/helpers/errors";
 import { cn } from "@/lib/utils";
 import { updateDoctorProfile } from "../api";

@@ -16,7 +16,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { listSpecializations } from "@/features/auth/api";
+import { listSpecializations } from "@/features/specializations/api";
 
 const SPECIALTY_ICONS: Record<string, LucideIcon> = {
   Cardiology: Heart,

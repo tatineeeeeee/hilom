@@ -8,7 +8,7 @@ import {
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { StatTile } from "@/features/dashboard/components/StatTile";
+import { StatTile } from "@/components/ui/StatTile";
 import { useAdminStats, useUnverifiedDoctors } from "@/features/admin/hooks";
 import { formatPHP } from "@/lib/utils/formatCurrency";
 import type { UnverifiedDoctorRow } from "@/features/admin/schemas";
