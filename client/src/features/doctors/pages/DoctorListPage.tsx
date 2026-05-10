@@ -3,11 +3,11 @@ import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { QueryErrorState } from "@/components/ui/query-error-state";
 import { cn } from "@/lib/utils";
 import { useDoctors } from "../hooks";
-import { DoctorCard } from "../components/DoctorCard";
 import { DoctorFilter } from "../components/DoctorFilter";
+import { DoctorSpecialtyChips } from "../components/DoctorSpecialtyChips";
+import { DoctorResultsGrid } from "../components/DoctorResultsGrid";
 import { useSpecializations } from "@/features/specializations/hooks";
 import type { DoctorFilters } from "../schemas";
 
@@ -16,10 +16,6 @@ const SORT_LABELS: Record<string, string> = {
   fee: "Fee",
   name: "Name",
 };
-
-const DoctorCardSkeleton = () => (
-  <div className="h-36 animate-pulse rounded-xl border bg-muted/40" />
-);
 
 export const DoctorListPage = () => {
   const [searchParams] = useSearchParams();
@@ -87,7 +83,6 @@ export const DoctorListPage = () => {
         Find a doctor
       </h1>
 
-      {/* Search bar */}
       <div className="mb-4 flex gap-2">
         <div className="relative flex-1">
           <Search
@@ -142,34 +137,17 @@ export const DoctorListPage = () => {
         </Button>
       </div>
 
-      {/* Specialty chips — horizontal scroll on mobile */}
-      {specs && specs.length > 0 && (
-        <div className="mb-4 flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible sm:pb-0">
-          {specs.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => toggleSpec(s.id)}
-              className={cn(
-                "flex-none rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                activeSpecIds.includes(s.id)
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground",
-              )}
-            >
-              {s.name}
-            </button>
-          ))}
-        </div>
-      )}
+      <DoctorSpecialtyChips
+        specs={specs ?? []}
+        activeSpecIds={activeSpecIds}
+        onToggle={toggleSpec}
+      />
 
       <div className="flex gap-6">
-        {/* Sidebar filter — md+ */}
         <aside className="hidden md:block w-56 shrink-0">
           <DoctorFilter filters={filters} onChange={handleFiltersChange} />
         </aside>
 
-        {/* Mobile bottom sheet filter */}
         {drawerOpen && (
           <div className="fixed inset-0 z-50 md:hidden">
             <div
@@ -185,77 +163,19 @@ export const DoctorListPage = () => {
         )}
 
         <main className="min-w-0 flex-1">
-          {isPending && (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <DoctorCardSkeleton key={i} />
-              ))}
-            </div>
-          )}
-
-          {!isPending && isError && (
-            <QueryErrorState
-              message="Couldn't load doctors."
-              onRetry={() => void refetch()}
-            />
-          )}
-
-          {!isPending && !isError && doctors.length === 0 && (
-            <div className="py-12 text-center">
-              <p className="text-sm text-muted-foreground">
-                No doctors match those filters.
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-3"
-                onClick={() => {
-                  setSearchInput("");
-                  setFilters({ sort: filters.sort ?? "rating", page: 1 });
-                }}
-              >
-                Clear all filters
-              </Button>
-            </div>
-          )}
-
-          {!isPending && doctors.length > 0 && (
-            <>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {doctors.map((d) => (
-                  <DoctorCard key={d.id} doctor={d} />
-                ))}
-              </div>
-
-              {totalPages > 1 && (
-                <nav className="mt-6 flex items-center justify-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={(filters.page ?? 1) <= 1}
-                    onClick={() =>
-                      setFilters((f) => ({ ...f, page: (f.page ?? 1) - 1 }))
-                    }
-                  >
-                    ‹
-                  </Button>
-                  <span className="text-sm text-muted-foreground">
-                    {filters.page ?? 1} / {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={(filters.page ?? 1) >= totalPages}
-                    onClick={() =>
-                      setFilters((f) => ({ ...f, page: (f.page ?? 1) + 1 }))
-                    }
-                  >
-                    ›
-                  </Button>
-                </nav>
-              )}
-            </>
-          )}
+          <DoctorResultsGrid
+            doctors={doctors}
+            isPending={isPending}
+            isError={isError}
+            page={filters.page ?? 1}
+            totalPages={totalPages}
+            onRetry={() => void refetch()}
+            onClearFilters={() => {
+              setSearchInput("");
+              setFilters({ sort: filters.sort ?? "rating", page: 1 });
+            }}
+            onPageChange={(next) => setFilters((f) => ({ ...f, page: next }))}
+          />
         </main>
       </div>
     </div>
