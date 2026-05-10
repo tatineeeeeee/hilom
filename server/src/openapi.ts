@@ -61,7 +61,6 @@ export const openapiDocument = {
     tagged("chat", "Conversations + messages (Socket.io for real-time)"),
     tagged("prescriptions", "Doctor-issued prescriptions"),
     tagged("reviews", "Public reviews list + create"),
-    tagged("admin", "Admin-only user/doctor management + platform stats"),
     tagged("me", "Authenticated profile + schedule + dashboards"),
   ],
   components: {
@@ -380,53 +379,6 @@ export const openapiDocument = {
           "200": { description: "Stats" },
           "403": { description: "Doctor only" },
         },
-      },
-    },
-    "/api/admin/users": {
-      get: {
-        tags: ["admin"],
-        summary: "Paginated user list (role filter + search)",
-        security: [{ bearer: [] }],
-        responses: {
-          "200": { description: "Users" },
-          "403": { description: "Admin only" },
-        },
-      },
-    },
-    "/api/admin/doctors/unverified": {
-      get: {
-        tags: ["admin"],
-        summary: "Paginated unverified doctors awaiting review",
-        security: [{ bearer: [] }],
-        responses: { "200": { description: "Doctors" } },
-      },
-    },
-    "/api/admin/doctors/{id}/verify": {
-      patch: {
-        tags: ["admin"],
-        summary: "Flip is_verified true/false",
-        security: [{ bearer: [] }],
-        parameters: [
-          {
-            name: "id",
-            in: "path",
-            required: true,
-            schema: { type: "string" },
-          },
-        ],
-        responses: {
-          "200": { description: "Updated profile" },
-          "404": { description: "Not found" },
-        },
-      },
-    },
-    "/api/admin/stats": {
-      get: {
-        tags: ["admin"],
-        summary:
-          "Platform-wide counts: users by role, appointments by status, revenue, unverified count",
-        security: [{ bearer: [] }],
-        responses: { "200": { description: "Stats" } },
       },
     },
   },

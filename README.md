@@ -67,6 +67,12 @@ flowchart LR
 
 Auth flow: access token lives in a Zustand store (memory only — lost on refresh, by design). Refresh token is an httpOnly + secure + sameSite cookie. Every page load calls `/api/auth/refresh` to restore the session. On a 401, an Axios response interceptor silently refreshes via single-flight (one inflight refresh shared across concurrent 401s) and retries the original request.
 
+## API documentation
+
+Interactive Swagger UI is served at `/api/docs` (and the raw spec at `/api/openapi.json`). The OpenAPI document is generated from the same Zod schemas used at runtime, so it never drifts. Admin endpoints are filtered out of the public spec — admin middleware still enforces 403 on those routes.
+
+Local: <http://localhost:4000/api/docs>. Production URL is wired up in Phase 11 (Railway deploy).
+
 ## Project structure
 
 ```
