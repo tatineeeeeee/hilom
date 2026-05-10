@@ -2,12 +2,13 @@ import { useState } from "react";
 import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { UnverifiedDoctorRow } from "../components/UnverifiedDoctorRow";
 import { useUnverifiedDoctors } from "../hooks";
 
 export const DoctorVerificationPage = () => {
   const [page, setPage] = useState(1);
-  const { data, isPending, isError } = useUnverifiedDoctors(page);
+  const { data, isPending, isError, refetch } = useUnverifiedDoctors(page);
   const totalPages = data
     ? Math.max(1, Math.ceil(data.total / data.pageSize))
     : 1;
@@ -23,7 +24,10 @@ export const DoctorVerificationPage = () => {
       )}
 
       {isError && (
-        <p className="text-sm text-destructive">Could not load queue.</p>
+        <QueryErrorState
+          message="Couldn't load verification queue."
+          onRetry={() => void refetch()}
+        />
       )}
 
       {data && data.rows.length === 0 && (

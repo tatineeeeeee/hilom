@@ -22,7 +22,7 @@ export const DoctorDetailPage = () => {
   const navigate = useNavigate();
   const slotPickerRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated, user } = useAuth();
-  const { data: doctor, isPending, isError } = useDoctor(id ?? "");
+  const { data: doctor, isPending, isError, refetch } = useDoctor(id ?? "");
 
   const hasBottomNav = isAuthenticated && user?.role !== "admin";
 
@@ -42,14 +42,18 @@ export const DoctorDetailPage = () => {
     return (
       <div className="mx-auto max-w-3xl px-4 py-12 text-center">
         <p className="text-sm text-muted-foreground">Doctor not found.</p>
-        <Button
-          variant="outline"
-          size="sm"
-          className="mt-4"
-          onClick={() => navigate("/doctors")}
-        >
-          Back to list
-        </Button>
+        <div className="mt-4 flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/doctors")}
+          >
+            Back to list
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => void refetch()}>
+            Retry
+          </Button>
+        </div>
       </div>
     );
   }

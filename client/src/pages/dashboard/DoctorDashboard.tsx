@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatTile } from "@/components/ui/StatTile";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { DaySchedule } from "@/features/dashboard/components/DaySchedule";
 import { GreetingHeader } from "@/features/dashboard/components/GreetingHeader";
 import { useDoctorStats } from "@/features/dashboard/hooks";
@@ -135,12 +136,17 @@ const DoctorDashboardSkeleton = () => (
 
 export const DoctorDashboard = () => {
   const fullName = useAuthStore((s) => s.user?.fullName ?? "");
-  const { data, isPending, isError } = useDoctorStats();
+  const { data, isPending, isError, refetch } = useDoctorStats();
   const { data: unread } = useUnreadCount();
 
   if (isPending) return <DoctorDashboardSkeleton />;
   if (isError || !data) {
-    return <p className="text-sm text-destructive">Could not load stats.</p>;
+    return (
+      <QueryErrorState
+        message="Couldn't load stats."
+        onRetry={() => void refetch()}
+      />
+    );
   }
 
   const ratingDisplay = data.rating.average

@@ -1,5 +1,6 @@
 import { UserCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { useAuth } from "@/features/auth/hooks";
 import { PatientProfileForm } from "../components/PatientProfileForm";
 import { DoctorProfileForm } from "../components/DoctorProfileForm";
@@ -46,9 +47,10 @@ export const ProfileSetupPage = () => {
           <Skeleton className="h-12 rounded-lg" />
         </div>
       ) : profileQuery.isError ? (
-        <p className="text-sm text-destructive">
-          Could not load your profile. Try refreshing the page.
-        </p>
+        <QueryErrorState
+          message="Couldn't load your profile."
+          onRetry={() => void profileQuery.refetch()}
+        />
       ) : user.role === "patient" ? (
         <PatientProfileForm
           initial={isPatientProfile(profile) ? profile : null}

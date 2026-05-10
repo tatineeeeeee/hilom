@@ -40,7 +40,7 @@ export const authLimiter = rateLimit({
   limit: 5,
   standardHeaders: "draft-7",
   legacyHeaders: false,
-  skip: () => process.env.NODE_ENV !== "production",
+  skip: () => process.env.NODE_ENV === "test",
   store: buildStore("auth"),
   message: {
     success: false,
@@ -53,7 +53,7 @@ export const refreshLimiter = rateLimit({
   limit: 30,
   standardHeaders: "draft-7",
   legacyHeaders: false,
-  skip: () => process.env.NODE_ENV !== "production",
+  skip: () => process.env.NODE_ENV === "test",
   store: buildStore("refresh"),
   message: {
     success: false,
@@ -66,7 +66,7 @@ export const tokenConsumerLimiter = rateLimit({
   limit: 30,
   standardHeaders: "draft-7",
   legacyHeaders: false,
-  skip: () => process.env.NODE_ENV !== "production",
+  skip: () => process.env.NODE_ENV === "test",
   store: buildStore("token-consume"),
   message: {
     success: false,
@@ -86,7 +86,7 @@ const keyedLimiter = (
     limit: maxPerHour,
     standardHeaders: "draft-7",
     legacyHeaders: false,
-    skip: () => process.env.NODE_ENV !== "production",
+    skip: () => process.env.NODE_ENV === "test",
     store: buildStore(prefix),
     keyGenerator: (req) =>
       keyer(req) ?? (req.ip ? ipKeyGenerator(req.ip) : "unknown"),

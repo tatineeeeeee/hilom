@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { useDoctorReviews } from "../hooks";
 import { ReviewItem } from "./ReviewItem";
 import { StarBar } from "./StarBar";
@@ -14,7 +15,10 @@ export const DoctorReviewsSection = ({
   doctorId,
 }: DoctorReviewsSectionProps) => {
   const [page, setPage] = useState(1);
-  const { data, isPending, isError } = useDoctorReviews(doctorId, page);
+  const { data, isPending, isError, refetch } = useDoctorReviews(
+    doctorId,
+    page,
+  );
 
   const totalPages = data
     ? Math.max(1, Math.ceil(data.total / data.pageSize))
@@ -89,7 +93,10 @@ export const DoctorReviewsSection = ({
         )}
 
         {isError && (
-          <p className="text-sm text-destructive">Could not load reviews.</p>
+          <QueryErrorState
+            message="Couldn't load reviews."
+            onRetry={() => void refetch()}
+          />
         )}
 
         {data && data.reviews.length === 0 && (

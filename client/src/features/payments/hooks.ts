@@ -17,6 +17,7 @@ export const usePaymentByAppointment = (appointmentId: string | undefined) =>
       return getPayment(appointmentId);
     },
     enabled: Boolean(appointmentId),
+    staleTime: 0,
     retry: false,
   });
 
@@ -41,7 +42,7 @@ export const useMyPayments = (page = 1) => {
   return useQuery({
     queryKey: paymentListKey(page),
     queryFn: () => listMyPayments({ page }),
-    staleTime: 30_000,
+    staleTime: 0,
     enabled: isAuthenticated,
   });
 };

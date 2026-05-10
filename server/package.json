@@ -1,6 +1,9 @@
 {
   "name": "server",
   "private": true,
+  "engines": {
+    "node": ">=20.19"
+  },
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
@@ -14,6 +17,7 @@
     "db:push": "drizzle-kit push",
     "db:push:test": "cross-env DATABASE_URL=postgresql://postgres:postgres@localhost:5432/hilom_test drizzle-kit push",
     "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seed.ts",
     "db:seed:doctor": "tsx src/db/seedDoctor.ts",
     "db:seed:admin": "tsx src/db/seedAdmin.ts",

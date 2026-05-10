@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LinkButton } from "@/components/ui/link-button";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { cn } from "@/lib/utils";
 import { useMyAppointments } from "../hooks";
 import { AppointmentCard } from "../components/AppointmentCard";
@@ -21,7 +22,10 @@ export const PatientAppointmentsPage = () => {
   const [page, setPage] = useState(1);
   const [reviewTarget, setReviewTarget] = useState<Appointment | null>(null);
 
-  const { data, isPending, isError } = useMyAppointments({ status, page });
+  const { data, isPending, isError, refetch } = useMyAppointments({
+    status,
+    page,
+  });
   const totalPages = data ? Math.ceil(data.total / data.pageSize) : 0;
 
   return (
@@ -64,7 +68,10 @@ export const PatientAppointmentsPage = () => {
       )}
 
       {isError && (
-        <p className="text-sm text-destructive">Could not load appointments.</p>
+        <QueryErrorState
+          message="Couldn't load appointments."
+          onRetry={() => void refetch()}
+        />
       )}
 
       {data && data.appointments.length === 0 && (

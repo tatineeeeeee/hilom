@@ -11,14 +11,14 @@ export const useDoctors = (filters: DoctorFilters) =>
   useQuery({
     queryKey: doctorsQueryKey(filters),
     queryFn: () => listDoctors(filters),
-    staleTime: 60_000,
+    staleTime: 2 * 60_000,
   });
 
 export const useDoctor = (id: string) =>
   useQuery({
     queryKey: doctorQueryKey(id),
     queryFn: () => getDoctor(id),
-    staleTime: 60_000,
+    staleTime: 2 * 60_000,
     enabled: id.length > 0,
   });
 
@@ -29,6 +29,6 @@ export const useDoctorSlots = (id: string, date: string) =>
   useQuery({
     queryKey: doctorSlotsQueryKey(id, date),
     queryFn: () => getDoctorSlots(id, date),
-    staleTime: 30_000,
+    staleTime: 0,
     enabled: id.length > 0 && date.length > 0,
   });

@@ -20,7 +20,7 @@ export const useMyAppointments = (params: { status?: string; page?: number }) =>
   useQuery({
     queryKey: myAppointmentsKey(params),
     queryFn: () => listMyAppointments(params),
-    staleTime: 30_000,
+    staleTime: 0,
   });
 
 export const useDoctorAppointments = (params: {
@@ -30,7 +30,7 @@ export const useDoctorAppointments = (params: {
   useQuery({
     queryKey: doctorAppointmentsKey(params),
     queryFn: () => listDoctorAppointments(params),
-    staleTime: 30_000,
+    staleTime: 0,
   });
 
 export const useBookAppointment = () => {

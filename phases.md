@@ -358,8 +358,17 @@ Push the project from "good code" to "I would hire this person." Live demo, real
 - [ ] Dependabot enabled and a successful weekly bump PR has merged
 - [ ] `CHANGELOG.md` auto-generates from conventional commits on each release
 - [ ] Lighthouse score on the production client: Performance >85, Accessibility >95, Best Practices >95, SEO >90
-- [ ] OpenAPI spec (`server/openapi.json`) generated from Zod schemas + served at `/api/docs` via Swagger UI
-- [ ] **Rate limit promoted to Redis-backed** (carried over from Phase 2.5) — `server/src/middleware/rateLimit.ts` switches to `rate-limit-redis` with an in-memory fallback for `NODE_ENV !== "production"`. Keep the existing `skip: () => NODE_ENV === "test"` so the auth suite still isn't throttled. Provision Redis on Railway before this lands.
+- [x] OpenAPI spec served at `/api/docs` via Swagger UI — admin paths filtered out of the public document (PR #19)
+- [ ] **Rate limit promoted to Redis-backed** (carried over from Phase 2.5) — `server/src/middleware/rateLimit.ts` switches to `rate-limit-redis` with an in-memory fallback for `NODE_ENV !== "production"`. Provision Redis on Railway before this lands.
+  - [x] `skip` narrowed to `NODE_ENV === "test"` (was `!== "production"`, PR #19) — rate-limiting now active in dev
+
+**Production migration playbook**:
+
+- Railway server service must set its **pre-deploy command** to `cd server && bun run db:migrate`. Migrations run after build and before traffic shifts; if they fail, Railway aborts the deploy and the previous version keeps serving.
+- Schema changes ship via `bun run --filter server db:generate` → review the generated SQL in `server/drizzle/` → commit alongside the schema diff. Never edit historical migration files; create a new one.
+- Rollback: revert the offending migration's commit on a new PR; for data-incompatible reverts add a forward-compensating migration rather than rewriting history.
+- Local bootstrap (one-time after this lands, for devs who used `db:push`): `dropdb hilom_dev && createdb hilom_dev && bun run --filter server db:migrate && bun run --filter server db:seed:all`.
+- `db:push` and `db:push:test` remain in `server/package.json` as **local-only** conveniences; CI and Railway use `db:migrate`.
 
 ---
 

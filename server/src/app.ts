@@ -24,7 +24,13 @@ import { openapiDocument } from "./openapi";
 export const app: Express = express();
 
 app.use(requestId);
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }),
+);
 const allowedOrigins =
   env.NODE_ENV === "production"
     ? [env.CLIENT_URL]
@@ -57,6 +63,8 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
+// /api/docs is intentionally exposed in production: portfolio + recruiter signal.
+// Admin paths are filtered out of the OpenAPI document; middleware enforces 403.
 if (env.NODE_ENV !== "test") {
   app.get("/api/openapi.json", (_req, res) => {
     res.json(openapiDocument);

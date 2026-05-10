@@ -5,6 +5,10 @@ on:
   push:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,11 +37,17 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+      - name: Cache bun install
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
       - name: Install
         run: bun install --frozen-lockfile
-      - name: Push test schema
-        working-directory: server
-        run: bunx drizzle-kit push
+      - name: Migrate test schema
+        run: bun run --filter server db:migrate
       - name: Typecheck
         run: bun run typecheck
       - name: Lint
@@ -86,11 +96,17 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+      - name: Cache bun install
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
       - name: Install
         run: bun install --frozen-lockfile
-      - name: Push test schema
-        working-directory: server
-        run: bunx drizzle-kit push
+      - name: Migrate test schema
+        run: bun run --filter server db:migrate
       - name: Install Playwright browsers
         working-directory: e2e
         run: bunx playwright install --with-deps chromium

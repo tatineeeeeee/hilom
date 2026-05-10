@@ -1,8 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { listSpecializations } from "@/features/specializations/api";
+import { useSpecializations } from "@/features/specializations/hooks";
 import type { DoctorFilters } from "../schemas";
 
 interface DoctorFilterProps {
@@ -11,11 +10,7 @@ interface DoctorFilterProps {
 }
 
 export const DoctorFilter = ({ filters, onChange }: DoctorFilterProps) => {
-  const specializations = useQuery({
-    queryKey: ["specializations"],
-    queryFn: listSpecializations,
-    staleTime: 5 * 60 * 1000,
-  });
+  const specializations = useSpecializations();
 
   const toggleSpec = (id: number) => {
     const current = filters.specializationId ?? [];

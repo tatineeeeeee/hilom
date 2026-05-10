@@ -1,13 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { FileText } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { useAuth } from "@/features/auth/hooks";
 import { useMyPrescriptions } from "../hooks";
 
 export const MyPrescriptionsPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data, isPending, isError } = useMyPrescriptions();
+  const { data, isPending, isError, refetch } = useMyPrescriptions();
 
   const isDoctor = user?.role === "doctor";
   const heading = isDoctor ? "Prescriptions issued" : "My prescriptions";
@@ -30,9 +31,10 @@ export const MyPrescriptionsPage = () => {
       )}
 
       {isError && (
-        <p className="text-sm text-destructive">
-          Could not load prescriptions.
-        </p>
+        <QueryErrorState
+          message="Couldn't load prescriptions."
+          onRetry={() => void refetch()}
+        />
       )}
 
       {data && data.prescriptions.length === 0 && (

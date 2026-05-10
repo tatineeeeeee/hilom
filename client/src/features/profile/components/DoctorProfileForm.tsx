@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/forms/FormField";
-import { listSpecializations } from "@/features/specializations/api";
 import { extractApiError } from "@/lib/helpers/errors";
 import { cn } from "@/lib/utils";
 import { updateDoctorProfile } from "../api";
 import { profileQueryKey } from "../hooks";
+import { SpecializationSelect } from "./SpecializationSelect";
 import {
   doctorProfileSchema,
   isSlotDuration,
@@ -31,12 +31,6 @@ export const DoctorProfileForm = ({ initial }: DoctorProfileFormProps) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
-
-  const specializations = useQuery({
-    queryKey: ["specializations"],
-    queryFn: listSpecializations,
-    staleTime: 5 * 60 * 1000,
-  });
 
   const {
     register,
@@ -88,42 +82,10 @@ export const DoctorProfileForm = ({ initial }: DoctorProfileFormProps) => {
           Practice details
         </p>
         <div className="grid gap-4">
-          <div className="grid gap-1.5">
-            <Label htmlFor="specializationId">Specialization</Label>
-            <select
-              id="specializationId"
-              {...register("specializationId", { valueAsNumber: true })}
-              aria-invalid={errors.specializationId ? true : undefined}
-              aria-describedby={
-                errors.specializationId ? "specializationId-error" : undefined
-              }
-              className={cn(
-                "min-h-11 rounded-md border border-input bg-background px-3 text-sm",
-                "focus:outline-none focus:ring-2 focus:ring-ring",
-                errors.specializationId && "border-destructive",
-              )}
-              disabled={specializations.isLoading}
-            >
-              <option value={0}>
-                {specializations.isLoading
-                  ? "Loading…"
-                  : "Select a specialization"}
-              </option>
-              {specializations.data?.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-            {errors.specializationId && (
-              <p
-                id="specializationId-error"
-                className="text-xs text-destructive"
-              >
-                {errors.specializationId.message}
-              </p>
-            )}
-          </div>
+          <SpecializationSelect
+            register={register}
+            error={errors.specializationId}
+          />
 
           <div className="grid gap-1.5">
             <Label htmlFor="bio">Bio</Label>

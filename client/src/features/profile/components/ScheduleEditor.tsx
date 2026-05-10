@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { extractApiError } from "@/lib/helpers/errors";
 import { getMySchedule, updateMySchedule, type ScheduleInput } from "../api";
 
@@ -42,7 +43,12 @@ export const ScheduleEditor = () => {
     Record<number, string>
   >({});
 
-  const { data: scheduleRows, isPending } = useQuery({
+  const {
+    data: scheduleRows,
+    isPending,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: scheduleQueryKey,
     queryFn: getMySchedule,
     staleTime: 30_000,
@@ -102,6 +108,15 @@ export const ScheduleEditor = () => {
 
   if (isPending) {
     return <p className="text-sm text-muted-foreground">Loading schedule…</p>;
+  }
+
+  if (isError) {
+    return (
+      <QueryErrorState
+        message="Couldn't load schedule."
+        onRetry={() => void refetch()}
+      />
+    );
   }
 
   return (

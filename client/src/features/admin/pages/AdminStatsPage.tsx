@@ -1,11 +1,12 @@
 import { AlertCircle, Banknote, Stethoscope, Users } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatTile } from "@/components/ui/StatTile";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { formatPHP } from "@/lib/utils/formatCurrency";
 import { useAdminStats } from "../hooks";
 
 export const AdminStatsPage = () => {
-  const { data, isPending, isError } = useAdminStats();
+  const { data, isPending, isError, refetch } = useAdminStats();
 
   if (isPending) {
     return (
@@ -18,7 +19,12 @@ export const AdminStatsPage = () => {
   }
 
   if (isError || !data) {
-    return <p className="text-sm text-destructive">Could not load stats.</p>;
+    return (
+      <QueryErrorState
+        message="Couldn't load stats."
+        onRetry={() => void refetch()}
+      />
+    );
   }
 
   return (

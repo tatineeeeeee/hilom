@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { useDoctorSlots } from "../hooks";
 import { BookingModal } from "@/features/appointments/components/BookingModal";
 import type { TimeSlot } from "../api";
@@ -22,7 +23,12 @@ export const SlotPicker = ({ doctorId, doctorName }: SlotPickerProps) => {
   const [date, setDate] = useState(todayISO());
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
 
-  const { data: slots, isPending, isError } = useDoctorSlots(doctorId, date);
+  const {
+    data: slots,
+    isPending,
+    isError,
+    refetch,
+  } = useDoctorSlots(doctorId, date);
 
   return (
     <div className="grid gap-4">
@@ -47,9 +53,10 @@ export const SlotPicker = ({ doctorId, doctorName }: SlotPickerProps) => {
       )}
 
       {isError && (
-        <p className="text-sm text-destructive">
-          Could not load slots for this date.
-        </p>
+        <QueryErrorState
+          message="Couldn't load slots for this date."
+          onRetry={() => void refetch()}
+        />
       )}
 
       {!isPending && !isError && slots !== undefined && (

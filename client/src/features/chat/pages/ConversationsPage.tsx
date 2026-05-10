@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { MessageSquare } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { useChatSocket, useConversationList } from "../hooks";
 import { UnreadBadge } from "../components/UnreadBadge";
 
@@ -18,7 +19,7 @@ const formatRelative = (iso: string | null): string => {
 
 export const ConversationsPage = () => {
   useChatSocket();
-  const { data, isPending, isError } = useConversationList();
+  const { data, isPending, isError, refetch } = useConversationList();
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6">
@@ -38,9 +39,10 @@ export const ConversationsPage = () => {
       )}
 
       {isError && (
-        <p className="text-sm text-destructive">
-          Could not load conversations.
-        </p>
+        <QueryErrorState
+          message="Couldn't load conversations."
+          onRetry={() => void refetch()}
+        />
       )}
 
       {data && data.conversations.length === 0 && (
