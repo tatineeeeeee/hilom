@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import {
   Activity,
@@ -16,7 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { listSpecializations } from "@/features/specializations/api";
+import { useSpecializations } from "@/features/specializations/hooks";
 
 const SPECIALTY_ICONS: Record<string, LucideIcon> = {
   Cardiology: Heart,
@@ -37,11 +36,7 @@ const specialtyIcon = (name: string): LucideIcon =>
   SPECIALTY_ICONS[name] ?? Stethoscope;
 
 export const SpecialtyGrid = () => {
-  const { data, isPending } = useQuery({
-    queryKey: ["specializations"],
-    queryFn: listSpecializations,
-    staleTime: 5 * 60_000,
-  });
+  const { data, isPending } = useSpecializations();
 
   return (
     <div>

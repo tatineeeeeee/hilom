@@ -23,6 +23,7 @@ export const usePrescriptionByAppointment = (
       return getPrescription(appointmentId);
     },
     enabled: Boolean(appointmentId),
+    staleTime: 30_000,
     retry: false,
   });
 

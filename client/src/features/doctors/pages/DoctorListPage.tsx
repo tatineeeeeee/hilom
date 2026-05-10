@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useDoctors } from "../hooks";
 import { DoctorCard } from "../components/DoctorCard";
 import { DoctorFilter } from "../components/DoctorFilter";
-import { listSpecializations } from "@/features/specializations/api";
+import { useSpecializations } from "@/features/specializations/hooks";
 import type { DoctorFilters } from "../schemas";
 
 const SORT_LABELS: Record<string, string> = {
@@ -36,11 +35,7 @@ export const DoctorListPage = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { data: specs } = useQuery({
-    queryKey: ["specializations"],
-    queryFn: listSpecializations,
-    staleTime: 5 * 60_000,
-  });
+  const { data: specs } = useSpecializations();
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);

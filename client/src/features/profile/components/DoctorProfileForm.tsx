@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/forms/FormField";
-import { listSpecializations } from "@/features/specializations/api";
+import { useSpecializations } from "@/features/specializations/hooks";
 import { extractApiError } from "@/lib/helpers/errors";
 import { cn } from "@/lib/utils";
 import { updateDoctorProfile } from "../api";
@@ -32,11 +32,7 @@ export const DoctorProfileForm = ({ initial }: DoctorProfileFormProps) => {
   const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
 
-  const specializations = useQuery({
-    queryKey: ["specializations"],
-    queryFn: listSpecializations,
-    staleTime: 5 * 60 * 1000,
-  });
+  const specializations = useSpecializations();
 
   const {
     register,

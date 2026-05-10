@@ -1,14 +1,9 @@
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { listSpecializations } from "@/features/specializations/api";
+import { useSpecializations } from "@/features/specializations/hooks";
 import { SpecializationIcon } from "./SpecializationIcon";
 
 export const SpecializationsGrid = () => {
-  const { data, isPending } = useQuery({
-    queryKey: ["specializations"],
-    queryFn: listSpecializations,
-    staleTime: 5 * 60_000,
-  });
+  const { data, isPending } = useSpecializations();
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-12">
