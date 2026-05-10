@@ -1,6 +1,9 @@
 {
   "name": "hilom",
   "private": true,
+  "engines": {
+    "node": ">=20.19"
+  },
   "workspaces": [
     "client",
     "server",

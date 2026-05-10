@@ -14,7 +14,7 @@ A multi-specialty healthcare marketplace for the Philippines: patients browse do
 
 ## Quickstart
 
-Prerequisites: Bun ≥ 1.1, Node ≥ 20, PostgreSQL 17 running locally.
+Prerequisites: Bun ≥ 1.1, Node ≥ 20.19 (see `.nvmrc`), PostgreSQL 17 running locally.
 
 ```bash
 # 1. Clone and install
