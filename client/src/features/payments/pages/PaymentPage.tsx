@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { LinkButton } from "@/components/ui/link-button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { formatPHP } from "@/lib/utils/formatCurrency";
 import { useAuth } from "@/features/auth/hooks";
@@ -22,6 +23,7 @@ export const PaymentPage = () => {
     data: payment,
     isPending,
     isError,
+    refetch,
   } = usePaymentByAppointment(appointmentId);
 
   const { mutate: confirm, isPending: confirming } = useConfirmPaymentMock(
@@ -45,9 +47,10 @@ export const PaymentPage = () => {
   if (isError || !payment) {
     return (
       <div className="mx-auto max-w-xl px-4 py-6">
-        <p className="text-sm text-destructive">
-          Could not load this payment. Please try again later.
-        </p>
+        <QueryErrorState
+          message="Couldn't load this payment."
+          onRetry={() => void refetch()}
+        />
       </div>
     );
   }

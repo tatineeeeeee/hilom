@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LinkButton } from "@/components/ui/link-button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useDoctorAppointments, useUpdateAppointmentStatus } from "../hooks";
 import type { DoctorAppointment } from "../schemas";
@@ -57,7 +58,10 @@ export const DoctorAppointmentsPage = () => {
   const [status, setStatus] = useState<string | undefined>();
   const [page, setPage] = useState(1);
 
-  const { data, isPending, isError } = useDoctorAppointments({ status, page });
+  const { data, isPending, isError, refetch } = useDoctorAppointments({
+    status,
+    page,
+  });
   const { mutate: updateStatus, isPending: isUpdating } =
     useUpdateAppointmentStatus();
 
@@ -102,7 +106,10 @@ export const DoctorAppointmentsPage = () => {
       )}
 
       {isError && (
-        <p className="text-sm text-destructive">Could not load appointments.</p>
+        <QueryErrorState
+          message="Couldn't load appointments."
+          onRetry={() => void refetch()}
+        />
       )}
 
       {data && data.appointments.length === 0 && (

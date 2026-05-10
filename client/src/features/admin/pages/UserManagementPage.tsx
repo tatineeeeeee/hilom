@@ -3,6 +3,7 @@ import { Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { UserRow } from "../components/UserRow";
 import { useAdminUsers } from "../hooks";
 
@@ -29,7 +30,11 @@ export const UserManagementPage = () => {
     return () => clearTimeout(handle);
   }, [searchInput]);
 
-  const { data, isPending, isError } = useAdminUsers({ page, role, search });
+  const { data, isPending, isError, refetch } = useAdminUsers({
+    page,
+    role,
+    search,
+  });
   const totalPages = data
     ? Math.max(1, Math.ceil(data.total / data.pageSize))
     : 1;
@@ -68,7 +73,10 @@ export const UserManagementPage = () => {
       )}
 
       {isError && (
-        <p className="text-sm text-destructive">Could not load users.</p>
+        <QueryErrorState
+          message="Couldn't load users."
+          onRetry={() => void refetch()}
+        />
       )}
 
       {data && data.rows.length === 0 && (

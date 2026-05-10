@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatTile } from "@/components/ui/StatTile";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { useAdminStats, useUnverifiedDoctors } from "@/features/admin/hooks";
 import { formatPHP } from "@/lib/utils/formatCurrency";
 import type { UnverifiedDoctorRow } from "@/features/admin/schemas";
@@ -108,11 +109,16 @@ const AdminDashboardSkeleton = () => (
 );
 
 export const AdminDashboard = () => {
-  const { data, isPending, isError } = useAdminStats();
+  const { data, isPending, isError, refetch } = useAdminStats();
 
   if (isPending) return <AdminDashboardSkeleton />;
   if (isError || !data) {
-    return <p className="text-sm text-destructive">Could not load stats.</p>;
+    return (
+      <QueryErrorState
+        message="Couldn't load stats."
+        onRetry={() => void refetch()}
+      />
+    );
   }
 
   const activeDoctors = data.users.doctors - data.doctors.unverified;

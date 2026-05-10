@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { cn } from "@/lib/utils";
 import { useDoctors } from "../hooks";
 import { DoctorCard } from "../components/DoctorCard";
@@ -47,7 +48,7 @@ export const DoctorListPage = () => {
     };
   }, [searchInput]);
 
-  const { data, isPending } = useDoctors(filters);
+  const { data, isPending, isError, refetch } = useDoctors(filters);
   const doctors = data?.doctors ?? [];
   const total = data?.total ?? 0;
   const pageSize = data?.pageSize ?? 20;
@@ -192,7 +193,14 @@ export const DoctorListPage = () => {
             </div>
           )}
 
-          {!isPending && doctors.length === 0 && (
+          {!isPending && isError && (
+            <QueryErrorState
+              message="Couldn't load doctors."
+              onRetry={() => void refetch()}
+            />
+          )}
+
+          {!isPending && !isError && doctors.length === 0 && (
             <div className="py-12 text-center">
               <p className="text-sm text-muted-foreground">
                 No doctors match those filters.

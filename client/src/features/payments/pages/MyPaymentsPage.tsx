@@ -3,6 +3,7 @@ import { Banknote } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LinkButton } from "@/components/ui/link-button";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useAuth } from "@/features/auth/hooks";
 import { formatPHP } from "@/lib/utils/formatCurrency";
@@ -19,7 +20,7 @@ const formatDay = (iso: string): string =>
 export const MyPaymentsPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data, isPending, isError } = useMyPayments();
+  const { data, isPending, isError, refetch } = useMyPayments();
 
   const isDoctor = user?.role === "doctor";
 
@@ -36,7 +37,10 @@ export const MyPaymentsPage = () => {
       )}
 
       {isError && (
-        <p className="text-sm text-destructive">Could not load payments.</p>
+        <QueryErrorState
+          message="Couldn't load payments."
+          onRetry={() => void refetch()}
+        />
       )}
 
       {data && data.payments.length === 0 && (

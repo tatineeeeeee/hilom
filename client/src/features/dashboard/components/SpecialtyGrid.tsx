@@ -15,6 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { useSpecializations } from "@/features/specializations/hooks";
 
 const SPECIALTY_ICONS: Record<string, LucideIcon> = {
@@ -36,12 +37,17 @@ const specialtyIcon = (name: string): LucideIcon =>
   SPECIALTY_ICONS[name] ?? Stethoscope;
 
 export const SpecialtyGrid = () => {
-  const { data, isPending } = useSpecializations();
+  const { data, isPending, isError, refetch } = useSpecializations();
 
   return (
     <div>
       <p className="mb-3 text-sm font-medium">Browse by specialty</p>
-      {isPending || !data ? (
+      {isError ? (
+        <QueryErrorState
+          message="Couldn't load specialties."
+          onRetry={() => void refetch()}
+        />
+      ) : isPending || !data ? (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="h-28 rounded-xl" />

@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { useSpecializations } from "@/features/specializations/hooks";
 import { SpecializationIcon } from "./SpecializationIcon";
 
 export const SpecializationsGrid = () => {
-  const { data, isPending } = useSpecializations();
+  const { data, isPending, isError, refetch } = useSpecializations();
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-12">
@@ -14,7 +15,12 @@ export const SpecializationsGrid = () => {
         Ten specializations and growing. Tap one to see verified doctors.
       </p>
 
-      {isPending || !data ? (
+      {isError ? (
+        <QueryErrorState
+          message="Couldn't load specializations."
+          onRetry={() => void refetch()}
+        />
+      ) : isPending || !data ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {Array.from({ length: 10 }).map((_, i) => (
             <div
