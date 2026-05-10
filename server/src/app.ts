@@ -24,7 +24,13 @@ import { openapiDocument } from "./openapi";
 export const app: Express = express();
 
 app.use(requestId);
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }),
+);
 const allowedOrigins =
   env.NODE_ENV === "production"
     ? [env.CLIENT_URL]
