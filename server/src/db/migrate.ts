@@ -5,5 +5,8 @@ import { env } from "../config/env";
 
 const pool = new Pool({ connectionString: env.DATABASE_URL });
 const db = drizzle(pool);
-await migrate(db, { migrationsFolder: "./drizzle" });
-await pool.end();
+
+void (async () => {
+  await migrate(db, { migrationsFolder: "./drizzle" });
+  await pool.end();
+})();
