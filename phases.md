@@ -358,8 +358,9 @@ Push the project from "good code" to "I would hire this person." Live demo, real
 - [ ] Dependabot enabled and a successful weekly bump PR has merged
 - [ ] `CHANGELOG.md` auto-generates from conventional commits on each release
 - [ ] Lighthouse score on the production client: Performance >85, Accessibility >95, Best Practices >95, SEO >90
-- [ ] OpenAPI spec (`server/openapi.json`) generated from Zod schemas + served at `/api/docs` via Swagger UI
-- [ ] **Rate limit promoted to Redis-backed** (carried over from Phase 2.5) — `server/src/middleware/rateLimit.ts` switches to `rate-limit-redis` with an in-memory fallback for `NODE_ENV !== "production"`. Keep the existing `skip: () => NODE_ENV === "test"` so the auth suite still isn't throttled. Provision Redis on Railway before this lands.
+- [x] OpenAPI spec served at `/api/docs` via Swagger UI — admin paths filtered out of the public document (PR #19)
+- [ ] **Rate limit promoted to Redis-backed** (carried over from Phase 2.5) — `server/src/middleware/rateLimit.ts` switches to `rate-limit-redis` with an in-memory fallback for `NODE_ENV !== "production"`. Provision Redis on Railway before this lands.
+  - [x] `skip` narrowed to `NODE_ENV === "test"` (was `!== "production"`, PR #19) — rate-limiting now active in dev
 
 **Production migration playbook**:
 
