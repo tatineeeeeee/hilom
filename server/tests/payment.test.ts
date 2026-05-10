@@ -378,6 +378,83 @@ describe("POST /api/payments/webhook", () => {
     }
   });
 
+  it("returns 400 when the payload fails schema validation", async () => {
+    process.env.PAYMONGO_WEBHOOK_SECRET = "test-webhook-secret";
+    try {
+      const body = JSON.stringify({ data: { id: "evt_malformed" } });
+      const signature = crypto
+        .createHmac("sha256", "test-webhook-secret")
+        .update(body)
+        .digest("hex");
+
+      const res = await request(app)
+        .post("/api/payments/webhook")
+        .set("Content-Type", "application/json")
+        .set("paymongo-signature", signature)
+        .send(body);
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+    } finally {
+      delete process.env.PAYMONGO_WEBHOOK_SECRET;
+    }
+  });
+
+  it("ignores unknown extra fields (forward-compatible)", async () => {
+    const { profileId } = await setupDoctor("pay-webhook-fwd@example.com");
+    const date = nextDate(5);
+    const dow = manilaDateDayOfWeek(date);
+    await seedSchedule(profileId, [
+      { dayOfWeek: dow, startTime: "09:00", endTime: "12:00" },
+    ]);
+    const patient = await registerPatient("pay-webhook-fwd-p@example.com");
+    const { appointmentId } = await bookSlot(
+      patient,
+      profileId,
+      date,
+      "09:00",
+      "09:30",
+    );
+
+    const row = await db.query.payments.findFirst({
+      where: eq(payments.appointmentId, appointmentId),
+    });
+    if (!row?.paymongoPaymentIntentId) {
+      throw new Error("Payment intent ID missing");
+    }
+
+    process.env.PAYMONGO_WEBHOOK_SECRET = "test-webhook-secret";
+    try {
+      const body = JSON.stringify({
+        future_field: "should-not-fail-validation",
+        data: {
+          id: "evt_fwd",
+          attributes: {
+            type: "payment.paid",
+            data: {
+              attributes: { payment_intent_id: row.paymongoPaymentIntentId },
+            },
+          },
+        },
+      });
+      const signature = crypto
+        .createHmac("sha256", "test-webhook-secret")
+        .update(body)
+        .digest("hex");
+
+      const res = await request(app)
+        .post("/api/payments/webhook")
+        .set("Content-Type", "application/json")
+        .set("paymongo-signature", signature)
+        .send(body);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+    } finally {
+      delete process.env.PAYMONGO_WEBHOOK_SECRET;
+    }
+  });
+
   it("marks the payment escrowed on a valid payment.paid event", async () => {
     const { profileId } = await setupDoctor("pay-webhook@example.com");
     const date = nextDate(4);

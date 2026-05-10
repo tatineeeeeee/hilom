@@ -100,8 +100,7 @@ export const paymongoWebhook = async (
       { fieldErrors: parsed.error.flatten().fieldErrors },
       "paymongo webhook payload failed schema validation",
     );
-    res.status(200).json({ success: true, data: { received: false } });
-    return;
+    throw new AppError(400, "Invalid webhook payload");
   }
 
   const eventId = parsed.data.data.id;
