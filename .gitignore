@@ -9,7 +9,6 @@ test-results/
 *.log
 .DS_Store
 bun.lockb
-drizzle/
 *.tsbuildinfo
 CLAUDE.md.local
 .claude/

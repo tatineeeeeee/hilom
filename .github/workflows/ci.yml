@@ -35,9 +35,8 @@ jobs:
           bun-version: latest
       - name: Install
         run: bun install --frozen-lockfile
-      - name: Push test schema
-        working-directory: server
-        run: bunx drizzle-kit push
+      - name: Migrate test schema
+        run: bun run --filter server db:migrate
       - name: Typecheck
         run: bun run typecheck
       - name: Lint
@@ -88,9 +87,8 @@ jobs:
           bun-version: latest
       - name: Install
         run: bun install --frozen-lockfile
-      - name: Push test schema
-        working-directory: server
-        run: bunx drizzle-kit push
+      - name: Migrate test schema
+        run: bun run --filter server db:migrate
       - name: Install Playwright browsers
         working-directory: e2e
         run: bunx playwright install --with-deps chromium
