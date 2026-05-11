@@ -13,12 +13,20 @@ const iconClasses = {
   indigo: "bg-[oklch(0.62_0.15_250_/_0.15)] text-[oklch(0.45_0.15_250)]",
 } as const satisfies Record<TileAccent, string>;
 
-const stripClasses = {
-  teal: "border-l-[var(--chart-1)]",
-  terracotta: "border-l-[var(--chart-2)]",
-  calamansi: "border-l-[var(--chart-3)]",
-  turmeric: "border-l-[var(--chart-4)]",
-  indigo: "border-l-[var(--chart-5)]",
+const bgTintClasses = {
+  teal: "bg-linear-to-br from-[oklch(0.520_0.105_195_/_0.07)] to-card",
+  terracotta: "bg-linear-to-br from-[oklch(0.680_0.125_35_/_0.09)] to-card",
+  calamansi: "bg-linear-to-br from-[oklch(0.700_0.130_130_/_0.09)] to-card",
+  turmeric: "bg-linear-to-br from-[oklch(0.780_0.130_85_/_0.09)] to-card",
+  indigo: "bg-linear-to-br from-[oklch(0.620_0.150_250_/_0.09)] to-card",
+} as const satisfies Record<TileAccent, string>;
+
+const iconGlowClasses = {
+  teal: "shadow-[0_0_14px_3px_oklch(0.520_0.105_195_/_0.25)]",
+  terracotta: "shadow-[0_0_14px_3px_oklch(0.680_0.125_35_/_0.25)]",
+  calamansi: "shadow-[0_0_14px_3px_oklch(0.700_0.130_130_/_0.25)]",
+  turmeric: "shadow-[0_0_14px_3px_oklch(0.780_0.130_85_/_0.25)]",
+  indigo: "shadow-[0_0_14px_3px_oklch(0.620_0.150_250_/_0.25)]",
 } as const satisfies Record<TileAccent, string>;
 
 interface StatTileProps {
@@ -41,8 +49,7 @@ export const StatTile = ({
   const inner = (
     <Card
       className={cn(
-        accent && "border-l-4",
-        accent && stripClasses[accent],
+        accent && bgTintClasses[accent],
         to && "transition-shadow hover:shadow-md",
       )}
     >
@@ -52,6 +59,7 @@ export const StatTile = ({
             className={cn(
               "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
               accent ? iconClasses[accent] : "bg-muted text-muted-foreground",
+              accent && iconGlowClasses[accent],
             )}
           >
             <span className="[&>svg]:h-5 [&>svg]:w-5">{icon}</span>
