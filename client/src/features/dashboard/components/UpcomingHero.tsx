@@ -37,7 +37,7 @@ const HeroCard = ({ appt }: { appt: Appointment }) => {
   const countdown = daysUntil(appt.appointmentDate);
 
   return (
-    <Card>
+    <Card className="bg-linear-to-br from-primary/8 via-background to-accent/15">
       <CardContent className="pt-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
@@ -116,7 +116,7 @@ const HeroCard = ({ appt }: { appt: Appointment }) => {
 };
 
 const EmptyHero = () => (
-  <Card>
+  <Card className="bg-linear-to-br from-primary/8 via-background to-accent/15">
     <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
       <Stethoscope className="size-12 text-primary/40" />
       <div>
