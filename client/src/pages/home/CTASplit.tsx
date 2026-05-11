@@ -3,7 +3,7 @@ import { LinkButton } from "@/components/ui/link-button";
 export const CTASplit = () => (
   <section className="mx-auto max-w-5xl px-4 py-12">
     <div className="grid gap-4 lg:grid-cols-2">
-      <div className="flex flex-col rounded-2xl border bg-linear-to-br from-[oklch(0.520_0.105_195_/_0.12)] to-card p-8">
+      <div className="flex flex-col rounded-2xl border bg-linear-to-br from-[oklch(0.520_0.105_195/0.12)] to-card p-8">
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           For patients
         </p>
@@ -18,7 +18,7 @@ export const CTASplit = () => (
           Sign up as a patient
         </LinkButton>
       </div>
-      <div className="flex flex-col rounded-2xl border bg-linear-to-br from-[oklch(0.680_0.125_35_/_0.14)] to-card p-8">
+      <div className="flex flex-col rounded-2xl border bg-linear-to-br from-[oklch(0.680_0.125_35/0.14)] to-card p-8">
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           For doctors
         </p>
