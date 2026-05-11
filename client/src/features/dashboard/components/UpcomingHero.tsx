@@ -33,11 +33,21 @@ const STATUS_DOT: Record<string, string> = {
   cancelled: "bg-muted-foreground",
 };
 
+const STATUS_TINT: Record<string, string> = {
+  pending:
+    "bg-linear-to-br from-[oklch(0.780_0.130_85_/_0.16)] via-background to-card",
+  confirmed:
+    "bg-linear-to-br from-[oklch(0.520_0.105_195_/_0.14)] via-background to-card",
+  completed:
+    "bg-linear-to-br from-[oklch(0.700_0.130_130_/_0.16)] via-background to-card",
+  cancelled: "bg-linear-to-br from-muted via-background to-card",
+};
+
 const HeroCard = ({ appt }: { appt: Appointment }) => {
   const countdown = daysUntil(appt.appointmentDate);
 
   return (
-    <Card className="bg-linear-to-br from-primary/8 via-background to-accent/15">
+    <Card className={STATUS_TINT[appt.status] ?? STATUS_TINT.pending}>
       <CardContent className="pt-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
