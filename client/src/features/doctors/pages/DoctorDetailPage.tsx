@@ -81,7 +81,7 @@ export const DoctorDetailPage = () => {
       </Button>
 
       {/* Profile hero */}
-      <div className="mb-4 rounded-xl border bg-card p-5">
+      <div className="mb-4 rounded-xl border bg-linear-to-br from-primary/8 via-background to-accent/15 bg-card p-5">
         <div className="flex items-start gap-4">
           <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary">
             {initials(doctor.fullName)}

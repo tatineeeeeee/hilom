@@ -36,7 +36,7 @@ export const ActionTiles = () => {
     <div className="grid gap-3 sm:grid-cols-3">
       <StatTile
         icon={<Pill />}
-        accent="blue"
+        accent="terracotta"
         label="Prescriptions"
         value={rxCount}
         sublabel="total"
@@ -44,7 +44,7 @@ export const ActionTiles = () => {
       />
       <StatTile
         icon={<MessageCircle />}
-        accent="amber"
+        accent="turmeric"
         label="Unread messages"
         value={unreadCount}
         sublabel="unread"

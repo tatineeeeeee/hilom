@@ -60,15 +60,24 @@ export const MobileBottomNav = () => {
               )
             }
           >
-            <div className="relative">
-              <Icon className="size-5" aria-hidden />
-              {badge && unreadCount > 0 && (
-                <span className="absolute -right-1.5 -top-1 flex size-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </div>
-            {label}
+            {({ isActive }) => (
+              <>
+                <div
+                  className={cn(
+                    "relative rounded-xl px-3 py-1 transition-colors",
+                    isActive && "bg-linear-to-b from-primary/15 to-primary/8",
+                  )}
+                >
+                  <Icon className="size-5" aria-hidden />
+                  {badge && unreadCount > 0 && (
+                    <span className="absolute -right-1.5 -top-1 flex size-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </div>
+                {label}
+              </>
+            )}
           </NavLink>
         ))}
       </div>

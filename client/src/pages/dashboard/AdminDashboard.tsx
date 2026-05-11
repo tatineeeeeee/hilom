@@ -136,7 +136,7 @@ export const AdminDashboard = () => {
         />
         <StatTile
           icon={<Stethoscope />}
-          accent="blue"
+          accent="indigo"
           label="Active doctors"
           value={activeDoctors}
           sublabel={
@@ -148,14 +148,14 @@ export const AdminDashboard = () => {
         />
         <StatTile
           icon={<Banknote />}
-          accent="green"
+          accent="calamansi"
           label="Revenue released"
           value={formatPHP(data.revenue.released)}
           sublabel={`${formatPHP(data.revenue.escrowed)} escrowed`}
         />
         <StatTile
           icon={<AlertCircle />}
-          accent={data.doctors.unverified > 0 ? "amber" : undefined}
+          accent={data.doctors.unverified > 0 ? "turmeric" : undefined}
           label="Needs review"
           value={data.doctors.unverified}
           sublabel={

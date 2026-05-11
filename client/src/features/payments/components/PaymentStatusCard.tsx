@@ -18,19 +18,19 @@ const COPY: Record<
     title: "Awaiting payment",
     body: "Choose a method below and confirm to hold your slot.",
     Icon: Clock,
-    accent: "text-amber-600",
+    accent: "text-[oklch(0.40_0.10_85)]",
   },
   escrowed: {
     title: "Paid — held for your appointment",
     body: "We'll release this to the doctor once the visit is completed.",
     Icon: Wallet,
-    accent: "text-blue-600",
+    accent: "text-primary",
   },
   released: {
     title: "Released to the doctor",
     body: "Thanks for using Hilom. You can review your appointment any time.",
     Icon: CheckCircle2,
-    accent: "text-green-600",
+    accent: "text-[oklch(0.30_0.10_130)]",
   },
   refunded: {
     title: "Refunded",

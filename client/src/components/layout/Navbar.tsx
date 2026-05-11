@@ -33,7 +33,7 @@ export const Navbar = () => {
   const hasBottomNav = isAuthenticated && user?.role !== "admin";
 
   return (
-    <header className="sticky top-0 z-30 w-full border-b bg-background/95 backdrop-blur">
+    <header className="sticky top-0 z-30 w-full bg-background/95 backdrop-blur after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-linear-to-r after:from-transparent after:via-primary/30 after:to-transparent after:content-['']">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link to="/" className="text-xl font-bold tracking-tight">
           Hilom
