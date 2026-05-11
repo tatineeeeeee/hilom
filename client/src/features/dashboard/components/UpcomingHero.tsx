@@ -27,9 +27,9 @@ const formatDate = (isoDate: string): string =>
   });
 
 const STATUS_DOT: Record<string, string> = {
-  pending: "bg-amber-500",
-  confirmed: "bg-blue-500",
-  completed: "bg-emerald-500",
+  pending: "bg-[oklch(0.78_0.13_85)]",
+  confirmed: "bg-primary",
+  completed: "bg-[oklch(0.70_0.13_130)]",
   cancelled: "bg-muted-foreground",
 };
 

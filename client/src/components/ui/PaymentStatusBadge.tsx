@@ -1,10 +1,10 @@
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import type { PaymentStatus } from "@/types";
 
 const colors: Record<PaymentStatus, string> = {
-  pending: "bg-amber-100 text-amber-800",
-  escrowed: "bg-blue-100 text-blue-800",
-  released: "bg-green-100 text-green-800",
+  pending: "bg-[oklch(0.78_0.13_85_/_0.15)] text-[oklch(0.40_0.10_85)]",
+  escrowed: "bg-primary/12 text-primary",
+  released: "bg-[oklch(0.70_0.13_130_/_0.15)] text-[oklch(0.30_0.10_130)]",
   refunded: "bg-muted text-muted-foreground",
 };
 
@@ -20,7 +20,12 @@ interface PaymentStatusBadgeProps {
 }
 
 export const PaymentStatusBadge = ({ status }: PaymentStatusBadgeProps) => (
-  <Badge className={colors[status]} variant="outline">
+  <span
+    className={cn(
+      "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+      colors[status],
+    )}
+  >
     {labels[status]}
-  </Badge>
+  </span>
 );

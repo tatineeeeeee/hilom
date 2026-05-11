@@ -2,16 +2,16 @@ import { Link } from "react-router-dom";
 import type { DoctorStatsScheduleRow } from "../schemas";
 
 const statusColors: Record<DoctorStatsScheduleRow["status"], string> = {
-  pending: "bg-amber-100 text-amber-800",
-  confirmed: "bg-blue-100 text-blue-800",
-  completed: "bg-green-100 text-green-800",
+  pending: "bg-[oklch(0.78_0.13_85_/_0.15)] text-[oklch(0.40_0.10_85)]",
+  confirmed: "bg-primary/12 text-primary",
+  completed: "bg-[oklch(0.70_0.13_130_/_0.15)] text-[oklch(0.30_0.10_130)]",
   cancelled: "bg-muted text-muted-foreground",
 };
 
 const dotColors: Record<DoctorStatsScheduleRow["status"], string> = {
-  pending: "bg-amber-400",
-  confirmed: "bg-blue-400",
-  completed: "bg-green-500",
+  pending: "bg-[oklch(0.78_0.13_85)]",
+  confirmed: "bg-primary",
+  completed: "bg-[oklch(0.70_0.13_130)]",
   cancelled: "bg-muted-foreground",
 };
 

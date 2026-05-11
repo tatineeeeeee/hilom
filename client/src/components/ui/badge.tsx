@@ -9,7 +9,7 @@ const badgeVariants = cva(
         default: "bg-primary/10 text-primary",
         secondary: "bg-secondary text-secondary-foreground",
         success:
-          "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+          "bg-[oklch(0.70_0.13_130_/_0.15)] text-[oklch(0.30_0.10_130)] dark:bg-[oklch(0.40_0.10_130_/_0.25)] dark:text-[oklch(0.85_0.13_130)]",
         destructive: "bg-destructive/10 text-destructive",
         outline: "border border-border text-foreground",
       },
