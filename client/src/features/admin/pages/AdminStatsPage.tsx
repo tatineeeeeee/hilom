@@ -41,14 +41,14 @@ export const AdminStatsPage = () => {
         value={data.appointments.total}
         sublabel={`${data.appointments.pending} pending · ${data.appointments.confirmed} confirmed · ${data.appointments.completed} done · ${data.appointments.cancelled} cancelled`}
         icon={<Stethoscope />}
-        accent="blue"
+        accent="indigo"
       />
       <StatTile
         label="Revenue released"
         value={formatPHP(data.revenue.released)}
         sublabel={`${formatPHP(data.revenue.escrowed)} escrowed`}
         icon={<Banknote />}
-        accent="green"
+        accent="calamansi"
       />
       <StatTile
         label="Unverified doctors"
@@ -57,7 +57,7 @@ export const AdminStatsPage = () => {
           data.doctors.unverified > 0 ? "Review pending" : "All caught up"
         }
         icon={<AlertCircle />}
-        accent="amber"
+        accent="turmeric"
         to="/admin/doctors"
       />
     </div>

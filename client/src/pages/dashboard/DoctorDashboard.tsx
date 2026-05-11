@@ -113,7 +113,7 @@ const EarningsTile = ({ earnings }: { earnings: DoctorStats["earnings"] }) => {
 
 const pendingAccent = (count: number) => {
   if (count === 0) return undefined;
-  return "amber" as const;
+  return "turmeric" as const;
 };
 
 const pendingSublabel = (count: number): string => {
@@ -169,7 +169,7 @@ export const DoctorDashboard = () => {
         <EarningsTile earnings={data.earnings} />
         <StatTile
           icon={<MessageCircle />}
-          accent="blue"
+          accent="indigo"
           label="Messages"
           value={unread ?? 0}
           sublabel="unread"
