@@ -14,11 +14,11 @@ const iconClasses = {
 } as const satisfies Record<TileAccent, string>;
 
 const bgTintClasses = {
-  teal: "bg-linear-to-br from-[oklch(0.520_0.105_195_/_0.07)] to-card",
-  terracotta: "bg-linear-to-br from-[oklch(0.680_0.125_35_/_0.09)] to-card",
-  calamansi: "bg-linear-to-br from-[oklch(0.700_0.130_130_/_0.09)] to-card",
-  turmeric: "bg-linear-to-br from-[oklch(0.780_0.130_85_/_0.09)] to-card",
-  indigo: "bg-linear-to-br from-[oklch(0.620_0.150_250_/_0.09)] to-card",
+  teal: "bg-linear-to-br from-[oklch(0.520_0.105_195_/_0.16)] to-card",
+  terracotta: "bg-linear-to-br from-[oklch(0.680_0.125_35_/_0.18)] to-card",
+  calamansi: "bg-linear-to-br from-[oklch(0.700_0.130_130_/_0.18)] to-card",
+  turmeric: "bg-linear-to-br from-[oklch(0.780_0.130_85_/_0.18)] to-card",
+  indigo: "bg-linear-to-br from-[oklch(0.620_0.150_250_/_0.16)] to-card",
 } as const satisfies Record<TileAccent, string>;
 
 const iconGlowClasses = {
