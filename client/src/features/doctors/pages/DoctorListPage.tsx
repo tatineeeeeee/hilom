@@ -107,6 +107,7 @@ export const DoctorListPage = () => {
           )}
         </div>
         <select
+          aria-label="Sort doctors"
           value={filters.sort ?? "rating"}
           onChange={(e) =>
             setFilters((f) => ({

@@ -9,7 +9,7 @@ export const Footer = () => (
           href="/api/docs"
           className="hover:text-foreground"
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
         >
           API docs
         </a>
@@ -17,7 +17,7 @@ export const Footer = () => (
           href="https://github.com/tatineeeeeee/hilom"
           className="hover:text-foreground"
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
         >
           GitHub
         </a>
