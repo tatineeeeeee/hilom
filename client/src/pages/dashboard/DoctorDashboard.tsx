@@ -134,9 +134,9 @@ const ChatTile = ({ unread }: { unread: number }) => {
       to="/messages"
       className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <Card className="bg-linear-to-br from-[oklch(0.620_0.150_250_/_0.16)] to-card transition-shadow hover:shadow-md">
+      <Card className="bg-linear-to-br from-[oklch(0.620_0.150_250/0.16)] to-card transition-shadow hover:shadow-md">
         <CardContent className="flex items-center gap-3 pt-6">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[oklch(0.62_0.15_250_/_0.15)] text-[oklch(0.45_0.15_250)] shadow-[0_0_14px_3px_oklch(0.620_0.150_250_/_0.25)]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[oklch(0.62_0.15_250/0.15)] text-[oklch(0.45_0.15_250)] shadow-[0_0_14px_3px_oklch(0.620_0.150_250/0.25)]">
             <span className="[&>svg]:h-5 [&>svg]:w-5">
               <MessageCircle />
             </span>
