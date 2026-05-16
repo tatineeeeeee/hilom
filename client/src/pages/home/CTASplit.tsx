@@ -1,97 +1,63 @@
-import { Check } from "lucide-react";
 import { LinkButton } from "@/components/ui/link-button";
-import { BorderBeam } from "@/components/ui/border-beam";
-
-const PATIENT_PERKS = [
-  "No registration fee, ever",
-  "Pay with GCash, Maya, or card",
-  "Browse only verified doctors",
-];
-
-const DOCTOR_PERKS = [
-  "Set your own schedule and fee",
-  "Escrow ensures on-time payment",
-  "Keep 100% of every consultation",
-];
 
 export const CTASplit = () => (
   <section className="mx-auto max-w-5xl px-4 py-12">
     <div className="grid gap-4 lg:grid-cols-2">
-      {/* Patient — filled/bold */}
-      <div className="relative flex flex-col overflow-hidden rounded-2xl bg-primary p-8 text-primary-foreground">
-        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-primary-foreground/60">
+      {/* Patient — stat anchor then copy */}
+      <div className="flex flex-col rounded-2xl border border-primary/20 bg-primary/5 p-9">
+        <p className="mb-4 text-xs font-medium uppercase tracking-widest text-primary/60">
           For patients
         </p>
-        <h3 className="mb-3 text-2xl font-semibold leading-snug">
-          Stop calling clinics.
+        <div className="mb-5 flex items-baseline gap-2">
+          <span className="text-5xl font-bold leading-none text-primary">
+            500+
+          </span>
+          <span className="text-sm text-muted-foreground">
+            verified Filipino doctors
+          </span>
+        </div>
+        <h3 className="mb-3 text-2xl font-bold leading-snug">
+          Book in under a minute.
           <br />
-          Book in two taps.
+          Pay only after you confirm.
         </h3>
-        <p className="mb-5 text-sm text-primary-foreground/75">
-          Sign up free, browse our verified doctor list, and book your first
-          appointment in under a minute.
+        <p className="mb-8 grow text-sm leading-relaxed text-muted-foreground">
+          Browse by specialty, fee, or rating. Pay via GCash, Maya, or card.
+          Your prescription lands directly in your account — no clinic pickup.
         </p>
-        <ul className="mb-6 grow space-y-2.5">
-          {PATIENT_PERKS.map((perk) => (
-            <li
-              key={perk}
-              className="flex items-center gap-2 text-sm text-primary-foreground/85"
-            >
-              <Check className="size-3.5 shrink-0" aria-hidden />
-              {perk}
-            </li>
-          ))}
-        </ul>
-        <LinkButton
-          to="/register"
-          size="lg"
-          className="self-start bg-white text-primary hover:bg-white/90 focus-visible:ring-white"
-        >
+        <LinkButton to="/register" size="lg" className="self-start">
           Get started — free
         </LinkButton>
-        <BorderBeam
-          size={250}
-          duration={10}
-          colorFrom="oklch(0.88 0.06 50)"
-          colorTo="oklch(1 0 0 / 0.55)"
-        />
       </div>
 
-      {/* Doctor — warm tinted */}
-      <div className="relative flex flex-col overflow-hidden rounded-2xl border bg-linear-to-br from-[oklch(0.680_0.125_35/0.14)] to-card p-8">
-        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      {/* Doctor — promise callout then copy */}
+      <div className="flex flex-col rounded-2xl border border-[oklch(0.680_0.125_35/0.25)] bg-[oklch(0.680_0.125_35/0.07)] p-9">
+        <p className="mb-4 text-xs font-medium uppercase tracking-widest text-[oklch(0.45_0.12_35)]">
           For doctors
         </p>
-        <h3 className="mb-3 text-2xl font-semibold leading-snug">
-          Take control of your bookings.
+        <div className="mb-5 rounded-lg bg-[oklch(0.680_0.125_35/0.12)] px-4 py-3">
+          <p className="text-sm font-semibold leading-snug text-[oklch(0.38_0.10_50)]">
+            You keep 100% of every consultation fee you set — no commission,
+            ever.
+          </p>
+        </div>
+        <h3 className="mb-3 text-2xl font-bold leading-snug">
+          Your schedule.
+          <br />
+          Your rates. Your practice.
         </h3>
-        <p className="mb-5 text-sm text-muted-foreground">
-          Set your own schedule, fee, and slot duration. Get paid via escrow —
-          funds release after each completed visit.
+        <p className="mb-8 grow text-sm leading-relaxed text-muted-foreground">
+          Set your own slot duration and fee. Hilom holds payment in escrow and
+          releases it the moment your visit is marked complete.
         </p>
-        <ul className="mb-6 grow space-y-2.5">
-          {DOCTOR_PERKS.map((perk) => (
-            <li
-              key={perk}
-              className="flex items-center gap-2 text-sm text-muted-foreground"
-            >
-              <Check
-                className="size-3.5 shrink-0 text-[oklch(0.40_0.10_50)]"
-                aria-hidden
-              />
-              {perk}
-            </li>
-          ))}
-        </ul>
-        <LinkButton to="/register" size="lg" className="self-start">
+        <LinkButton
+          to="/register"
+          variant="outline"
+          size="lg"
+          className="self-start"
+        >
           Apply as a doctor
         </LinkButton>
-        <BorderBeam
-          size={250}
-          duration={12}
-          colorFrom="oklch(0.680 0.125 35)"
-          colorTo="oklch(0.520 0.105 195)"
-        />
       </div>
     </div>
   </section>
