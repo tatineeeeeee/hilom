@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { NumberTicker } from "@/components/ui/number-ticker";
 import { cn } from "@/lib/utils";
 
 type TileAccent = "teal" | "terracotta" | "calamansi" | "turmeric" | "indigo";
@@ -36,6 +37,7 @@ interface StatTileProps {
   to?: string;
   icon?: ReactNode;
   accent?: TileAccent;
+  animate?: boolean;
 }
 
 export const StatTile = ({
@@ -45,7 +47,15 @@ export const StatTile = ({
   to,
   icon,
   accent,
+  animate,
 }: StatTileProps) => {
+  const displayValue =
+    animate && typeof value === "number" ? (
+      <NumberTicker value={value} />
+    ) : (
+      value
+    );
+
   const inner = (
     <Card
       className={cn(
@@ -68,7 +78,9 @@ export const StatTile = ({
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               {label}
             </p>
-            <p className="text-2xl font-semibold leading-tight">{value}</p>
+            <p className="text-2xl font-semibold leading-tight">
+              {displayValue}
+            </p>
             {sublabel && (
               <p className="mt-0.5 truncate text-xs text-muted-foreground">
                 {sublabel}
@@ -84,7 +96,7 @@ export const StatTile = ({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-semibold">{value}</p>
+            <p className="text-2xl font-semibold">{displayValue}</p>
             {sublabel && (
               <p className="mt-1 text-xs text-muted-foreground">{sublabel}</p>
             )}
