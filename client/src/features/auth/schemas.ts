@@ -12,9 +12,10 @@ const passwordSchema = z
 
 const phoneSchema = z
   .string()
-  .min(7, "Phone is too short")
-  .max(20)
-  .regex(/^[+\d][\d\s-]*$/, "Invalid phone format");
+  .regex(
+    /^(\+?63|0)9\d{9}$/,
+    "Enter a valid PH number (e.g. 09171234567 or +639171234567)",
+  );
 
 const optionalPhone = z.preprocess(
   (val) => (val === "" || val === null ? undefined : val),
