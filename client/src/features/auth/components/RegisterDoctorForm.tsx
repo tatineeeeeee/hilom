@@ -73,6 +73,7 @@ export const RegisterDoctorForm = () => {
         type="tel"
         autoComplete="tel"
         inputMode="tel"
+        maxLength={16}
         error={errors.phone?.message}
         {...register("phone")}
       />
