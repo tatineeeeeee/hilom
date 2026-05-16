@@ -41,6 +41,7 @@ export const ActionTiles = () => {
         value={rxCount}
         sublabel="total"
         to="/prescriptions"
+        animate
       />
       <StatTile
         icon={<MessageCircle />}
@@ -49,6 +50,7 @@ export const ActionTiles = () => {
         value={unreadCount}
         sublabel="unread"
         to="/messages"
+        animate
       />
       <StatTile
         icon={<Clock />}

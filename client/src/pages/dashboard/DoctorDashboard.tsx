@@ -13,9 +13,10 @@ import { QueryErrorState } from "@/components/ui/query-error-state";
 import { DaySchedule } from "@/features/dashboard/components/DaySchedule";
 import { GreetingHeader } from "@/features/dashboard/components/GreetingHeader";
 import { useDoctorStats } from "@/features/dashboard/hooks";
-import { useUnreadCount } from "@/features/chat/hooks";
+import { useUnreadCount, useConversationList } from "@/features/chat/hooks";
 import { useAuthStore } from "@/features/auth/store";
 import { formatPHP } from "@/lib/utils/formatCurrency";
+import { initials } from "@/lib/utils/initials";
 import type { DoctorStats } from "@/features/dashboard/schemas";
 
 const sparkPoints = (days: { date: string; amount: string }[]): string => {
@@ -122,6 +123,53 @@ const pendingSublabel = (count: number): string => {
   return `${count} patients waiting`;
 };
 
+const ChatTile = ({ unread }: { unread: number }) => {
+  const { data: convData } = useConversationList(1);
+  const unreadConvs = (convData?.conversations ?? [])
+    .filter((c) => c.unreadCount > 0)
+    .slice(0, 3);
+
+  return (
+    <Link
+      to="/messages"
+      className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <Card className="bg-linear-to-br from-[oklch(0.620_0.150_250_/_0.16)] to-card transition-shadow hover:shadow-md">
+        <CardContent className="flex items-center gap-3 pt-6">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[oklch(0.62_0.15_250_/_0.15)] text-[oklch(0.45_0.15_250)] shadow-[0_0_14px_3px_oklch(0.620_0.150_250_/_0.25)]">
+            <span className="[&>svg]:h-5 [&>svg]:w-5">
+              <MessageCircle />
+            </span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Messages
+            </p>
+            <p className="text-2xl font-semibold leading-tight">{unread}</p>
+            {unreadConvs.length > 0 ? (
+              <div className="mt-1 flex -space-x-1.5">
+                {unreadConvs.map((c) => (
+                  <div
+                    key={c.id}
+                    className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[9px] font-semibold text-primary ring-2 ring-card"
+                    title={c.otherPartyName}
+                  >
+                    {initials(c.otherPartyName)}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                unread
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+};
+
 const DoctorDashboardSkeleton = () => (
   <div className="space-y-4">
     <div className="grid gap-4 sm:grid-cols-4">
@@ -167,20 +215,14 @@ export const DoctorDashboard = () => {
       <GreetingHeader variant="doctor" fullName={fullName} />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <EarningsTile earnings={data.earnings} />
-        <StatTile
-          icon={<MessageCircle />}
-          accent="indigo"
-          label="Messages"
-          value={unread ?? 0}
-          sublabel="unread"
-          to="/messages"
-        />
+        <ChatTile unread={unread ?? 0} />
         <StatTile
           label={pendingLabel}
           accent={pendingAccent(data.pendingConfirmations)}
           value={data.pendingConfirmations}
           sublabel={pendingSublabel(data.pendingConfirmations)}
           to="/my-appointments"
+          animate
         />
         <StatTile
           icon={<Star />}

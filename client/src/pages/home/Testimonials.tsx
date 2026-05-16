@@ -1,4 +1,5 @@
 import { Quote } from "lucide-react";
+import { Marquee } from "@/components/ui/marquee";
 
 interface Testimonial {
   initials: string;
@@ -35,6 +36,27 @@ const TESTIMONIALS: Testimonial[] = [
   },
 ];
 
+const TestimonialCard = ({ t }: { t: Testimonial }) => (
+  <figure className="flex w-72 shrink-0 flex-col gap-3 rounded-xl border bg-card p-5">
+    <Quote className="size-5 text-primary/60" aria-hidden />
+    <blockquote className="text-sm leading-relaxed text-foreground">
+      &ldquo;{t.quote}&rdquo;
+    </blockquote>
+    <figcaption className="mt-auto flex items-center gap-3 pt-2">
+      <span
+        className={`flex size-9 items-center justify-center rounded-full text-xs font-semibold ${t.hue}`}
+        aria-hidden
+      >
+        {t.initials}
+      </span>
+      <div className="text-xs">
+        <p className="font-medium">{t.name}</p>
+        <p className="text-muted-foreground">{t.role}</p>
+      </div>
+    </figcaption>
+  </figure>
+);
+
 export const Testimonials = () => (
   <section className="mx-auto max-w-5xl px-4 py-12">
     <h2 className="mb-1 text-center text-3xl font-bold tracking-tight sm:text-4xl">
@@ -43,30 +65,19 @@ export const Testimonials = () => (
     <p className="mb-8 text-center text-sm text-muted-foreground">
       Patients and doctors using Hilom in real visits.
     </p>
-    <div className="grid gap-4 sm:grid-cols-3">
-      {TESTIMONIALS.map((t) => (
-        <figure
-          key={t.name}
-          className="flex flex-col gap-3 rounded-xl border bg-card p-5"
-        >
-          <Quote className="size-5 text-primary/60" aria-hidden />
-          <blockquote className="text-sm leading-relaxed text-foreground">
-            &ldquo;{t.quote}&rdquo;
-          </blockquote>
-          <figcaption className="mt-auto flex items-center gap-3 pt-2">
-            <span
-              className={`flex size-9 items-center justify-center rounded-full text-xs font-semibold ${t.hue}`}
-              aria-hidden
-            >
-              {t.initials}
-            </span>
-            <div className="text-xs">
-              <p className="font-medium">{t.name}</p>
-              <p className="text-muted-foreground">{t.role}</p>
-            </div>
-          </figcaption>
-        </figure>
-      ))}
+    <div className="relative overflow-hidden">
+      <Marquee pauseOnHover className="[--duration:35s]">
+        {TESTIMONIALS.map((t) => (
+          <TestimonialCard key={`a-${t.name}`} t={t} />
+        ))}
+      </Marquee>
+      <Marquee reverse pauseOnHover className="[--duration:35s]">
+        {TESTIMONIALS.map((t) => (
+          <TestimonialCard key={`b-${t.name}`} t={t} />
+        ))}
+      </Marquee>
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-linear-to-r from-background" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-linear-to-l from-background" />
     </div>
   </section>
 );
