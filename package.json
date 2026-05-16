@@ -1,6 +1,7 @@
 {
   "name": "hilom",
   "private": true,
+  "packageManager": "bun@1.3.10",
   "engines": {
     "node": ">=20.19"
   },
