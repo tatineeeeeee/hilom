@@ -1,9 +1,10 @@
 import { LinkButton } from "@/components/ui/link-button";
+import { BorderBeam } from "@/components/ui/border-beam";
 
 export const CTASplit = () => (
   <section className="mx-auto max-w-5xl px-4 py-12">
     <div className="grid gap-4 lg:grid-cols-2">
-      <div className="flex flex-col rounded-2xl border bg-linear-to-br from-[oklch(0.520_0.105_195/0.12)] to-card p-8">
+      <div className="relative flex flex-col overflow-hidden rounded-2xl border bg-linear-to-br from-[oklch(0.520_0.105_195/0.12)] to-card p-8">
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           For patients
         </p>
@@ -17,6 +18,12 @@ export const CTASplit = () => (
         <LinkButton to="/register" size="lg" className="self-start">
           Sign up as a patient
         </LinkButton>
+        <BorderBeam
+          size={200}
+          duration={10}
+          colorFrom="oklch(0.520 0.105 195)"
+          colorTo="oklch(0.680 0.125 35)"
+        />
       </div>
       <div className="flex flex-col rounded-2xl border bg-linear-to-br from-[oklch(0.680_0.125_35/0.14)] to-card p-8">
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
