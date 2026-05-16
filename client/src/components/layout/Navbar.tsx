@@ -10,7 +10,7 @@ import { UnreadBadge } from "@/features/chat/components/UnreadBadge";
 import { cn } from "@/lib/utils";
 
 export const Navbar = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, initializing, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   useChatSocket();
@@ -41,59 +41,60 @@ export const Navbar = () => {
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-2 sm:flex">
-          {isAuthenticated ? (
-            <>
-              <NavLink to="/dashboard" className={linkClasses}>
-                Dashboard
-              </NavLink>
-              {user?.role === "patient" && (
-                <NavLink to="/appointments" className={linkClasses}>
-                  Appointments
+          {!initializing &&
+            (isAuthenticated ? (
+              <>
+                <NavLink to="/dashboard" className={linkClasses}>
+                  Dashboard
                 </NavLink>
-              )}
-              {user?.role === "doctor" && (
-                <NavLink to="/my-appointments" className={linkClasses}>
-                  Appointments
+                {user?.role === "patient" && (
+                  <NavLink to="/appointments" className={linkClasses}>
+                    Appointments
+                  </NavLink>
+                )}
+                {user?.role === "doctor" && (
+                  <NavLink to="/my-appointments" className={linkClasses}>
+                    Appointments
+                  </NavLink>
+                )}
+                {user?.role !== "admin" && (
+                  <>
+                    <NavLink to="/messages" className={linkClasses}>
+                      <span className="flex items-center gap-1.5">
+                        Messages
+                        <UnreadBadge count={unreadCount} />
+                      </span>
+                    </NavLink>
+                    <NavLink to="/prescriptions" className={linkClasses}>
+                      Prescriptions
+                    </NavLink>
+                    <NavLink to="/payments" className={linkClasses}>
+                      Payments
+                    </NavLink>
+                  </>
+                )}
+                {user?.role === "admin" && (
+                  <NavLink to="/admin" className={linkClasses}>
+                    Admin
+                  </NavLink>
+                )}
+                <span className="hidden text-sm text-muted-foreground md:inline">
+                  {user?.fullName}
+                </span>
+                <Button variant="outline" size="sm" onClick={handleLogout}>
+                  Log out
+                </Button>
+              </>
+            ) : (
+              <>
+                <NavLink to="/login" className={linkClasses}>
+                  Log in
                 </NavLink>
-              )}
-              {user?.role !== "admin" && (
-                <>
-                  <NavLink to="/messages" className={linkClasses}>
-                    <span className="flex items-center gap-1.5">
-                      Messages
-                      <UnreadBadge count={unreadCount} />
-                    </span>
-                  </NavLink>
-                  <NavLink to="/prescriptions" className={linkClasses}>
-                    Prescriptions
-                  </NavLink>
-                  <NavLink to="/payments" className={linkClasses}>
-                    Payments
-                  </NavLink>
-                </>
-              )}
-              {user?.role === "admin" && (
-                <NavLink to="/admin" className={linkClasses}>
-                  Admin
-                </NavLink>
-              )}
-              <span className="hidden text-sm text-muted-foreground md:inline">
-                {user?.fullName}
-              </span>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                Log out
-              </Button>
-            </>
-          ) : (
-            <>
-              <NavLink to="/login" className={linkClasses}>
-                Log in
-              </NavLink>
-              <LinkButton to="/register" size="sm">
-                Sign up
-              </LinkButton>
-            </>
-          )}
+                <LinkButton to="/register" size="sm">
+                  Sign up
+                </LinkButton>
+              </>
+            ))}
         </nav>
 
         {/* Mobile hamburger — hidden for non-admin auth users (bottom nav handles routing) */}
